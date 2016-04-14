@@ -7,7 +7,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.speech.tts.Voice;
 import android.support.annotation.Nullable;
+
+import com.google.common.base.Optional;
 
 import java.util.Locale;
 
@@ -47,8 +50,7 @@ public class SpeakerService extends Service {
         }
 
         public void speak(final CharSequence text, final Locale locale) {
-            // FIXME: Use a TTS engine that supports the requested locale
-            output = new TextToSpeech(SpeakerService.this, new TextToSpeech.OnInitListener() {
+            final TextToSpeech.OnInitListener listener = new TextToSpeech.OnInitListener() {
                 @Override
                 public void onInit(int status) {
                     if (status != TextToSpeech.SUCCESS) {
@@ -61,8 +63,8 @@ public class SpeakerService extends Service {
                         @Override
                         public void run() {
                             try {
-                                // FIXME: We shouldn't say the locale name. Perhaps if detection
-                                // failed and this is just a fallback though?
+                                // FIXME: We shouldn't say the locale name, that's for development
+                                // purposes only
                                 doSpeak(locale.getDisplayLanguage() + ": " + text);
                             } catch (Exception e) {
                                 Timber.e(e, "Speaking failed: " + text);
@@ -70,9 +72,19 @@ public class SpeakerService extends Service {
                         }
                     });
                 }
-            });
+            };
 
-            // FIXME: Tell the TTS engine to use a voice that supports the current locale
+            // FIXME: Use a TTS engine that supports the requested locale
+            output = new TextToSpeech(SpeakerService.this, listener);
+
+            // Tell the TTS engine to use a voice that supports the current locale
+            Optional<Voice> optionalVoice = TtsUtils.getVoiceForEngineAndLocale(output, locale);
+            if (optionalVoice.isPresent()) {
+                Timber.i("Using voice: %s", optionalVoice.get().getName());
+                output.setVoice(optionalVoice.get());
+            } else {
+                Timber.w("No %s voice found, using default voice", locale.getDisplayLanguage());
+            }
         }
     }
 
