@@ -43,7 +43,7 @@ public class SpeakerService extends Service {
                 }
             });
 
-            output.speak(text, TextToSpeech.QUEUE_ADD, null, null);
+            output.speak(text, TextToSpeech.QUEUE_ADD, null, "oh, the uniqueness");
         }
 
         public void speak(final CharSequence text, final Locale locale) {
@@ -89,7 +89,7 @@ public class SpeakerService extends Service {
     }
 
     private void speak(CharSequence text, Locale locale) {
-        Timber.e("Should have said in locale <%s>: <%s>", locale, text);
+        Timber.i("Speaking in locale <%s>: <%s>", text, locale);
         new SpeakOnce().speak(text, locale);
     }
 
