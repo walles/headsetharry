@@ -28,18 +28,20 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Installing on Johan's Phone
-* Listen for incoming SMS messages
+* Use an appropriate TTS engine / voice for reading the incoming SMS
+* When a message arrives, determine what language to use for reading it
 * When a message comes in, ignore it unless sound is being routed
 through a headset
 * When a message comes in, ignore it if a phone call is in progress
 * Inventory available voices on the system to determine which languages
 to support
-* When a message arrives, determine what language to use for reading it
-* Use an appropriate TTS engine / voice for reading the incoming SMS
 
 # TODO Before Getting Beta Users
+* Upload to GitHub
+* Add a `.travis.yml` configuration to lint and run the unit tests
 * Make up a release process and document it
 * Think about whether we think we'll survive app upgrades
+* Think about whether we think we'll survive device reboots
 
 # TODO Before Releasing on Android Market
 * Look up incoming phone numbers and read contact names rather than
@@ -48,6 +50,7 @@ phone numbers.
 * When a phone call ends, read all events received during the call
 * If the user is playing music, pause or turn down the music while the
 message is being read.
+* Make an icon / all the other graphics needed by Market
 * Add a Settings activity where:
     * You can see what languages are available
     * You can see What languages are enabled (there's a TTS voice for the
@@ -67,3 +70,4 @@ lose wifi connectivity.
 
 # DONE
 * Log to Crashlytics
+* Listen for incoming SMS messages in `SmsReceiver.java`
