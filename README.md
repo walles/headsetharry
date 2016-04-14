@@ -28,7 +28,6 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Installing on Johan's Phone
-* When a message arrives, determine what language to use for reading it
 * Use an appropriate TTS engine / voice for reading the incoming SMS
 * When a message comes in, ignore it unless sound is being routed
 through a headset
@@ -37,7 +36,6 @@ through a headset
 to support
 
 # TODO Before Getting Beta Users
-* Upload to GitHub
 * Add a `.travis.yml` configuration to lint and run the unit tests
 * Make up a release process and document it
 * Make sure we can handle incoming MMS messages
@@ -45,6 +43,7 @@ to support
 * Think about whether we think we'll survive device reboots
 
 # TODO Before Releasing on Android Market
+* Add a license
 * Look up incoming phone numbers and read contact names rather than
 phone numbers.
 * When a message comes in, enqueue it if a phone call is in progress.
@@ -76,3 +75,5 @@ handle them?
 # DONE
 * Log to Crashlytics
 * Listen for incoming SMS messages in `SmsReceiver.java`
+* Upload to GitHub
+* When a message arrives, determine what language to use for reading it

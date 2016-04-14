@@ -25,15 +25,6 @@ import timber.log.Timber;
  * Receive incoming SMSes.
  */
 public class SmsReceiver extends BroadcastReceiver {
-    private class LanguageDetectionException extends Exception {
-        public LanguageDetectionException(String message) {
-            super(message);
-        }
-        public LanguageDetectionException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         final Bundle bundle = intent.getExtras();
@@ -49,29 +40,33 @@ public class SmsReceiver extends BroadcastReceiver {
 
         for (Object pduObj : pduObjs) {
             SmsMessage message = SmsMessage.createFromPdu((byte[])pduObj);
-            Locale locale;
+
+            Optional<Locale> optionalLocale = Optional.absent();
             try {
-                locale = getLocale(message);
-            } catch (LanguageDetectionException e) {
+                optionalLocale = getLocale(message);
+            } catch (IOException e) {
                 Timber.e(e, "Language detection failed");
-                continue;
             }
-            CharSequence announcement = toString(message, locale);
+
+            Locale locale;
+            if (optionalLocale.isPresent()) {
+                locale = optionalLocale.get();
+            } else {
+                // Unable to find out from the message, go with the system locale
+                locale = Locale.getDefault();
+            }
+            CharSequence announcement = toString(message, optionalLocale);
             SpeakerService.speak(context, announcement, locale);
         }
     }
 
-    private Locale getLocale(SmsMessage message) throws LanguageDetectionException {
+    private Optional<Locale> getLocale(SmsMessage message) throws IOException {
         List<LanguageProfile> languageProfiles = new LinkedList<>();
         LanguageProfileReader languageProfileReader = new LanguageProfileReader();
 
         // FIXME: Use the locales for which there are voices present on the system
-        try {
-            languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString("en")));
-            languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString("sv")));
-        } catch (IOException e) {
-            throw new LanguageDetectionException("Loading language profiles failed", e);
-        }
+        languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString("en")));
+        languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString("sv")));
 
         LanguageDetector languageDetector =
             LanguageDetectorBuilder.create(NgramExtractors.standard())
@@ -80,22 +75,37 @@ public class SmsReceiver extends BroadcastReceiver {
         Optional<LdLocale> ldLocale = languageDetector.detect(message.getDisplayMessageBody());
 
         if (!ldLocale.isPresent()) {
-            throw new LanguageDetectionException(
-                "Unable to detect language for: <" + message.getDisplayMessageBody() + ">");
+            String languages = "";
+            for (LanguageProfile languageProfile: languageProfiles) {
+                if (languages.length() > 0) {
+                    languages += ",";
+                }
+                languages += languageProfile.getLocale();
+            }
+            Timber.w("Unable to detect language among <%s> for: <%s>",
+                    languages,
+                    message.getDisplayMessageBody());
+            return Optional.absent();
         }
 
-        return new Locale.Builder().setLanguageTag(ldLocale.get().getLanguage()).build();
+        return Optional.of(new Locale.Builder().setLanguageTag(ldLocale.get().getLanguage()).build());
     }
 
-    private CharSequence toString(SmsMessage message, Locale locale) {
+    private CharSequence toString(SmsMessage message, Optional<Locale> locale) {
         // FIXME: Get an SMS message template for the given locale and fill that in.
 
         // FIXME: What if we don't have an SMS message template for the given locale?
+
+        // FIXME: Localize all strings in this method
 
         String source = message.getDisplayOriginatingAddress();
         if (source == null) {
             source = "unknown sender";
         }
-        return String.format("SMS from %s: %s", source, message.getDisplayMessageBody());
+
+        return String.format("%sSMS from %s: %s",
+            locale.isPresent() ? "" : "Unknown language ",
+            source,
+            message.getDisplayMessageBody());
     }
 }

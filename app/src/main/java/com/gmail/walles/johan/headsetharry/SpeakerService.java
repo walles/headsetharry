@@ -61,7 +61,9 @@ public class SpeakerService extends Service {
                         @Override
                         public void run() {
                             try {
-                                doSpeak(text);
+                                // FIXME: We shouldn't say the locale name. Perhaps if detection
+                                // failed and this is just a fallback though?
+                                doSpeak(locale.getDisplayLanguage() + ": " + text);
                             } catch (Exception e) {
                                 Timber.e(e, "Speaking failed: " + text);
                             }
@@ -89,7 +91,7 @@ public class SpeakerService extends Service {
     }
 
     private void speak(CharSequence text, Locale locale) {
-        Timber.i("Speaking in locale <%s>: <%s>", text, locale);
+        Timber.i("Speaking in locale <%s>: <%s>", locale, text);
         new SpeakOnce().speak(text, locale);
     }
 
