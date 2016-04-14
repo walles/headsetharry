@@ -31,11 +31,7 @@ public class SmsReceiver extends BroadcastReceiver {
             SmsMessage message = SmsMessage.createFromPdu((byte[])pduObj);
             Locale locale = getLocale(message);
             CharSequence announcement = toString(message, locale);
-            try {
-                new TTS().speak(announcement, locale);
-            } catch (TTS.UnsupportedLocaleException e) {
-                Timber.e(e, "While speaking: " + announcement);
-            }
+            SpeakerService.speak(context, announcement, locale);
         }
     }
 

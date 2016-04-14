@@ -40,6 +40,7 @@ to support
 * Upload to GitHub
 * Add a `.travis.yml` configuration to lint and run the unit tests
 * Make up a release process and document it
+* Make sure we can handle incoming MMS messages
 * Think about whether we think we'll survive app upgrades
 * Think about whether we think we'll survive device reboots
 
@@ -67,6 +68,10 @@ message is being read.
 * Add Caller ID support.
 * Add support for saying when we connect to a wifi network, or when we
 lose wifi connectivity.
+* Think about long messages, should we have an upper limit on how much
+we read?
+* Think about multipart messages, how do we handle them? How should we
+handle them?
 
 # DONE
 * Log to Crashlytics
