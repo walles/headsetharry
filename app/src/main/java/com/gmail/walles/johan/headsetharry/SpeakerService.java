@@ -3,7 +3,10 @@ package com.gmail.walles.johan.headsetharry;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.Nullable;
 
 import java.util.Locale;
@@ -14,6 +17,62 @@ public class SpeakerService extends Service {
     private static final String SPEAK_ACTION = "com.gmail.walles.johan.headsetharry.speak_action";
     private static final String TEXT_EXTRA = "com.gmail.walles.johan.headsetharry.text";
     private static final String LOCALE_EXTRA = "com.gmail.walles.johan.headsetharry.locale";
+
+    private class SpeakOnce {
+        private TextToSpeech output;
+        private Handler handler = new Handler();
+
+        private void doSpeak(final CharSequence text) {
+            output.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                @Override
+                public void onStart(String utteranceId) {
+                    Timber.v("Speech started...");
+                }
+
+                @Override
+                public void onDone(String utteranceId) {
+                    Timber.v("Speech successfully completed");
+                    output.shutdown();
+                }
+
+                @Override
+                public void onError(String utteranceId) {
+                    String message = "Speech failed: <" + text + ">";
+                    Timber.e(new Exception(message), message);
+                    output.shutdown();
+                }
+            });
+
+            output.speak(text, TextToSpeech.QUEUE_ADD, null, null);
+        }
+
+        public void speak(final CharSequence text, final Locale locale) {
+            // FIXME: Use a TTS engine that supports the requested locale
+            output = new TextToSpeech(SpeakerService.this, new TextToSpeech.OnInitListener() {
+                @Override
+                public void onInit(int status) {
+                    if (status != TextToSpeech.SUCCESS) {
+                        String message = "Error initializing TTS, status code was " + status;
+                        Timber.e(new Exception(message), message);
+                        return;
+                    }
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                doSpeak(text);
+                            } catch (Exception e) {
+                                Timber.e(e, "Speaking failed: " + text);
+                            }
+                        }
+                    });
+                }
+            });
+
+            // FIXME: Tell the TTS engine to use a voice that supports the current locale
+        }
+    }
 
     public static void speak(Context context, CharSequence text, Locale locale) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -31,6 +90,7 @@ public class SpeakerService extends Service {
 
     private void speak(CharSequence text, Locale locale) {
         Timber.e("Should have said in locale <%s>: <%s>", locale, text);
+        new SpeakOnce().speak(text, locale);
     }
 
     @Override
