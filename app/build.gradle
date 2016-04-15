@@ -23,7 +23,11 @@ android {
 
     defaultConfig {
         applicationId "com.gmail.walles.johan.headsetharry"
-        minSdkVersion 21
+
+        // The TTS API in SDK 21 is broken, stay at 20 or lower:
+        // https://code.google.com/p/android/issues/detail?id=80696
+        minSdkVersion 20
+
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"

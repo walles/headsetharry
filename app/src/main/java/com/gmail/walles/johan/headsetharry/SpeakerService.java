@@ -7,11 +7,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
-import android.speech.tts.Voice;
 import android.support.annotation.Nullable;
 
-import com.google.common.base.Optional;
-
+import java.util.HashMap;
 import java.util.Locale;
 
 import timber.log.Timber;
@@ -23,7 +21,12 @@ public class SpeakerService extends Service {
 
     private class SpeakOnce {
         private TextToSpeech output;
-        private Handler handler = new Handler();
+        private final Locale locale;
+        private final Handler handler = new Handler();
+
+        public SpeakOnce(Locale locale) {
+            this.locale = locale;
+        }
 
         private void doSpeak(final CharSequence text) {
             output.setOnUtteranceProgressListener(new UtteranceProgressListener() {
@@ -46,10 +49,51 @@ public class SpeakerService extends Service {
                 }
             });
 
-            output.speak(text, TextToSpeech.QUEUE_ADD, null, "oh, the uniqueness");
+            HashMap<String, String> params = new HashMap<>();
+            params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "oh, the uniqueness");
+            //noinspection deprecation
+            output.speak(text.toString(), TextToSpeech.QUEUE_ADD, params);
         }
 
-        public void speak(final CharSequence text, final Locale locale) {
+        private boolean isSetLanguageOk(int setLanguageReturnCode) {
+            switch (setLanguageReturnCode) {
+                case TextToSpeech.LANG_AVAILABLE:
+                case TextToSpeech.LANG_COUNTRY_AVAILABLE:
+                case TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        @SuppressWarnings("deprecation")
+        private void configureEngineAndSpeak(CharSequence text) {
+            // Tell the TTS engine to use a voice that supports the current locale
+            int result = output.setLanguage(locale);
+            if (isSetLanguageOk(result)) {
+                Timber.v("TTS configured for %s using %s", locale, output.getLanguage());
+                doSpeak(text);
+                return;
+            }
+
+            final Locale defaultLocale = output.getDefaultLanguage();
+
+            Timber.w("TTS doesn't support %s (%d), using default locale %s", locale, result, defaultLocale);
+            result = output.setLanguage(defaultLocale);
+            if (isSetLanguageOk(result)) {
+                Timber.v("TTS configured for default locale %s using %s", locale, output.getLanguage());
+                doSpeak(text);
+                return;
+            }
+
+            String message =
+                String.format("TTS doesn't support its own default locale %s (%d)", defaultLocale, result);
+            Timber.e(new Exception(message), message);
+            output.shutdown();
+        }
+
+        public void speak(final CharSequence text) {
             final TextToSpeech.OnInitListener listener = new TextToSpeech.OnInitListener() {
                 @Override
                 public void onInit(int status) {
@@ -65,7 +109,7 @@ public class SpeakerService extends Service {
                             try {
                                 // FIXME: We shouldn't say the locale name, that's for development
                                 // purposes only
-                                doSpeak(locale.getDisplayLanguage() + ": " + text);
+                                configureEngineAndSpeak(locale.getDisplayLanguage() + ": " + text);
                             } catch (Exception e) {
                                 Timber.e(e, "Speaking failed: " + text);
                             }
@@ -76,15 +120,6 @@ public class SpeakerService extends Service {
 
             // FIXME: Use a TTS engine that supports the requested locale
             output = new TextToSpeech(SpeakerService.this, listener);
-
-            // Tell the TTS engine to use a voice that supports the current locale
-            Optional<Voice> optionalVoice = TtsUtils.getVoiceForEngineAndLocale(output, locale);
-            if (optionalVoice.isPresent()) {
-                Timber.i("Using voice: %s", optionalVoice.get().getName());
-                output.setVoice(optionalVoice.get());
-            } else {
-                Timber.w("No %s voice found, using default voice", locale.getDisplayLanguage());
-            }
         }
     }
 
@@ -100,11 +135,6 @@ public class SpeakerService extends Service {
     public void onCreate() {
         super.onCreate();
         LoggingUtil.setUpLogging(this);
-    }
-
-    private void speak(CharSequence text, Locale locale) {
-        Timber.i("Speaking in locale <%s>: <%s>", locale, text);
-        new SpeakOnce().speak(text, locale);
     }
 
     @Override
@@ -133,7 +163,9 @@ public class SpeakerService extends Service {
 
         Locale locale = (Locale)localeObject;
 
-        speak(text, locale);
+        Timber.i("Speaking in locale <%s>: <%s>", locale, text);
+        new SpeakOnce(locale).speak(text);
+
         return Service.START_NOT_STICKY;
     }
 
