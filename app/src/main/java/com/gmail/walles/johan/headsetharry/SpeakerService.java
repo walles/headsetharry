@@ -3,7 +3,6 @@ package com.gmail.walles.johan.headsetharry;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -19,110 +18,6 @@ public class SpeakerService extends Service {
     private static final String TEXT_EXTRA = "com.gmail.walles.johan.headsetharry.text";
     private static final String LOCALE_EXTRA = "com.gmail.walles.johan.headsetharry.locale";
 
-    private class SpeakOnce {
-        private TextToSpeech output;
-        private final Locale locale;
-        private final Handler handler = new Handler();
-
-        public SpeakOnce(Locale locale) {
-            this.locale = locale;
-        }
-
-        private void doSpeak(final CharSequence text) {
-            output.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                @Override
-                public void onStart(String utteranceId) {
-                    Timber.v("Speech started...");
-                }
-
-                @Override
-                public void onDone(String utteranceId) {
-                    Timber.v("Speech successfully completed");
-                    output.shutdown();
-                }
-
-                @Override
-                public void onError(String utteranceId) {
-                    String message = "Speech failed: <" + text + ">";
-                    Timber.e(new Exception(message), message);
-                    output.shutdown();
-                }
-            });
-
-            HashMap<String, String> params = new HashMap<>();
-            params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "oh, the uniqueness");
-            //noinspection deprecation
-            output.speak(text.toString(), TextToSpeech.QUEUE_ADD, params);
-        }
-
-        private boolean isSetLanguageOk(int setLanguageReturnCode) {
-            switch (setLanguageReturnCode) {
-                case TextToSpeech.LANG_AVAILABLE:
-                case TextToSpeech.LANG_COUNTRY_AVAILABLE:
-                case TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE:
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
-        @SuppressWarnings("deprecation")
-        private void configureEngineAndSpeak(CharSequence text) {
-            // Tell the TTS engine to use a voice that supports the current locale
-            int result = output.setLanguage(locale);
-            if (isSetLanguageOk(result)) {
-                Timber.v("TTS configured for %s using %s", locale, output.getLanguage());
-                doSpeak(text);
-                return;
-            }
-
-            final Locale defaultLocale = output.getDefaultLanguage();
-
-            Timber.w("TTS doesn't support %s (%d), using default locale %s", locale, result, defaultLocale);
-            result = output.setLanguage(defaultLocale);
-            if (isSetLanguageOk(result)) {
-                Timber.v("TTS configured for default locale %s using %s", locale, output.getLanguage());
-                doSpeak(text);
-                return;
-            }
-
-            String message =
-                String.format("TTS doesn't support its own default locale %s (%d)", defaultLocale, result);
-            Timber.e(new Exception(message), message);
-            output.shutdown();
-        }
-
-        public void speak(final CharSequence text) {
-            final TextToSpeech.OnInitListener listener = new TextToSpeech.OnInitListener() {
-                @Override
-                public void onInit(int status) {
-                    if (status != TextToSpeech.SUCCESS) {
-                        String message = "Error initializing TTS, status code was " + status;
-                        Timber.e(new Exception(message), message);
-                        return;
-                    }
-
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                // FIXME: We shouldn't say the locale name, that's for development
-                                // purposes only
-                                configureEngineAndSpeak(locale.getDisplayLanguage() + ": " + text);
-                            } catch (Exception e) {
-                                Timber.e(e, "Speaking failed: " + text);
-                            }
-                        }
-                    });
-                }
-            };
-
-            // FIXME: Use a TTS engine that supports the requested locale
-            output = new TextToSpeech(SpeakerService.this, listener);
-        }
-    }
-
     public static void speak(Context context, CharSequence text, Locale locale) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SPEAK_ACTION);
@@ -135,6 +30,51 @@ public class SpeakerService extends Service {
     public void onCreate() {
         super.onCreate();
         LoggingUtil.setUpLogging(this);
+    }
+
+    /**
+     * Speak the given text using the given TTS, then shut down the TTS.
+     */
+    private void speakAndShutdown(final TextToSpeech tts, final CharSequence text) {
+        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+                Timber.v("Speech started...");
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                Timber.v("Speech successfully completed");
+                tts.shutdown();
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+                String message = "Speech failed: <" + text + ">";
+                Timber.e(new Exception(message), message);
+                tts.shutdown();
+            }
+        });
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "oh, the uniqueness");
+        //noinspection deprecation
+        tts.speak(text.toString(), TextToSpeech.QUEUE_ADD, params);
+    }
+
+    private void speak(final CharSequence text, final Locale locale) {
+        TtsUtil.getEngineForLocale(this, locale, new TtsUtil.CompletionListener() {
+            @Override
+            public void onSuccess(TextToSpeech textToSpeech) {
+                // FIXME: We shouldn't say the locale name, that's for development purposes only
+                speakAndShutdown(textToSpeech, locale.getDisplayLanguage() + ": " + text);
+            }
+
+            @Override
+            public void onFailure(String message) {
+                Timber.e(new Exception(message), "Speech failed: " + message);
+            }
+        });
     }
 
     @Override
@@ -164,7 +104,7 @@ public class SpeakerService extends Service {
         Locale locale = (Locale)localeObject;
 
         Timber.i("Speaking in locale <%s>: <%s>", locale, text);
-        new SpeakOnce(locale).speak(text);
+        speak(text, locale);
 
         return Service.START_NOT_STICKY;
     }

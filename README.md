@@ -28,7 +28,6 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Installing on Johan's Phone
-* Use an appropriate TTS engine / voice for reading the incoming SMS
 * When a message comes in, ignore it unless sound is being routed
 through a headset
 * When a message comes in, ignore it if a phone call is in progress
@@ -77,3 +76,4 @@ handle them?
 * Listen for incoming SMS messages in `SmsReceiver.java`
 * Upload to GitHub
 * When a message arrives, determine what language to use for reading it
+* Use an appropriate TTS engine / voice for reading the incoming SMS
