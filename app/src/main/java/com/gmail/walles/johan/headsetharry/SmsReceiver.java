@@ -34,6 +34,10 @@ public class SmsReceiver extends BroadcastReceiver {
 
         final Object[] pduObjs = (Object[]) bundle.get("pdus");
         if (pduObjs == null) {
+            Timber.w("Got SMS with null PDUs");
+            return;
+        }
+        if (pduObjs.length == 0) {
             Timber.w("Got SMS with no PDUs");
             return;
         }

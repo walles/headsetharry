@@ -3,6 +3,7 @@ package com.gmail.walles.johan.headsetharry;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -84,29 +85,38 @@ public class SpeakerService extends Service {
             return Service.START_NOT_STICKY;
         }
 
+        AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        int audioMode = audioManager.getMode();
+        if (audioManager.getMode() != AudioManager.MODE_NORMAL) {
+            Timber.i("Not speaking, audio mode not MODE_NORMAL: %d", audioMode);
+        }
+
+        handleIntent(intent);
+
+        return Service.START_NOT_STICKY;
+    }
+
+    private void handleIntent(Intent intent) {
         CharSequence text = intent.getCharSequenceExtra(TEXT_EXTRA);
         if (text == null) {
             Timber.e("Speak action with null text");
-            return Service.START_NOT_STICKY;
+            return;
         }
 
         Object localeObject = intent.getSerializableExtra(LOCALE_EXTRA);
         if (localeObject == null) {
             Timber.e("Speak action with null locale");
-            return Service.START_NOT_STICKY;
+            return;
         }
 
         if (!(localeObject instanceof Locale)) {
             Timber.e("Speak action locale is not a Locale: %s", localeObject.getClass());
-            return Service.START_NOT_STICKY;
+            return;
         }
-
         Locale locale = (Locale)localeObject;
 
         Timber.i("Speaking in locale <%s>: <%s>", locale, text);
         speak(text, locale);
-
-        return Service.START_NOT_STICKY;
     }
 
     @Nullable

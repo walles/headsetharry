@@ -30,14 +30,16 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 # TODO Before Installing on Johan's Phone
 * When a message comes in, ignore it unless sound is being routed
 through a headset
-* When a message comes in, ignore it if a phone call is in progress
-* Inventory available voices on the system to determine which languages
-to support
 
 # TODO Before Getting Beta Users
+* Make sure we use the notification stream for our messages
+* Look up message sender's phone number for incoming messages and say
+the name of the sender rather than their phone number.
+* For incoming messages, identify exactly the languages for which there
+are voices installed on the system.
 * Add a `.travis.yml` configuration to lint and run the unit tests
 * Make up a release process and document it
-* Make sure we can handle incoming MMS messages
+* Make sure we don't say / do weird things on incoming MMS messages
 * Think about whether we think we'll survive app upgrades
 * Think about whether we think we'll survive device reboots
 
@@ -60,12 +62,13 @@ message is being read.
     https://play.google.com/store/search?q=tts&c=apps
 
 # TODO Misc
-* Add support for saying the name of whoever is calling.
-* Add support for calendar events. 
-* Add support for incoming Google Inbox e-mails.
-* Add Caller ID support.
-* Add support for saying when we connect to a wifi network, or when we
-lose wifi connectivity.
+* In Settings, should it be possible to tag contacts with their most
+likely language?
+* "Phone call from NN" (NN is name if in contacts, not number)
+* "Calendar event: ..."
+* Google Inbox: "Mail from NN: SUBJECT"
+* "Connected to WIFI-NAME"
+* "Wireless network connection lost"
 * Think about long messages, should we have an upper limit on how much
 we read?
 * Think about multipart messages, how do we handle them? How should we
@@ -77,3 +80,4 @@ handle them?
 * Upload to GitHub
 * When a message arrives, determine what language to use for reading it
 * Use an appropriate TTS engine / voice for reading the incoming SMS
+* When a message comes in, ignore it if a phone call is in progress
