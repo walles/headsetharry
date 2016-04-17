@@ -19,6 +19,8 @@ import com.optimaize.langdetect.ngram.NgramExtractors;
 import com.optimaize.langdetect.profiles.LanguageProfile;
 import com.optimaize.langdetect.profiles.LanguageProfileReader;
 
+import org.jetbrains.annotations.NonNls;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -72,13 +74,13 @@ public class SpeakerService extends Service {
 
             @Override
             public void onError(String utteranceId) {
-                String message = "Speech failed: <" + text + ">";
+                @NonNls String message = "Speech failed: <" + text + ">";
                 Timber.e(new Exception(message), message);
                 tts.shutdown();
             }
         });
 
-        HashMap<String, String> params = new HashMap<>();
+        @NonNls HashMap<String, String> params = new HashMap<>();
         params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "oh, the uniqueness");
         //noinspection deprecation
         tts.speak(text.toString(), TextToSpeech.QUEUE_ADD, params);
@@ -107,7 +109,7 @@ public class SpeakerService extends Service {
             return false;
         }
 
-        Set<String> parts = new HashSet<>(Arrays.asList(Build.PRODUCT.split("_")));
+        @NonNls Set<String> parts = new HashSet<>(Arrays.asList(Build.PRODUCT.split("_")));
         if (parts.size() == 0) {
             return false;
         }

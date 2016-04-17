@@ -7,6 +7,8 @@ import android.content.pm.ResolveInfo;
 import android.speech.tts.TextToSpeech;
 import android.util.StringBuilderPrinter;
 
+import org.jetbrains.annotations.NonNls;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -16,7 +18,7 @@ import timber.log.Timber;
 public class TtsUtil {
     public interface CompletionListener {
         void onSuccess(TextToSpeech textToSpeech);
-        void onFailure(String message);
+        void onFailure(@NonNls String message);
     }
 
     private static class EngineGetter {
@@ -104,7 +106,7 @@ public class TtsUtil {
             if (packageName == null) {
                 StringBuilder stringBuilder = new StringBuilder();
                 StringBuilderPrinter sbPrinter = new StringBuilderPrinter(stringBuilder);
-                resolveInfo.dump(sbPrinter, "Johan: ");
+                resolveInfo.dump(sbPrinter, "  ");
                 Timber.e(new Exception(stringBuilder.toString()), "Package name is null");
                 continue;
             }

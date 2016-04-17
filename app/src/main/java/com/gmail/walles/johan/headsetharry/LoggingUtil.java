@@ -22,6 +22,8 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
+import org.jetbrains.annotations.NonNls;
+
 import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
@@ -43,7 +45,7 @@ public class LoggingUtil {
 
     private static class CrashlyticsTree extends Timber.Tree {
         @Override
-        protected void log(int priority, String tag, String message, Throwable t) {
+        protected void log(int priority, @NonNls String tag, String message, Throwable t) {
             if (BuildConfig.DEBUG) {
                 tag = "DEBUG";
             } else if (TextUtils.isEmpty(tag)) {

@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 
+import org.jetbrains.annotations.NonNls;
+
 import timber.log.Timber;
 
 /**
@@ -14,7 +16,7 @@ import timber.log.Timber;
 public class SmsReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        final Bundle bundle = intent.getExtras();
+        @NonNls final Bundle bundle = intent.getExtras();
         if (bundle == null) {
             return;
         }
