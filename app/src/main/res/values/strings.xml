@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Headset Harry</string>
+    <string name="app_name" translatable="false">Headset Harry</string>
 
     <!-- Strings related to Settings -->
 
@@ -58,4 +58,7 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="unknown_sender">unknown sender</string>
+    <string name="sms_from" formatted="false">%s SMS from %s: %s</string>
+    <string name="unknown_language">"Unknown language "</string>
 </resources>

@@ -33,8 +33,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 the name of the sender rather than their phone number.
 * For incoming messages, identify exactly the languages for which there
 are voices installed on the system.
-* On incoming messages, use templates in order: identified language,
-system language, English
 * Add a `.travis.yml` configuration to lint and run the unit tests
 * Make up a release process and document it
 * Think about whether we think we'll survive app upgrades
@@ -87,3 +85,5 @@ handle them?
 through a headset
 * Verify that we work properly with a Bluetooth headset connected
 * Set app version name from `git describe`
+* On incoming messages, try to find a template in the same language as
+the message

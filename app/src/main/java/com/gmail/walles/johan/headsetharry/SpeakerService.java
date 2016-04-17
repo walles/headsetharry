@@ -3,6 +3,8 @@ package com.gmail.walles.johan.headsetharry;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.IBinder;
@@ -28,6 +30,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import timber.log.Timber;
@@ -91,8 +94,7 @@ public class SpeakerService extends Service {
         TtsUtil.getEngineForLocale(this, locale, new TtsUtil.CompletionListener() {
             @Override
             public void onSuccess(TextToSpeech textToSpeech) {
-                // FIXME: We shouldn't say the locale name, that's for development purposes only
-                speakAndShutdown(textToSpeech, locale.getDisplayLanguage() + ": " + text);
+                speakAndShutdown(textToSpeech, text);
             }
 
             @Override
@@ -182,41 +184,56 @@ public class SpeakerService extends Service {
 
         Optional<Locale> optionalLocale = Optional.absent();
         try {
-            optionalLocale = getLocale(body);
+            optionalLocale = identifyLanguage(body);
         } catch (IOException e) {
             Timber.e(e, "Language detection failed");
         }
 
-        Locale locale;
-        if (optionalLocale.isPresent()) {
-            locale = optionalLocale.get();
-        } else {
-            // Unable to find out from the message, go with the system locale
-            locale = Locale.getDefault();
+        Locale locale = optionalLocale.or(Locale.getDefault());
+        speak(toSmsAnnouncement(body, sender, optionalLocale), locale);
+    }
+
+    // From: http://stackoverflow.com/a/9475663/473672
+    private Map<Integer, String> getStrings(Locale locale, int ... resourceIds) {
+        Map<Integer, String> returnMe = new HashMap<>();
+
+        Resources res = getResources();
+        Configuration conf = res.getConfiguration();
+        Locale savedLocale = conf.locale;
+        conf.locale = locale;
+        res.updateConfiguration(conf, null); // second arg null means don't change
+
+        // retrieve resources from desired locale
+        for (int resourceId: resourceIds) {
+            returnMe.put(resourceId, res.getString(resourceId));
         }
 
-        speak(toSmsAnnouncement(body, sender, optionalLocale), locale);
+        // restore original locale
+        conf.locale = savedLocale;
+        res.updateConfiguration(conf, null);
+
+        return returnMe;
     }
 
     private CharSequence toSmsAnnouncement(
         CharSequence body, CharSequence sender, Optional<Locale> optionalLocale)
     {
-        // FIXME: Get an SMS message template for the given locale and fill that in.
-        // FIXME: Fall back to getting a template for the system locale if that can't be found.
-        // FIXME: Fall back to getting a template in English if that can't be found. Or a generic one?
-
-        // FIXME: Localize all strings in this method
+        Locale locale = optionalLocale.or(Locale.getDefault());
+        Map<Integer, String> translations = getStrings(locale,
+            R.string.unknown_sender,
+            R.string.sms_from,
+            R.string.unknown_language);
 
         if (sender == null) {
-            sender = "unknown sender";
+            sender = translations.get(R.string.unknown_sender);
         }
 
-        return String.format("%sSMS from %s: %s",
-            optionalLocale.isPresent() ? "" : "Unknown language ",
+        return String.format(translations.get(R.string.sms_from),
+            optionalLocale.isPresent() ? "" : translations.get(R.string.unknown_language),
             sender, body);
     }
 
-    private Optional<Locale> getLocale(CharSequence text) throws IOException {
+    private Optional<Locale> identifyLanguage(CharSequence text) throws IOException {
         List<LanguageProfile> languageProfiles = new LinkedList<>();
         LanguageProfileReader languageProfileReader = new LanguageProfileReader();
 

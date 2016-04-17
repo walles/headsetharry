@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sms_from" formatted="false">SMS %s från %s: %s</string>
+    <string name="unknown_language">på okänt språk</string>
+    <string name="unknown_sender">okänd avsändare</string>
+</resources>
