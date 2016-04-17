@@ -72,7 +72,7 @@ public class TtsUtil {
             }
 
             if (remainingEnginePackageNames.isEmpty()) {
-                Timber.w("No TTS engine seems to support " + locale);
+                Timber.w("No TTS engine seems to support %s", locale);
                 callback.onFailure("No engine found for " + locale);
                 return;
             }
@@ -81,6 +81,7 @@ public class TtsUtil {
             Timber.d("Asking TTS engine %s about locale %s...", engine, locale);
 
             candidate = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+                @SuppressWarnings("deprecation")
                 @Override
                 public void onInit(int status) {
                     if (status != TextToSpeech.SUCCESS) {
@@ -91,7 +92,6 @@ public class TtsUtil {
 
                     int result = candidate.setLanguage(locale);
                     if (isSetLanguageOk(result)) {
-                        //noinspection deprecation
                         Timber.i("TTS engine %s set to %s for locale %s",
                             engine, candidate.getLanguage(), locale);
                         callback.onSuccess(candidate);

@@ -58,6 +58,9 @@ message is being read.
     https://play.google.com/store/search?q=tts&c=apps
 
 # TODO Misc
+* Maybe we should simply read notifications instead of trying to solve
+everything ourselves? Maybe read the `Notification.tickerText` to the
+user.
 * If we get a "phone number" with letters in it, maybe we should just
   read it as it is and not try to look it up.
 * In Settings, should it be possible to tag contacts with their most
