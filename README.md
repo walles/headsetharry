@@ -40,9 +40,6 @@ are voices installed on the system.
 * Set app version name from `git` somehow
 
 # TODO Before Releasing on Android Market
-* When finding TTS engines supporting the required language, try the
-system default TTS engine first, then the others in alphabetic order by
-package name (to be deterministic).
 * Add a license
 * Look up incoming phone numbers and read contact names rather than
 phone numbers.
@@ -91,3 +88,5 @@ the message
 * Look up message sender's phone number for incoming messages and say
 the name of the sender rather than their phone number.
 * Present phone numbers for which we have no contact info as unknown
+* When finding TTS engines supporting the required language, try the
+system default TTS engine first
