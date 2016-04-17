@@ -9,10 +9,22 @@ import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
+import com.google.common.base.Optional;
+import com.optimaize.langdetect.LanguageDetector;
+import com.optimaize.langdetect.LanguageDetectorBuilder;
+import com.optimaize.langdetect.i18n.LdLocale;
+import com.optimaize.langdetect.ngram.NgramExtractors;
+import com.optimaize.langdetect.profiles.LanguageProfile;
+import com.optimaize.langdetect.profiles.LanguageProfileReader;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -20,14 +32,19 @@ import timber.log.Timber;
 
 public class SpeakerService extends Service {
     private static final String SPEAK_ACTION = "com.gmail.walles.johan.headsetharry.speak_action";
-    private static final String TEXT_EXTRA = "com.gmail.walles.johan.headsetharry.text";
-    private static final String LOCALE_EXTRA = "com.gmail.walles.johan.headsetharry.locale";
 
-    public static void speak(Context context, CharSequence text, Locale locale) {
+    private static final String EXTRA_TYPE = "com.gmail.walles.johan.headsetharry.type";
+    private static final String EXTRA_BODY = "com.gmail.walles.johan.headsetharry.body";
+    private static final String EXTRA_SENDER = "com.gmail.walles.johan.headsetharry.sender";
+
+    private static final String TYPE_SMS = "SMS";
+
+    public static void speakSms(Context context, CharSequence body, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SPEAK_ACTION);
-        intent.putExtra(TEXT_EXTRA, text);
-        intent.putExtra(LOCALE_EXTRA, locale);
+        intent.putExtra(EXTRA_BODY, body);
+        intent.putExtra(EXTRA_SENDER, sender);
+        intent.putExtra(EXTRA_TYPE, TYPE_SMS);
         context.startService(intent);
     }
 
@@ -68,6 +85,7 @@ public class SpeakerService extends Service {
     }
 
     private void speak(final CharSequence text, final Locale locale) {
+        Timber.i("Speaking in locale <%s>: <%s>", locale, text);
         TtsUtil.getEngineForLocale(this, locale, new TtsUtil.CompletionListener() {
             @Override
             public void onSuccess(TextToSpeech textToSpeech) {
@@ -133,26 +151,96 @@ public class SpeakerService extends Service {
     }
 
     private void handleIntent(Intent intent) {
-        CharSequence text = intent.getCharSequenceExtra(TEXT_EXTRA);
-        if (text == null) {
-            Timber.e("Speak action with null text");
+        String type = intent.getStringExtra(EXTRA_TYPE);
+        if (TextUtils.isEmpty(type)) {
+            Timber.e("Speak action with no type");
             return;
         }
 
-        Object localeObject = intent.getSerializableExtra(LOCALE_EXTRA);
-        if (localeObject == null) {
-            Timber.e("Speak action with null locale");
+        if (TYPE_SMS.equals(type)) {
+            handleSmsIntent(intent);
+        } else {
+            Timber.w("Ignoring incoming intent of type %s");
+            return;
+        }
+    }
+
+    private void handleSmsIntent(Intent intent) {
+        CharSequence body = intent.getCharSequenceExtra(EXTRA_BODY);
+        if (body == null) {
+            Timber.e("Speak SMS intent with null body");
             return;
         }
 
-        if (!(localeObject instanceof Locale)) {
-            Timber.e("Speak action locale is not a Locale: %s", localeObject.getClass());
+        CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
+        if (sender == null) {
+            Timber.e("Speak SMS intent with null sender");
             return;
         }
-        Locale locale = (Locale)localeObject;
 
-        Timber.i("Speaking in locale <%s>: <%s>", locale, text);
-        speak(text, locale);
+        Optional<Locale> optionalLocale = Optional.absent();
+        try {
+            optionalLocale = getLocale(body);
+        } catch (IOException e) {
+            Timber.e(e, "Language detection failed");
+        }
+
+        Locale locale;
+        if (optionalLocale.isPresent()) {
+            locale = optionalLocale.get();
+        } else {
+            // Unable to find out from the message, go with the system locale
+            locale = Locale.getDefault();
+        }
+
+        speak(toSmsAnnouncement(body, sender, optionalLocale), locale);
+    }
+
+    private CharSequence toSmsAnnouncement(
+        CharSequence body, CharSequence sender, Optional<Locale> optionalLocale)
+    {
+        // FIXME: Get an SMS message template for the given locale and fill that in.
+        // FIXME: Fall back to getting a template for the system locale if that can't be found.
+        // FIXME: Fall back to getting a template in English if that can't be found. Or a generic one?
+
+        // FIXME: Localize all strings in this method
+
+        if (sender == null) {
+            sender = "unknown sender";
+        }
+
+        return String.format("%sSMS from %s: %s",
+            optionalLocale.isPresent() ? "" : "Unknown language ",
+            sender, body);
+    }
+
+    private Optional<Locale> getLocale(CharSequence text) throws IOException {
+        List<LanguageProfile> languageProfiles = new LinkedList<>();
+        LanguageProfileReader languageProfileReader = new LanguageProfileReader();
+
+        // FIXME: Use locales for which there are voices present on the system
+        languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString("en")));
+        languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString("sv")));
+
+        LanguageDetector languageDetector =
+            LanguageDetectorBuilder.create(NgramExtractors.standard())
+                .withProfiles(languageProfiles)
+                .build();
+        Optional<LdLocale> ldLocale = languageDetector.detect(text);
+
+        if (!ldLocale.isPresent()) {
+            String languages = "";
+            for (LanguageProfile languageProfile: languageProfiles) {
+                if (languages.length() > 0) {
+                    languages += ",";
+                }
+                languages += languageProfile.getLocale();
+            }
+            Timber.w("Unable to detect language among <%s> for: <%s>", languages, text);
+            return Optional.absent();
+        }
+
+        return Optional.of(new Locale(ldLocale.get().toString()));
     }
 
     @Nullable
