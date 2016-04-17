@@ -47,10 +47,17 @@ public class TtsUtil {
             }
             final String enginePackageName = remainingEnginePackageNames.get(0);
             remainingEnginePackageNames.remove(0);
+            Timber.d("Asking TTS engine %s about locale %s...", enginePackageName, locale);
 
             candidate = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
                 @Override
                 public void onInit(int status) {
+                    if (status != TextToSpeech.SUCCESS) {
+                        Timber.w("Failed to initialize TTS engine %s", enginePackageName);
+                        getEngine();
+                        return;
+                    }
+
                     int result = candidate.setLanguage(locale);
                     if (isSetLanguageOk(result)) {
                         // FIXME: Should we keep looking to see if we find a better one?

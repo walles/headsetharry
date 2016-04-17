@@ -27,23 +27,26 @@ apiKey=YOUR_API_KEY_HERE_
 The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
-# TODO Before Installing on Johan's Phone
-* When a message comes in, ignore it unless sound is being routed
-through a headset
-
 # TODO Before Getting Beta Users
-* Make sure we use the notification stream for our messages
+* Set app version name from `git describe`
+* Make sure we say something useful on incoming MMS messages
 * Look up message sender's phone number for incoming messages and say
 the name of the sender rather than their phone number.
 * For incoming messages, identify exactly the languages for which there
 are voices installed on the system.
+* On incoming messages, use templates in order: identified language,
+system language, English
 * Add a `.travis.yml` configuration to lint and run the unit tests
 * Make up a release process and document it
-* Make sure we don't say / do weird things on incoming MMS messages
 * Think about whether we think we'll survive app upgrades
 * Think about whether we think we'll survive device reboots
+* Verify that we work properly with a wired headset connected
+* Set app version name from `git` somehow
 
 # TODO Before Releasing on Android Market
+* When finding TTS engines supporting the required language, try the
+system default TTS engine first, then the others in alphabetic order by
+package name (to be deterministic).
 * Add a license
 * Look up incoming phone numbers and read contact names rather than
 phone numbers.
@@ -81,3 +84,6 @@ handle them?
 * When a message arrives, determine what language to use for reading it
 * Use an appropriate TTS engine / voice for reading the incoming SMS
 * When a message comes in, ignore it if a phone call is in progress
+* When a message comes in, ignore it unless sound is being routed
+through a headset
+* Verify that we work properly with a Bluetooth headset connected

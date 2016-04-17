@@ -4,13 +4,17 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import timber.log.Timber;
 
@@ -78,6 +82,28 @@ public class SpeakerService extends Service {
         });
     }
 
+    public static boolean isRunningOnEmulator() {
+        // Inspired by
+        // http://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in>
+        if (Build.PRODUCT == null) {
+            return false;
+        }
+
+        Set<String> parts = new HashSet<>(Arrays.asList(Build.PRODUCT.split("_")));
+        if (parts.size() == 0) {
+            return false;
+        }
+
+        parts.remove("sdk");
+        parts.remove("google");
+        parts.remove("x86");
+        parts.remove("phone");
+
+        // If the build identifier contains only the above keywords in some order, then we're
+        // in an emulator
+        return parts.isEmpty();
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!SPEAK_ACTION.equals(intent.getAction())) {
@@ -89,11 +115,21 @@ public class SpeakerService extends Service {
         int audioMode = audioManager.getMode();
         if (audioManager.getMode() != AudioManager.MODE_NORMAL) {
             Timber.i("Not speaking, audio mode not MODE_NORMAL: %d", audioMode);
+            return START_NOT_STICKY;
         }
 
-        handleIntent(intent);
-
-        return Service.START_NOT_STICKY;
+        if (audioManager.isBluetoothA2dpOn()) {
+            Timber.d("Speaking, A2DP enabled");
+            handleIntent(intent);
+            return Service.START_NOT_STICKY;
+        } else if (isRunningOnEmulator()) {
+            Timber.d("Speaking, running in emulator");
+            handleIntent(intent);
+            return Service.START_NOT_STICKY;
+        } else {
+            Timber.i("Not speaking; no headphones detected");
+            return START_NOT_STICKY;
+        }
     }
 
     private void handleIntent(Intent intent) {
