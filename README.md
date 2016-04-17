@@ -61,9 +61,6 @@ message is being read.
     https://play.google.com/store/search?q=tts&c=apps
 
 # TODO Misc
-* Should we present phone numbers for which we have no contacts as unknown?
-  Right now we "unknown" only the cases where we don't have a phone
-  number.
 * If we get a "phone number" with letters in it, maybe we should just
   read it as it is and not try to look it up.
 * In Settings, should it be possible to tag contacts with their most
@@ -93,3 +90,4 @@ through a headset
 the message
 * Look up message sender's phone number for incoming messages and say
 the name of the sender rather than their phone number.
+* Present phone numbers for which we have no contact info as unknown

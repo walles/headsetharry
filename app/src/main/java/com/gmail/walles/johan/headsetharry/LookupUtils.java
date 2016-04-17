@@ -8,6 +8,8 @@ import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.google.common.base.Optional;
+
 import timber.log.Timber;
 
 // This class was inspired by http://stackoverflow.com/a/11863152/473672
@@ -41,12 +43,12 @@ public class LookupUtils {
     /*
      * Returns contact's name
      */
-    public static String clarifyPhoneNumber(Context context, final String phoneNumber) {
+    public static Optional<String> getNameForNumber(Context context, final String phoneNumber) {
         ContentResolver resolver = context.getContentResolver();
         String contactId = getContactId(resolver, phoneNumber);
         if (contactId == null) {
             Timber.i("Failed to look up ID for <%s>", phoneNumber);
-            return phoneNumber;
+            return Optional.absent();
         }
 
         String[] projection = new String[] { ContactsContract.Contacts.DISPLAY_NAME };
@@ -54,7 +56,7 @@ public class LookupUtils {
             ContactsContract.Contacts._ID + "=?", new String[] { contactId }, null);
         if (cursor == null) {
             Timber.w("Failed to look up name for ID=<%s> and phone number=<%s>", contactId, phoneNumber);
-            return phoneNumber;
+            return Optional.absent();
         }
 
         String name = null;
@@ -65,10 +67,10 @@ public class LookupUtils {
 
         if (TextUtils.isEmpty(name)) {
             Timber.w("Got empty name for phone number=<%s>", phoneNumber);
-            return phoneNumber;
+            return Optional.absent();
         }
 
         Timber.i("Looked up phone number <%s> as <%s>", phoneNumber, name);
-        return name;
+        return Optional.of(name);
     }
 }

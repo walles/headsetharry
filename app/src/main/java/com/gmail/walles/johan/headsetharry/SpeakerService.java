@@ -224,7 +224,9 @@ public class SpeakerService extends Service {
         if (TextUtils.isEmpty(sender)) {
             sender = translations.get(R.string.unknown_sender);
         } else {
-            sender = LookupUtils.clarifyPhoneNumber(this, sender.toString());
+            sender =
+                LookupUtils.getNameForNumber(this, sender.toString())
+                    .or(translations.get(R.string.unknown_sender));
         }
 
         return String.format(translations.get(R.string.sms_from),
