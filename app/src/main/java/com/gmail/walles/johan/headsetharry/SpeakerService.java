@@ -176,11 +176,8 @@ public class SpeakerService extends Service {
             return;
         }
 
+        // It's OK for the sender to be null, we'll just say it's unknown
         CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
-        if (sender == null) {
-            Timber.e("Speak SMS intent with null sender");
-            return;
-        }
 
         Optional<Locale> optionalLocale = Optional.absent();
         try {
@@ -216,7 +213,7 @@ public class SpeakerService extends Service {
     }
 
     private CharSequence toSmsAnnouncement(
-        CharSequence body, CharSequence sender, Optional<Locale> optionalLocale)
+        CharSequence body, @Nullable CharSequence sender, Optional<Locale> optionalLocale)
     {
         Locale locale = optionalLocale.or(Locale.getDefault());
         Map<Integer, String> translations = getStrings(locale,
@@ -224,8 +221,10 @@ public class SpeakerService extends Service {
             R.string.sms_from,
             R.string.unknown_language);
 
-        if (sender == null) {
+        if (TextUtils.isEmpty(sender)) {
             sender = translations.get(R.string.unknown_sender);
+        } else {
+            sender = LookupUtils.clarifyPhoneNumber(this, sender.toString());
         }
 
         return String.format(translations.get(R.string.sms_from),
@@ -234,6 +233,10 @@ public class SpeakerService extends Service {
     }
 
     private Optional<Locale> identifyLanguage(CharSequence text) throws IOException {
+        if (TextUtils.isEmpty(text)) {
+            return Optional.absent();
+        }
+
         List<LanguageProfile> languageProfiles = new LinkedList<>();
         LanguageProfileReader languageProfileReader = new LanguageProfileReader();
 

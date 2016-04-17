@@ -28,16 +28,15 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Getting Beta Users
-* Make sure we say something useful on incoming MMS messages
-* Look up message sender's phone number for incoming messages and say
-the name of the sender rather than their phone number.
 * For incoming messages, identify exactly the languages for which there
 are voices installed on the system.
+* Verify that we work properly with a wired headset connected
+* Make sure we say something useful on incoming MMS messages
+    * Watch the MMS database: http://stackoverflow.com/a/6152073/473672
 * Add a `.travis.yml` configuration to lint and run the unit tests
 * Make up a release process and document it
 * Think about whether we think we'll survive app upgrades
 * Think about whether we think we'll survive device reboots
-* Verify that we work properly with a wired headset connected
 * Set app version name from `git` somehow
 
 # TODO Before Releasing on Android Market
@@ -62,6 +61,11 @@ message is being read.
     https://play.google.com/store/search?q=tts&c=apps
 
 # TODO Misc
+* Should we present phone numbers for which we have no contacts as unknown?
+  Right now we "unknown" only the cases where we don't have a phone
+  number.
+* If we get a "phone number" with letters in it, maybe we should just
+  read it as it is and not try to look it up.
 * In Settings, should it be possible to tag contacts with their most
 likely language?
 * "Phone call from NN" (NN is name if in contacts, not number)
@@ -87,3 +91,5 @@ through a headset
 * Set app version name from `git describe`
 * On incoming messages, try to find a template in the same language as
 the message
+* Look up message sender's phone number for incoming messages and say
+the name of the sender rather than their phone number.
