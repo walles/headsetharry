@@ -28,7 +28,6 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Getting Beta Users
-* Set app version name from `git describe`
 * Make sure we say something useful on incoming MMS messages
 * Look up message sender's phone number for incoming messages and say
 the name of the sender rather than their phone number.
@@ -87,3 +86,4 @@ handle them?
 * When a message comes in, ignore it unless sound is being routed
 through a headset
 * Verify that we work properly with a Bluetooth headset connected
+* Set app version name from `git describe`
