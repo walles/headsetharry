@@ -28,8 +28,17 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Getting Beta Users
-* For incoming messages, identify exactly the languages for which there
-are voices installed on the system.
+* Make a Settings activity where one can set which languages to support.
+The main Settings activity should have an item that just says
+`Languages: Swedish (Sweden), English (US)`. Clicking that box should
+take you to an activity listing all languages supported by our language
+detection. Next to each language there should be a checkbox. Checking
+that box for a language should show you a list of flavors ("Great
+Britain", "Australia") if more than one is available for that language.
+Choosing one should check the box next to the language, and amend the
+language name with the chosen flavor.
+* For incoming messages, identify exactly the languages that have been
+configured in the settings.
 * Verify that we work properly with a wired headset connected
 * Make sure we say something useful on incoming MMS messages
     * Watch the MMS database: http://stackoverflow.com/a/6152073/473672
@@ -58,6 +67,12 @@ message is being read.
     https://play.google.com/store/search?q=tts&c=apps
 
 # TODO Misc
+* Should we support speaking over Bluetooth SCO if available and
+supported?
+* In the language selection activity, should we test-speak a language
+when it's chosen? Then, if that doesn't work, refer people to the
+system language settings or to Google Play Store for installing more
+engines / languages.
 * Maybe we should simply read notifications instead of trying to solve
 everything ourselves? Maybe read the `Notification.tickerText` to the
 user.
@@ -74,6 +89,8 @@ likely language?
 we read?
 * Think about multipart messages, how do we handle them? How should we
 handle them?
+* In the Settings, should it be possible to order TTS engines in order
+of preference?
 
 # DONE
 * Log to Crashlytics
