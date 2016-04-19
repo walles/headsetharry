@@ -10,4 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.gmail.walles.johan.headsetharry.settings.LanguagesPickerActivity">
 
+    <ListView android:id="@+id/languagePickerListView" android:layout_width="fill_parent"
+              android:layout_height="fill_parent" />
+
 </RelativeLayout>
