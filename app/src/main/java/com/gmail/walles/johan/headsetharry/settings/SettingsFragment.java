@@ -21,6 +21,7 @@ public class SettingsFragment extends PreferenceFragment {
         addPreferencesFromResource(R.xml.preferences);
 
         Preference activeLanguagesPref = findPreference(ACTIVE_LANGUAGES_LIST);
+        activeLanguagesPref.setSummary("Swedish, English");
         activeLanguagesPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
