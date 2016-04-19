@@ -3,6 +3,7 @@ package com.gmail.walles.johan.headsetharry.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +13,11 @@ import android.widget.CheckBox;
 import android.widget.ListView;
 
 import com.gmail.walles.johan.headsetharry.R;
+import com.optimaize.langdetect.i18n.LdLocale;
+import com.optimaize.langdetect.profiles.BuiltInLanguages;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,13 +26,18 @@ public class LanguagesPickerActivity extends AppCompatActivity {
         context.startActivity(new Intent(context, LanguagesPickerActivity.class));
     }
 
-    private static class CheckableLocale {
+    private static class CheckableLocale implements Comparable {
         public Locale locale;
         public boolean checked;
 
         public CheckableLocale(Locale locale, boolean checked) {
             this.locale = locale;
             this.checked = checked;
+        }
+
+        @Override
+        public int compareTo(@NonNull Object other) {
+            return locale.getDisplayName().compareTo(((CheckableLocale)other).locale.getDisplayName());
         }
     }
 
@@ -75,12 +84,13 @@ public class LanguagesPickerActivity extends AppCompatActivity {
     }
 
     private void populateList() {
-        // FIXME: Take this list from what our language detector supports
-        Locale available[] = Locale.getAvailableLocales();
-        List<CheckableLocale> listed = new ArrayList<>(available.length);
-        for (Locale locale: available) {
-            listed.add(new CheckableLocale(locale, false));
+        // List the languages supported by our language detector
+        List<LdLocale> available = BuiltInLanguages.getLanguages();
+        List<CheckableLocale> listed = new ArrayList<>(available.size());
+        for (LdLocale locale: available) {
+            listed.add(new CheckableLocale(new Locale(locale.toString()), false));
         }
+        Collections.sort(listed);
 
         ListView listView = (ListView)findViewById(R.id.languagePickerListView);
         if (listView == null) {
@@ -96,6 +106,8 @@ public class LanguagesPickerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_languages_picker);
+
+        // FIXME: Add a back arrow to the top of the languages picker activity
 
         populateList();
     }

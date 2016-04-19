@@ -99,7 +99,7 @@ public class SpeakerService extends Service {
 
             @Override
             public void onFailure(String message) {
-                Timber.e(new Exception(message), "Speech failed: " + message);
+                Timber.e(new Exception(message), "Speech failed: %s", message);
             }
         });
     }
@@ -164,7 +164,7 @@ public class SpeakerService extends Service {
         if (TYPE_SMS.equals(type)) {
             handleSmsIntent(intent);
         } else {
-            Timber.w("Ignoring incoming intent of type %s");
+            Timber.w("Ignoring incoming intent of type %s", type);
             return;
         }
     }
