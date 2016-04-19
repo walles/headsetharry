@@ -26,7 +26,7 @@ public class LanguagesPickerActivity extends AppCompatActivity {
         context.startActivity(new Intent(context, LanguagesPickerActivity.class));
     }
 
-    private static class CheckableLocale implements Comparable {
+    private static class CheckableLocale implements Comparable<CheckableLocale> {
         public Locale locale;
         public boolean checked;
 
@@ -36,8 +36,8 @@ public class LanguagesPickerActivity extends AppCompatActivity {
         }
 
         @Override
-        public int compareTo(@NonNull Object other) {
-            return locale.getDisplayName().compareTo(((CheckableLocale)other).locale.getDisplayName());
+        public int compareTo(@NonNull CheckableLocale other) {
+            return locale.getDisplayName().compareTo((other).locale.getDisplayName());
         }
     }
 
