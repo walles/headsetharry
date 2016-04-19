@@ -1,4 +1,4 @@
-package com.gmail.walles.johan.headsetharry;
+package com.gmail.walles.johan.headsetharry.settings;
 
 import android.preference.PreferenceFragment;
 
