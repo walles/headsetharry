@@ -9,6 +9,8 @@ import android.util.AttributeSet;
 import com.optimaize.langdetect.i18n.LdLocale;
 import com.optimaize.langdetect.profiles.BuiltInLanguages;
 
+import org.jetbrains.annotations.NonNls;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +22,9 @@ public class LanguagesPreference
     extends MultiSelectListPreference
     implements SharedPreferences.OnSharedPreferenceChangeListener
 {
+    @NonNls
+    public static final String ACTIVE_LANGUAGES_PREFERENCE = "activeLanguagesList";
+
     @Override
     protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
         super.onSetInitialValue(restoreValue, defaultValue);
@@ -86,7 +91,7 @@ public class LanguagesPreference
         setEntryValues(values);
     }
 
-    private Locale parseLocale(String string) {
+    public static Locale parseLocale(String string) {
         String parts[] = string.split("_", -1);
         if (parts.length == 1) {
             parts = string.split("-", -1);

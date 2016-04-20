@@ -8,11 +8,14 @@ import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.gmail.walles.johan.headsetharry.settings.LanguagesPreference;
 import com.google.common.base.Optional;
 import com.optimaize.langdetect.LanguageDetector;
 import com.optimaize.langdetect.LanguageDetectorBuilder;
@@ -25,6 +28,7 @@ import org.jetbrains.annotations.NonNls;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -234,18 +238,33 @@ public class SpeakerService extends Service {
             sender, body);
     }
 
+    @NonNull
+    private List<LanguageProfile> getLanguageProfiles() throws IOException {
+        List<LanguageProfile> languageProfiles = new LinkedList<>();
+        LanguageProfileReader languageProfileReader = new LanguageProfileReader();
+
+        Set<String> localeCodes =
+            PreferenceManager.
+                getDefaultSharedPreferences(this).
+                getStringSet(LanguagesPreference.ACTIVE_LANGUAGES_PREFERENCE, Collections.<String>emptySet());
+
+        for (String localeCode: localeCodes) {
+            try {
+                languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString(localeCode)));
+            } catch (IOException e) {
+                @NonNls String message = "Failed to load configured language " + localeCode;
+                Timber.e(new Exception(message), message);
+            }
+        }
+        return languageProfiles;
+    }
+
     private Optional<Locale> identifyLanguage(CharSequence text) throws IOException {
         if (TextUtils.isEmpty(text)) {
             return Optional.absent();
         }
 
-        List<LanguageProfile> languageProfiles = new LinkedList<>();
-        LanguageProfileReader languageProfileReader = new LanguageProfileReader();
-
-        // FIXME: Use locales for which there are voices present on the system
-        languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString("en")));
-        languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString("sv")));
-
+        List<LanguageProfile> languageProfiles = getLanguageProfiles();
         LanguageDetector languageDetector =
             LanguageDetectorBuilder.create(NgramExtractors.standard())
                 .withProfiles(languageProfiles)

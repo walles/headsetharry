@@ -33,6 +33,10 @@ The main Settings activity should have an item that just says
 `Languages: Swedish (Sweden), English (US)`. Clicking that box should
 take you to an activity listing all languages supported by our language
 detection. Next to each language there should be a checkbox.
+* The configured-languages list should default to the system language
+(if available, what if not?).
+* Somehow try to help / inform the user if the language they want has no
+TTS available.
 * For incoming messages, identify exactly the languages that have been
 configured in the settings.
 * Should we support speaking over Bluetooth SCO if available and
