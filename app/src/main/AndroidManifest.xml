@@ -38,8 +38,6 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".settings.LanguagesPickerActivity">
-        </activity>
     </application>
 
 </manifest>
