@@ -8,7 +8,6 @@ import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.NonNull;
@@ -28,7 +27,6 @@ import org.jetbrains.annotations.NonNls;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -243,12 +241,7 @@ public class SpeakerService extends Service {
         List<LanguageProfile> languageProfiles = new LinkedList<>();
         LanguageProfileReader languageProfileReader = new LanguageProfileReader();
 
-        Set<String> localeCodes =
-            PreferenceManager.
-                getDefaultSharedPreferences(this).
-                getStringSet(LanguagesPreference.ACTIVE_LANGUAGES_PREFERENCE, Collections.<String>emptySet());
-
-        for (String localeCode: localeCodes) {
+        for (String localeCode: LanguagesPreference.getValues(this)) {
             try {
                 languageProfiles.add(languageProfileReader.readBuiltIn(LdLocale.fromString(localeCode)));
             } catch (IOException e) {

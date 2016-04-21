@@ -28,16 +28,16 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Getting Beta Users
-* The configured-languages list should default to the system language
-(if available, what if not?).
+* Support speaking over Bluetooth SCO if available and supported.
+Assuming we can test this, otherwise no.
 * Somehow try to help / inform the user if the language they want has no
 TTS available.
-* Should we support speaking over Bluetooth SCO if available and
-supported?
 * Verify that we work properly with a wired headset connected
-* Make sure we say something useful on incoming MMS messages
-    * Watch the MMS database: http://stackoverflow.com/a/6152073/473672
-* Add a `.travis.yml` configuration to lint and run the unit tests
+* Make sure we say something useful on incoming MMS messages, even if
+it's just "MMS from NN". To get the contents, maybe watch the MMS
+database: http://stackoverflow.com/a/6152073/473672
+* Add a `.travis.yml` configuration to lint, Findbugs and run the unit
+tests
 * Make up a release process and document it
 * Think about whether we think we'll survive app upgrades
 * Think about whether we think we'll survive device reboots
@@ -63,6 +63,8 @@ message is being read.
 
 # TODO Misc
 * Make sure people don't deselect all languages.
+* What do we do if there's no TTS for a configured language when we try
+to say something? Something notification based perhaps.
 * Enable selecting language flavors. US or GB English? Swedish or
 Finnish Swedish?
 * In the language selection activity, should we test-speak a language
@@ -109,3 +111,4 @@ system default TTS engine first
 * Make a Settings activity where one can set which languages to support.
 * For incoming messages, identify exactly the languages that have been
 configured in the settings.
+* Default the configured-languages list to the system language
