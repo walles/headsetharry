@@ -9,8 +9,6 @@ import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.IBinder;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -65,77 +63,6 @@ public class SpeakerService extends Service {
     public void onCreate() {
         super.onCreate();
         LoggingUtil.setUpLogging(this);
-    }
-
-    /**
-     * Speak the given text using the given TTS, then shut down the TTS.
-     */
-    private void speakAndShutdown(
-        final TextToSpeech tts, final CharSequence text, final boolean bluetoothSco)
-    {
-        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-            @Override
-            public void onStart(String utteranceId) {
-                Timber.v("Speech started...");
-            }
-
-            @Override
-            public void onDone(String utteranceId) {
-                Timber.v("Speech successfully completed");
-                tts.shutdown();
-
-                stopBluetoothSco();
-            }
-
-            @Override
-            public void onError(String utteranceId) {
-                @NonNls String message = "Speech failed: <" + text + ">";
-                Timber.e(new Exception(message), message);
-                tts.shutdown();
-
-                stopBluetoothSco();
-            }
-
-            private void stopBluetoothSco() {
-                if (bluetoothSco) {
-                    AudioManager audioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
-                    if (audioManager != null) {
-                        @NonNls String status = audioManager.isBluetoothScoOn() ? "enabled": "disabled";
-                        Timber.d("Disabling SCO, was %s", status);
-                        audioManager.setBluetoothScoOn(false);
-                        audioManager.stopBluetoothSco();
-                    }
-                }
-            }
-        });
-
-        @NonNls HashMap<String, String> params = new HashMap<>();
-        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "oh, the uniqueness");
-
-        if (bluetoothSco) {
-            Timber.v("Asking TTS to speak over Bluetooth SCO");
-            params.put(
-                TextToSpeech.Engine.KEY_PARAM_STREAM,
-                Integer.toString(AudioManager.STREAM_VOICE_CALL));
-        }
-
-        //noinspection deprecation
-        tts.speak(text.toString(), TextToSpeech.QUEUE_ADD, params);
-    }
-
-    private void speak(final CharSequence text, final Locale locale, final boolean bluetoothSco) {
-        Timber.i("Speaking in locale <%s>: <%s>", locale, text);
-        TtsUtil.getEngineForLocale(this, locale, new TtsUtil.CompletionListener() {
-            @Override
-            public void onSuccess(TextToSpeech textToSpeech) {
-                speakAndShutdown(textToSpeech, text, bluetoothSco);
-            }
-
-            @Override
-            public void onFailure(String message) {
-                Timber.e(new Exception(message), "Speech failed: %s", message);
-            }
-        });
     }
 
     private static boolean isRunningOnEmulator() {
@@ -286,7 +213,7 @@ public class SpeakerService extends Service {
         Optional<Locale> optionalLocale = identifyLanguage(body);
 
         Locale locale = optionalLocale.or(Locale.getDefault());
-        speak(toSmsAnnouncement(body, sender, optionalLocale), locale, bluetoothSco);
+        TtsUtil.speak(this, toSmsAnnouncement(body, sender, optionalLocale), locale, bluetoothSco);
     }
 
     // From: http://stackoverflow.com/a/9475663/473672
