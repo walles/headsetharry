@@ -84,7 +84,12 @@ public class LanguagesPreference
         if (names.isEmpty()) {
             setSummary("-");
         } else {
-            setSummary(TextUtils.join(", ", names));
+            String summary = TextUtils.join(", ", names);
+
+            // Capitalize first character, purely for looks
+            summary = summary.substring(0, 1).toUpperCase() + summary.substring(1);
+
+            setSummary(summary);
         }
     }
 
