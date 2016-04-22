@@ -3,6 +3,7 @@ package com.gmail.walles.johan.headsetharry;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.media.AudioManager;
@@ -38,12 +39,17 @@ import java.util.Set;
 import timber.log.Timber;
 
 public class SpeakerService extends Service {
+    @NonNls
     private static final String SPEAK_ACTION = "com.gmail.walles.johan.headsetharry.speak_action";
 
+    @NonNls
     private static final String EXTRA_TYPE = "com.gmail.walles.johan.headsetharry.type";
+    @NonNls
     private static final String EXTRA_BODY = "com.gmail.walles.johan.headsetharry.body";
+    @NonNls
     private static final String EXTRA_SENDER = "com.gmail.walles.johan.headsetharry.sender";
 
+    @NonNls
     private static final String TYPE_SMS = "SMS";
 
     public static void speakSms(Context context, CharSequence body, CharSequence sender) {
@@ -64,7 +70,9 @@ public class SpeakerService extends Service {
     /**
      * Speak the given text using the given TTS, then shut down the TTS.
      */
-    private void speakAndShutdown(final TextToSpeech tts, final CharSequence text) {
+    private void speakAndShutdown(
+        final TextToSpeech tts, final CharSequence text, final boolean bluetoothSco)
+    {
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId) {
@@ -75,6 +83,8 @@ public class SpeakerService extends Service {
             public void onDone(String utteranceId) {
                 Timber.v("Speech successfully completed");
                 tts.shutdown();
+
+                stopBluetoothSco();
             }
 
             @Override
@@ -82,21 +92,43 @@ public class SpeakerService extends Service {
                 @NonNls String message = "Speech failed: <" + text + ">";
                 Timber.e(new Exception(message), message);
                 tts.shutdown();
+
+                stopBluetoothSco();
+            }
+
+            private void stopBluetoothSco() {
+                if (bluetoothSco) {
+                    AudioManager audioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
+                    if (audioManager != null) {
+                        @NonNls String status = audioManager.isBluetoothScoOn() ? "enabled": "disabled";
+                        Timber.d("Disabling SCO, was %s", status);
+                        audioManager.setBluetoothScoOn(false);
+                        audioManager.stopBluetoothSco();
+                    }
+                }
             }
         });
 
         @NonNls HashMap<String, String> params = new HashMap<>();
         params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "oh, the uniqueness");
+
+        if (bluetoothSco) {
+            Timber.v("Asking TTS to speak over Bluetooth SCO");
+            params.put(
+                TextToSpeech.Engine.KEY_PARAM_STREAM,
+                Integer.toString(AudioManager.STREAM_VOICE_CALL));
+        }
+
         //noinspection deprecation
         tts.speak(text.toString(), TextToSpeech.QUEUE_ADD, params);
     }
 
-    private void speak(final CharSequence text, final Locale locale) {
+    private void speak(final CharSequence text, final Locale locale, final boolean bluetoothSco) {
         Timber.i("Speaking in locale <%s>: <%s>", locale, text);
         TtsUtil.getEngineForLocale(this, locale, new TtsUtil.CompletionListener() {
             @Override
             public void onSuccess(TextToSpeech textToSpeech) {
-                speakAndShutdown(textToSpeech, text);
+                speakAndShutdown(textToSpeech, text, bluetoothSco);
             }
 
             @Override
@@ -106,7 +138,7 @@ public class SpeakerService extends Service {
         });
     }
 
-    public static boolean isRunningOnEmulator() {
+    private static boolean isRunningOnEmulator() {
         // Inspired by
         // http://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in>
         if (Build.PRODUCT == null) {
@@ -128,6 +160,72 @@ public class SpeakerService extends Service {
         return parts.isEmpty();
     }
 
+    private boolean enableBluetoothSco(AudioManager audioManager) {
+        if (!audioManager.isBluetoothScoAvailableOffCall()) {
+            Timber.d("Bluetooth SCO not available off call, not trying it");
+            return false;
+        }
+
+        long t0 = System.currentTimeMillis();
+        boolean requested = false;
+        while (System.currentTimeMillis() - t0 < 3000) {
+            IntentFilter filter = new IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED);
+            Intent intent = registerReceiver(null, filter);
+            if (intent == null) {
+                Timber.w("Got null Intent when asking for ACTION_SCO_AUDIO_STATE_UPDATED");
+                audioManager.setBluetoothScoOn(false);
+                audioManager.stopBluetoothSco();
+                return false;
+            }
+
+            int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_ERROR);
+            if (state == AudioManager.SCO_AUDIO_STATE_ERROR) {
+                Timber.w("Got error result when asking for ACTION_SCO_AUDIO_STATE_UPDATED");
+                audioManager.setBluetoothScoOn(false);
+                audioManager.stopBluetoothSco();
+                return false;
+            }
+
+            if (state == AudioManager.SCO_AUDIO_STATE_CONNECTED) {
+                if (audioManager.isBluetoothScoOn()) {
+                    Timber.d("Bluetooth SCO audio connected");
+                    return true;
+                }
+
+                Timber.w("Bluetooth audio connected but not enabled, keep waiting...");
+            }
+
+            if (!requested) {
+                Timber.v("Requesting Bluetooth SCO audio output");
+                try {
+                    // From: http://stackoverflow.com/a/17150250/473672
+                    audioManager.startBluetoothSco();
+                } catch (NullPointerException e) {
+                    // We get this on some versions of Android if there is no headset:
+                    // http://stackoverflow.com/a/26914789/473672
+                    Timber.d("Got NPE from AudioManager.startBluetoothSco() => no headset available");
+                    return false;
+                }
+                audioManager.setBluetoothScoOn(true);
+                requested = true;
+            }
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Timber.w(e, "Interrupted waiting for Bluetooth SCO to get started");
+                audioManager.setBluetoothScoOn(false);
+                audioManager.stopBluetoothSco();
+                return false;
+            }
+        }
+
+        Timber.w("No response to trying to enable SCO audio, marking as failed");
+        audioManager.setBluetoothScoOn(false);
+        audioManager.stopBluetoothSco();
+        return false;
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!SPEAK_ACTION.equals(intent.getAction())) {
@@ -144,11 +242,15 @@ public class SpeakerService extends Service {
 
         if (audioManager.isBluetoothA2dpOn()) {
             Timber.d("Speaking, A2DP enabled");
-            handleIntent(intent);
+            handleIntent(intent, false);
+            return Service.START_NOT_STICKY;
+        } else if (enableBluetoothSco(audioManager)) {
+            Timber.d("Speaking, SCO enabled");
+            handleIntent(intent, true);
             return Service.START_NOT_STICKY;
         } else if (isRunningOnEmulator()) {
             Timber.d("Speaking, running in emulator");
-            handleIntent(intent);
+            handleIntent(intent, false);
             return Service.START_NOT_STICKY;
         } else {
             Timber.i("Not speaking; no headphones detected");
@@ -156,7 +258,7 @@ public class SpeakerService extends Service {
         }
     }
 
-    private void handleIntent(Intent intent) {
+    private void handleIntent(Intent intent, boolean bluetoothSco) {
         String type = intent.getStringExtra(EXTRA_TYPE);
         if (TextUtils.isEmpty(type)) {
             Timber.e("Speak action with no type");
@@ -164,14 +266,14 @@ public class SpeakerService extends Service {
         }
 
         if (TYPE_SMS.equals(type)) {
-            handleSmsIntent(intent);
+            handleSmsIntent(intent, bluetoothSco);
         } else {
             Timber.w("Ignoring incoming intent of type %s", type);
             return;
         }
     }
 
-    private void handleSmsIntent(Intent intent) {
+    private void handleSmsIntent(Intent intent, boolean bluetoothSco) {
         CharSequence body = intent.getCharSequenceExtra(EXTRA_BODY);
         if (body == null) {
             Timber.e("Speak SMS intent with null body");
@@ -181,15 +283,10 @@ public class SpeakerService extends Service {
         // It's OK for the sender to be null, we'll just say it's unknown
         CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
 
-        Optional<Locale> optionalLocale = Optional.absent();
-        try {
-            optionalLocale = identifyLanguage(body);
-        } catch (IOException e) {
-            Timber.e(e, "Language detection failed");
-        }
+        Optional<Locale> optionalLocale = identifyLanguage(body);
 
         Locale locale = optionalLocale.or(Locale.getDefault());
-        speak(toSmsAnnouncement(body, sender, optionalLocale), locale);
+        speak(toSmsAnnouncement(body, sender, optionalLocale), locale, bluetoothSco);
     }
 
     // From: http://stackoverflow.com/a/9475663/473672
@@ -237,7 +334,7 @@ public class SpeakerService extends Service {
     }
 
     @NonNull
-    private List<LanguageProfile> getLanguageProfiles() throws IOException {
+    private List<LanguageProfile> getLanguageProfiles() {
         List<LanguageProfile> languageProfiles = new LinkedList<>();
         LanguageProfileReader languageProfileReader = new LanguageProfileReader();
 
@@ -252,7 +349,7 @@ public class SpeakerService extends Service {
         return languageProfiles;
     }
 
-    private Optional<Locale> identifyLanguage(CharSequence text) throws IOException {
+    private Optional<Locale> identifyLanguage(CharSequence text) {
         if (TextUtils.isEmpty(text)) {
             return Optional.absent();
         }

@@ -28,8 +28,6 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Getting Beta Users
-* Support speaking over Bluetooth SCO if available and supported.
-Assuming we can test this, otherwise no.
 * Somehow try to help / inform the user if the language they want has no
 TTS available.
 * Verify that we work properly with a wired headset connected
@@ -63,6 +61,7 @@ message is being read.
 
 # TODO Misc
 * Make sure people don't deselect all languages.
+* Caps the language names in the settings, or at least the first one
 * What do we do if there's no TTS for a configured language when we try
 to say something? Something notification based perhaps.
 * Enable selecting language flavors. US or GB English? Swedish or
@@ -112,3 +111,4 @@ system default TTS engine first
 * For incoming messages, identify exactly the languages that have been
 configured in the settings.
 * Default the configured-languages list to the system language
+* Support speaking over Bluetooth SCO if available and supported.

@@ -49,18 +49,30 @@ public class TtsUtil {
             return returnMe;
         }
 
+        /**
+         * Entry point for locating a TTS engine for a given locale.
+         * <p/>
+         * The end result of calling this method is that {@link #callback} gets notified.
+         */
         public void getEngine() {
-            candidate = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+            final TextToSpeech[] someTts = new TextToSpeech[1];
+
+            // We need to initialize some (any) TTS...
+            someTts[0] = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
                 @Override
                 public void onInit(int status) {
+                    // ... so that we can query it for a list of others once it's initialized.
                     if (status != TextToSpeech.SUCCESS) {
                         @NonNls String message = "Failed to initialize system default TTS: " + status;
                         Timber.e(new Exception(message), message);
                         return;
                     }
 
-                    remainingEnginePackageNames = sortEngines(candidate.getEngines(), candidate.getDefaultEngine());
+                    remainingEnginePackageNames =
+                        sortEngines(someTts[0].getEngines(), someTts[0].getDefaultEngine());
                     Timber.d("System TTS packages: %s", remainingEnginePackageNames);
+
+                    // Start going through the remaining engine package names
                     tryNextEngine();
                 }
             });

@@ -28,7 +28,7 @@ public class LanguagesPreference
     implements SharedPreferences.OnSharedPreferenceChangeListener
 {
     @NonNls
-    public static final String ACTIVE_LANGUAGES_PREFERENCE = "activeLanguagesList";
+    private static final String ACTIVE_LANGUAGES_PREFERENCE = "activeLanguagesList";
 
     @Override
     public Set<String> getValues() {
@@ -114,7 +114,7 @@ public class LanguagesPreference
         setEntryValues(values);
     }
 
-    public static Locale parseLocale(String string) {
+    private static Locale parseLocale(String string) {
         String parts[] = string.split("_", -1);
         if (parts.length == 1) {
             parts = string.split("-", -1);
