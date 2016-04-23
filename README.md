@@ -31,9 +31,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 * Somehow try to help / inform the user if the language they want has no
 TTS available.
 * Verify that we work properly with a wired headset connected
-* Make sure we say something useful on incoming MMS messages, even if
-it's just "MMS from NN". To get the contents, maybe watch the MMS
-database: http://stackoverflow.com/a/6152073/473672
 * Add a `.travis.yml` configuration to lint, Findbugs and run the unit
 tests
 * Make up a release process and document it
@@ -43,8 +40,6 @@ tests
 
 # TODO Before Releasing on Android Market
 * Add a license
-* Look up incoming phone numbers and read contact names rather than
-phone numbers.
 * When a message comes in, enqueue it if a phone call is in progress.
 * When a phone call ends, read all events received during the call
 * If the user is playing music, pause or turn down the music while the
@@ -60,6 +55,8 @@ message is being read.
     https://play.google.com/store/search?q=tts&c=apps
 
 # TODO Misc
+* Read any text parts of MMS messages. To get the contents, maybe watch
+the MMS database: http://stackoverflow.com/a/6152073/473672
 * Make sure people don't deselect all languages.
 * What do we do if there's no TTS for a configured language when we try
 to say something? Something notification based perhaps.
@@ -112,3 +109,7 @@ configured in the settings.
 * Default the configured-languages list to the system language
 * Support speaking over Bluetooth SCO if available and supported.
 * Caps the language names in the settings, or at least the first one
+* Announce incoming MMS. We don't access their content; just announcing
+them will be enough for now.
+* Look up incoming phone numbers and read contact names rather than
+phone numbers.

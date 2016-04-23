@@ -158,16 +158,20 @@ public class SpeakerService extends Service {
             return;
         }
 
+        Presenter presenter;
         if (SmsPresenter.TYPE.equals(type)) {
-            SmsPresenter presenter = new SmsPresenter(this, intent);
-            TtsUtil.speak(this,
-                presenter.getAnnouncement(),
-                presenter.getAnnouncementLocale(),
-                bluetoothSco);
+            presenter = new SmsPresenter(this, intent);
+        } else if (MmsPresenter.TYPE.equals(type)) {
+            presenter = new MmsPresenter(this, intent);
         } else {
             Timber.w("Ignoring incoming intent of type %s", type);
             return;
         }
+
+        TtsUtil.speak(this,
+            presenter.getAnnouncement(),
+            presenter.getAnnouncementLocale(),
+            bluetoothSco);
     }
 
     @Nullable

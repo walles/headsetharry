@@ -43,9 +43,15 @@ public class LookupUtils {
     /*
      * Returns contact's name
      */
-    public static Optional<String> getNameForNumber(Context context, final String phoneNumber) {
+    public static Optional<String> getNameForNumber(
+        Context context, @Nullable final CharSequence phoneNumber)
+    {
+        if (TextUtils.isEmpty(phoneNumber)) {
+            return Optional.absent();
+        }
+
         ContentResolver resolver = context.getContentResolver();
-        String contactId = getContactId(resolver, phoneNumber);
+        String contactId = getContactId(resolver, phoneNumber.toString());
         if (contactId == null) {
             Timber.i("Failed to look up ID for <%s>", phoneNumber);
             return Optional.absent();

@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name" translatable="false">Headset Harry</string>
 
+    <string name="mms_from_x" formatted="false">MMS from %s</string>
+
     <string name="sms">SMS</string>
     <string name="empty_sms">Empty SMS</string>
     <string name="unknown_language_sms">Unknown language SMS</string>

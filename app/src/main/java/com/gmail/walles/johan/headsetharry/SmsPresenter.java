@@ -28,7 +28,7 @@ import java.util.Map;
 
 import timber.log.Timber;
 
-public class SmsPresenter {
+public class SmsPresenter extends Presenter {
     @NonNls
     private static final String EXTRA_BODY = "com.gmail.walles.johan.headsetharry.body";
     @NonNls
@@ -50,10 +50,12 @@ public class SmsPresenter {
         context.startService(intent);
     }
 
+    @Override
     public Locale getAnnouncementLocale() {
         return locale.or(Locale.getDefault());
     }
 
+    @Override
     public String getAnnouncement() {
         return announcement;
     }

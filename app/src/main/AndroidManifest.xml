@@ -38,6 +38,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".MmsReceiver">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.WAP_PUSH_RECEIVED"/>
+                <data android:mimeType="application/vnd.wap.mms-message" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

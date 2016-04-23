@@ -6,4 +6,5 @@
     <string name="unknown_sender">okänd avsändare</string>
     <string name="what_from_where_colon_body" formatted="false">%s från %s: %s</string>
     <string name="sms">SMS</string>
+    <string name="mms_from_x" formatted="false">MMS från %s</string>
 </resources>
