@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sms_from" formatted="false">SMS %s från %s: %s</string>
-    <string name="unknown_language">på okänt språk</string>
+    <string name="app_name">Headset Harry</string>
+    <string name="empty_sms">Tomt SMS</string>
+    <string name="unknown_language_sms">SMS på okänt språk</string>
     <string name="unknown_sender">okänd avsändare</string>
+    <string name="what_from_where_colon_body" formatted="false">%s från %s: %s</string>
+    <string name="sms">SMS</string>
 </resources>

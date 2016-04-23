@@ -34,7 +34,7 @@ public class SmsReceiver extends BroadcastReceiver {
         for (Object pduObj : pduObjs) {
             SmsMessage message = SmsMessage.createFromPdu((byte[])pduObj);
 
-            SpeakerService.speakSms(context,
+            SmsPresenter.speak(context,
                 message.getDisplayMessageBody(), message.getOriginatingAddress());
         }
     }

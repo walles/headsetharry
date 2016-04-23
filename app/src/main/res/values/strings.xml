@@ -1,15 +1,11 @@
 <resources>
     <string name="app_name" translatable="false">Headset Harry</string>
 
-    <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
-
-    <!-- Example settings for Data & Sync -->
-
-    <!-- Example settings for Notifications -->
+    <string name="sms">SMS</string>
+    <string name="empty_sms">Empty SMS</string>
+    <string name="unknown_language_sms">Unknown language SMS</string>
 
     <string name="unknown_sender">unknown sender</string>
-    <string name="sms_from" formatted="false">%s SMS from %s: %s</string>
-    <string name="unknown_language">"Unknown language "</string>
+
+    <string name="what_from_where_colon_body" formatted="false">%s from %s: %s</string>
 </resources>
