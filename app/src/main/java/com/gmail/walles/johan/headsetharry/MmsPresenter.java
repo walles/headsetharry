@@ -15,7 +15,6 @@ public class MmsPresenter extends Presenter {
     @NonNls
     public static final String TYPE = "MMS";
 
-    private final Context context;
     private final String announcement;
 
     public static void speak(Context context, CharSequence sender) {
@@ -27,7 +26,7 @@ public class MmsPresenter extends Presenter {
     }
 
     public MmsPresenter(Context context, Intent intent) {
-        this.context = context;
+        super(context);
 
         // It's OK for the sender to be null, we'll just say it's unknown
         CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
