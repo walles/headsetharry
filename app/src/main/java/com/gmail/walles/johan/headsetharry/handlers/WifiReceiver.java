@@ -21,9 +21,15 @@ public class WifiReceiver extends BroadcastReceiver {
             return;
         }
 
-        NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-        if (ConnectivityManager.TYPE_WIFI != netInfo.getType ()) {
-            Timber.d("WifiReceiver got non-Wifi event %d", netInfo.getType());
+        NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+        if (ConnectivityManager.TYPE_WIFI != networkInfo.getType()) {
+            Timber.d("WifiReceiver got non-Wifi event %d", networkInfo.getType());
+            return;
+        }
+
+        NetworkInfo.State state = networkInfo.getState();
+        if (state != NetworkInfo.State.CONNECTED && state != NetworkInfo.State.DISCONNECTED) {
+            Timber.d("WifiReceiver got non-final network state %s, ignoring", state);
             return;
         }
 
