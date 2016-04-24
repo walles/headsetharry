@@ -1,8 +1,13 @@
-package com.gmail.walles.johan.headsetharry;
+package com.gmail.walles.johan.headsetharry.handlers;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+
+import com.gmail.walles.johan.headsetharry.LookupUtils;
+import com.gmail.walles.johan.headsetharry.Presenter;
+import com.gmail.walles.johan.headsetharry.R;
+import com.gmail.walles.johan.headsetharry.SpeakerService;
 
 import org.jetbrains.annotations.NonNls;
 

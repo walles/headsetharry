@@ -7,4 +7,7 @@
     <string name="what_from_where_colon_body" formatted="false">%s från %s: %s</string>
     <string name="sms">SMS</string>
     <string name="mms_from_x" formatted="false">MMS från %s</string>
+    <string name="wifi_disconnected">Trådlöst nätverk frånkopplat</string>
+    <string name="connected_to_unnamed_network">Ansluten till namnlöst nätverk</string>
+    <string name="connected_to_networkname" formatted="false">Ansluten till %s</string>
 </resources>

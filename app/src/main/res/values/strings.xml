@@ -10,4 +10,7 @@
     <string name="unknown_sender">unknown sender</string>
 
     <string name="what_from_where_colon_body" formatted="false">%s from %s: %s</string>
+    <string name="wifi_disconnected">Wireless network disconnected</string>
+    <string name="connected_to_unnamed_network">Connected to unnamed network</string>
+    <string name="connected_to_networkname" formatted="false">Connected to %s</string>
 </resources>

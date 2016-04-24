@@ -1,10 +1,12 @@
-package com.gmail.walles.johan.headsetharry;
+package com.gmail.walles.johan.headsetharry.handlers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+
+import com.gmail.walles.johan.headsetharry.LoggingUtil;
 
 import org.jetbrains.annotations.NonNls;
 
@@ -16,6 +18,8 @@ import timber.log.Timber;
 public class SmsReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        LoggingUtil.setUpLogging(context);
+
         @NonNls final Bundle bundle = intent.getExtras();
         if (bundle == null) {
             return;
