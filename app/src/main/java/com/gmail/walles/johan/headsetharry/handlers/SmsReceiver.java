@@ -36,6 +36,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
 
         for (Object pduObj : pduObjs) {
+            //noinspection deprecation
             SmsMessage message = SmsMessage.createFromPdu((byte[])pduObj);
 
             SmsPresenter.speak(context,

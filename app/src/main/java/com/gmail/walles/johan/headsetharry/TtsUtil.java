@@ -210,7 +210,7 @@ public class TtsUtil {
         throw new UnsupportedOperationException("Utility class, don't instantiate");
     }
 
-    public static void getEngineForLocale(Context context, Locale locale, CompletionListener callback) {
+    private static void getEngineForLocale(Context context, Locale locale, CompletionListener callback) {
         new EngineGetter(context, locale, callback).getEngine();
     }
 }
