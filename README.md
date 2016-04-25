@@ -30,8 +30,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 # TODO Before Getting Beta Users
 * Add a `.travis.yml` configuration to lint, Findbugs and run the unit
 tests
-* Think about whether we think we'll survive app upgrades
-* Think about whether we think we'll survive device reboots
 * Set app version name from `git` somehow
 * Make up a release process and document it
 
@@ -69,8 +67,6 @@ engines / languages.
 * Maybe we should simply read notifications instead of trying to solve
 everything ourselves? Maybe read the `Notification.tickerText` to the
 user.
-* If we get a "phone number" with letters in it, maybe we should just
-  read it as it is and not try to look it up.
 * In Settings, should it be possible to tag contacts with their most
 likely language?
 * "Phone call from NN" (NN is name if in contacts, not number)
@@ -115,3 +111,9 @@ phone numbers.
 * Add support for announcements over wired headsets
 * Somehow try to help / inform the user if the language they want has no
 TTS available.
+* Don't look up "phone number"s with letters in them, just pretend they
+are already looked up.
+* Think about whether we think we'll survive app upgrades. Yes, we're
+just receiving broadcasts, nothing that needs to be restarted for that.
+* Think about whether we think we'll survive device reboots. Yes, we're
+just receiving broadcasts, nothing that needs to be restarted for that.

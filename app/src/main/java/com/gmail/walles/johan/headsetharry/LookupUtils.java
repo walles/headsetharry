@@ -40,6 +40,20 @@ public class LookupUtils {
         return contactId;
     }
 
+    /**
+     * When receiving SMSes, incoming phone numbers are really sender names.
+     * <p/>
+     * Detect if that seems to be the case here.
+     */
+    private static boolean containsLetters(CharSequence charSequence) {
+        for (int i = 0; i < charSequence.length(); i++) {
+            if (Character.isLetter(charSequence.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /*
      * Returns contact's name
      */
@@ -48,6 +62,12 @@ public class LookupUtils {
     {
         if (TextUtils.isEmpty(phoneNumber)) {
             return Optional.absent();
+        }
+
+        if (containsLetters(phoneNumber)) {
+            // Looks like a sender already, this happens for SMSes from some organizations.
+            // At least in Sweden.
+            return Optional.of(phoneNumber.toString());
         }
 
         ContentResolver resolver = context.getContentResolver();
