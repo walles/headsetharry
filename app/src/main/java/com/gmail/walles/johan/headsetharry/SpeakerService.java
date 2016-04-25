@@ -141,6 +141,14 @@ public class SpeakerService extends Service {
             Timber.d("Speaking, A2DP enabled");
             handleIntent(intent, false);
             return Service.START_NOT_STICKY;
+        } else if (audioManager.isWiredHeadsetOn()) {
+            // isWiredHeadsetOn() is deprecated because "This is not a valid indication that audio
+            // playback is actually over the wired headset", but I've decided to keep using it until
+            // somebody can demonstrate to me what concrete problems can arise from using it for
+            // detecting where our speech will actually end up.
+            Timber.d("Speaking, wired headphones connected");
+            handleIntent(intent, false);
+            return Service.START_NOT_STICKY;
         } else if (enableBluetoothSco(audioManager)) {
             Timber.d("Speaking, SCO enabled");
             handleIntent(intent, true);

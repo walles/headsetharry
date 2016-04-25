@@ -30,13 +30,12 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 # TODO Before Getting Beta Users
 * Somehow try to help / inform the user if the language they want has no
 TTS available.
-* Verify that we work properly with a wired headset connected
 * Add a `.travis.yml` configuration to lint, Findbugs and run the unit
 tests
-* Make up a release process and document it
 * Think about whether we think we'll survive app upgrades
 * Think about whether we think we'll survive device reboots
 * Set app version name from `git` somehow
+* Make up a release process and document it
 
 # TODO Before Releasing on Android Market
 * Add a license
@@ -114,3 +113,4 @@ them will be enough for now.
 * Look up incoming phone numbers and read contact names rather than
 phone numbers.
 * Announce connections to and disconnections from Wifi networks
+* Add support for announcements over wired headsets
