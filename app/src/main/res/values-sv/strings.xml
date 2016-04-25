@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Headset Harry</string>
     <string name="empty_sms">Tomt SMS</string>
     <string name="unknown_language_sms">SMS på okänt språk</string>
     <string name="unknown_sender">okänd avsändare</string>
     <string name="what_from_where_colon_body" formatted="false">%s från %s: %s</string>
     <string name="sms">SMS</string>
     <string name="mms_from_x" formatted="false">MMS från %s</string>
+    <string name="wifi_disconnected">Trådlöst nätverk frånkopplat</string>
+    <string name="connected_to_unnamed_network">Ansluten till namnlöst nätverk</string>
+    <string name="connected_to_networkname" formatted="false">Ansluten till %s</string>
 </resources>

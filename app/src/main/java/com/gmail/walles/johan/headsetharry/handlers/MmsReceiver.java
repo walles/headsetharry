@@ -1,9 +1,11 @@
-package com.gmail.walles.johan.headsetharry;
+package com.gmail.walles.johan.headsetharry.handlers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.gmail.walles.johan.headsetharry.LoggingUtil;
 
 import org.jetbrains.annotations.NonNls;
 
@@ -20,6 +22,8 @@ public class MmsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        LoggingUtil.setUpLogging(context);
+
         if (!ACTION_MMS_RECEIVED.equals(intent.getAction())) {
             Timber.w("Got broadcast with unknown MMS action: <%s>", intent.getAction());
             return;

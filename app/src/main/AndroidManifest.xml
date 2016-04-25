@@ -2,6 +2,7 @@
 <manifest package="com.gmail.walles.johan.headsetharry"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
@@ -32,16 +33,23 @@
 
         <service android:name=".SpeakerService"/>
 
-        <receiver android:name=".SmsReceiver">
+        <receiver android:name=".handlers.SmsReceiver">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".MmsReceiver">
+        <receiver android:name=".handlers.MmsReceiver">
             <intent-filter>
                 <action android:name="android.provider.Telephony.WAP_PUSH_RECEIVED"/>
                 <data android:mimeType="application/vnd.wap.mms-message" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".handlers.WifiReceiver">
+            <intent-filter>
+                <action android:name="android.net.wifi.STATE_CHANGE"/>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
 

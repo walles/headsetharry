@@ -40,13 +40,13 @@ tests
 
 # TODO Before Releasing on Android Market
 * Add a license
-* When a message comes in, enqueue it if a phone call is in progress.
-* When a phone call ends, read all events received during the call
+* Verify that we work OK even for locales that we don't have any
+translations for (whatever "OK" means in this case).
 * If the user is playing music, pause or turn down the music while the
 message is being read.
 * Make an icon / all the other graphics needed by Market
 * Add a Settings activity where:
-    * You can see what languages are available
+    * OK: You can see what languages are available
     * You can see What languages are enabled (there's a TTS voice for the
     language)
     * Clicking a checkbox next to an available but not enabled language
@@ -55,6 +55,8 @@ message is being read.
     https://play.google.com/store/search?q=tts&c=apps
 
 # TODO Misc
+* When a message comes in, enqueue it if a phone call is in progress.
+* When a phone call ends, read all events received during the call
 * Read any text parts of MMS messages. To get the contents, maybe watch
 the MMS database: http://stackoverflow.com/a/6152073/473672
 * Make sure people don't deselect all languages.
@@ -76,8 +78,6 @@ likely language?
 * "Phone call from NN" (NN is name if in contacts, not number)
 * "Calendar event: ..."
 * Google Inbox: "Mail from NN: SUBJECT"
-* "Connected to WIFI-NAME"
-* "Wireless network connection lost"
 * Think about long messages, should we have an upper limit on how much
 we read?
 * Think about multipart messages, how do we handle them? How should we
@@ -113,3 +113,4 @@ configured in the settings.
 them will be enough for now.
 * Look up incoming phone numbers and read contact names rather than
 phone numbers.
+* Announce connections to and disconnections from Wifi networks
