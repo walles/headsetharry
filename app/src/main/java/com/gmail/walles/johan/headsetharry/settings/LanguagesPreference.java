@@ -1,13 +1,20 @@
 package com.gmail.walles.johan.headsetharry.settings;
 
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.net.Uri;
 import android.preference.MultiSelectListPreference;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.widget.Toast;
 
+import com.gmail.walles.johan.headsetharry.TtsUtil;
 import com.google.common.base.Optional;
 import com.optimaize.langdetect.i18n.LdLocale;
 import com.optimaize.langdetect.profiles.BuiltInLanguages;
@@ -23,12 +30,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import timber.log.Timber;
+
 public class LanguagesPreference
     extends MultiSelectListPreference
     implements SharedPreferences.OnSharedPreferenceChangeListener
 {
     @NonNls
     private static final String ACTIVE_LANGUAGES_PREFERENCE = "activeLanguagesList";
+    @NonNls
+    private static final String PLAY_STORE_SEARCH_TTS_URL = "market://search?q=TTS&c=apps";
+    @NonNls
+    private static final String ACTION_ANDROID_TTS_SETTINGS = "com.android.settings.TTS_SETTINGS";
 
     @Override
     public Set<String> getValues() {
@@ -64,6 +77,63 @@ public class LanguagesPreference
         }
 
         updateSummary();
+
+        testSpeakConfiguredLanguages();
+    }
+
+    private void testSpeakConfiguredLanguages() {
+        Set<String> configuredLanguageNames = getValues(getContext());
+        List<Locale> locales = new ArrayList<>(configuredLanguageNames.size());
+        for (String languageName: configuredLanguageNames) {
+            locales.add(parseLocale(languageName));
+        }
+        TtsUtil.testSpeakLocales(getContext(), locales, new TtsUtil.TestFailureListener() {
+            @Override
+            public void onTestSpeakLocaleFailed(Locale locale) {
+                new AlertDialog.Builder(getContext()).
+                    setTitle("Can't speak " + locale.getDisplayName()).
+                    setMessage(String.format(
+                        "No Text-to-speech support for %s.\n" +
+                        "\n" +
+                        "You can either try to get a new TTS engine from Google Play Store " +
+                        "or try to configure your existing TTS engines.",
+                        locale.getDisplayName())).
+                    setPositiveButton("Install TTS", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // FIXME: Launch Google Play with a pre-filled search
+                            Intent goToMarket = new Intent(Intent.ACTION_VIEW);
+                            goToMarket.setData(Uri.parse(PLAY_STORE_SEARCH_TTS_URL));
+                            try {
+                                getContext().startActivity(goToMarket);
+                            } catch (ActivityNotFoundException e) {
+                                Timber.w(e, "Google Play Store not available");
+                                Toast.makeText(getContext(),
+                                    "Google Play Store not available on this device",
+                                    Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }).
+                    setNeutralButton("System TTS Settings", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Launch System TTS Settings, from http://stackoverflow.com/a/8688354/473672
+                            Intent openSystemTtsSettings = new Intent();
+                            openSystemTtsSettings.setAction(ACTION_ANDROID_TTS_SETTINGS);
+                            try {
+                                getContext().startActivity(openSystemTtsSettings);
+                            } catch (ActivityNotFoundException e) {
+                                Timber.w(e, "System TTS Settings not available");
+                                Toast.makeText(getContext(),
+                                    "System TTS Settings not available",
+                                    Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }).
+                    setCancelable(true).
+                    show();
+            }
+        }, false);
     }
 
     private void updateSummary() {

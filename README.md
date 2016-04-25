@@ -28,8 +28,6 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Getting Beta Users
-* Somehow try to help / inform the user if the language they want has no
-TTS available.
 * Add a `.travis.yml` configuration to lint, Findbugs and run the unit
 tests
 * Think about whether we think we'll survive app upgrades
@@ -39,6 +37,7 @@ tests
 
 # TODO Before Releasing on Android Market
 * Add a license
+* Properly internationalize LanguagesPreference.java
 * Verify that we work OK even for locales that we don't have any
 translations for (whatever "OK" means in this case).
 * If the user is playing music, pause or turn down the music while the
@@ -114,3 +113,5 @@ them will be enough for now.
 phone numbers.
 * Announce connections to and disconnections from Wifi networks
 * Add support for announcements over wired headsets
+* Somehow try to help / inform the user if the language they want has no
+TTS available.
