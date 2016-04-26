@@ -2,14 +2,14 @@
 sudo: false
 
 language: android
+
 script: ./gradlew check --continue
+
 android:
-  components:
-    # The SDK version used to compile your project
-    - android-23
-
-    # The BuildTools version used by your project
-    - build-tools-23.0.3
-
-    # For appcompat-v7 support library
-    - extra-android-m2repository
+    components:
+        - platform-tools
+        - tools
+        - build-tools-23.0.3
+        - android-23
+        - extra-android-m2repository
+        - extra-google-m2repository
