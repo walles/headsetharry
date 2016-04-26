@@ -157,7 +157,7 @@ public class LanguagesPreference
             String summary = TextUtils.join(", ", names);
 
             // Capitalize first character, purely for looks
-            summary = summary.substring(0, 1).toUpperCase() + summary.substring(1);
+            summary = summary.substring(0, 1).toUpperCase(Locale.getDefault()) + summary.substring(1);
 
             setSummary(summary);
         }
