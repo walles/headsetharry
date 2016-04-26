@@ -47,11 +47,33 @@ android {
         versionCode 1
         versionName getVersionName()
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    lintOptions {
+        // This test can be fine one day and not fine the next without us changing anything. Not
+        // reliable enough, disable.
+        //
+        // Docs at http://tools.android.com/tips/lint-checks
+        disable("GradleDependency")
+
+        // Johan doesn't want to generate multiple icon sizes; most phones can resize an icon just
+        // fine by itself.
+        disable("IconMissingDensityFolder")
+
+        abortOnError true
+        warningsAsErrors true
+
+        textOutput "stdout"
+        textReport true
+
+        htmlReport true
+        htmlOutput file("$project.buildDir/reports/lint.html")
     }
 }
 
