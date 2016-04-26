@@ -35,28 +35,6 @@ public class SpeakerService extends Service {
         LoggingUtil.setUpLogging(this);
     }
 
-    private static boolean isRunningOnEmulator() {
-        // Inspired by
-        // http://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in>
-        if (Build.PRODUCT == null) {
-            return false;
-        }
-
-        @NonNls Set<String> parts = new HashSet<>(Arrays.asList(Build.PRODUCT.split("_")));
-        if (parts.size() == 0) {
-            return false;
-        }
-
-        parts.remove("sdk");
-        parts.remove("google");
-        parts.remove("x86");
-        parts.remove("phone");
-
-        // If the build identifier contains only the above keywords in some order, then we're
-        // in an emulator
-        return parts.isEmpty();
-    }
-
     private boolean enableBluetoothSco(AudioManager audioManager) {
         if (!audioManager.isBluetoothScoAvailableOffCall()) {
             Timber.d("Bluetooth SCO not available off call, not trying it");
@@ -153,7 +131,7 @@ public class SpeakerService extends Service {
             Timber.d("Speaking, SCO enabled");
             handleIntent(intent, true);
             return Service.START_NOT_STICKY;
-        } else if (isRunningOnEmulator()) {
+        } else if (EmulatorUtil.isRunningOnEmulator()) {
             Timber.d("Speaking, running in emulator");
             handleIntent(intent, false);
             return Service.START_NOT_STICKY;

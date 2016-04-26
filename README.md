@@ -29,7 +29,6 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Getting Beta Users
-* Don't log to Crashlytics if running in the emulator
 * Set app version code from `git` somehow
 * Make up a release process and document it
 
@@ -122,3 +121,4 @@ just receiving broadcasts, nothing that needs to be restarted for that.
 just receiving broadcasts, nothing that needs to be restarted for that.
 * Add a `.travis.yml` configuration to run lint and the unit tests
 * Add Findbugs to the Travis build
+* Don't log to Crashlytics if running in the emulator

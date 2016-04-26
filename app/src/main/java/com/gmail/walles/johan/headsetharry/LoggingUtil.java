@@ -35,12 +35,21 @@ public class LoggingUtil {
     }
 
     public static void setUpLogging(Context context) {
-        if (initializedLoggingClass != Timber.class) {
-            initializedLoggingClass = Timber.class;
-            Timber.plant(new CrashlyticsTree());
+        Timber.Tree tree;
+        if (EmulatorUtil.isRunningOnEmulator()) {
+            tree = new LocalTree();
+        } else {
+            tree = new CrashlyticsTree();
         }
 
-        Fabric.with(context, new Crashlytics());
+        if (initializedLoggingClass != Timber.class) {
+            initializedLoggingClass = Timber.class;
+            Timber.plant(tree);
+        }
+
+        if (!EmulatorUtil.isRunningOnEmulator()) {
+            Fabric.with(context, new Crashlytics());
+        }
     }
 
     private static class CrashlyticsTree extends Timber.Tree {
@@ -59,6 +68,22 @@ public class LoggingUtil {
                 Crashlytics.logException(t);
                 Log.println(priority, tag, message + "\n" + Log.getStackTraceString(t));
             }
+        }
+    }
+
+    private static class LocalTree extends Timber.Tree {
+        @Override
+        protected void log(int priority, @NonNls String tag, String message, Throwable t) {
+            if (BuildConfig.DEBUG) {
+                tag = "DEBUG";
+            } else if (TextUtils.isEmpty(tag)) {
+                tag = "HeadsetHarry";
+            }
+
+            if (t != null) {
+                message += "\n" + Log.getStackTraceString(t);
+            }
+            Log.println(priority, tag, message);
         }
     }
 }
