@@ -9,6 +9,8 @@ import com.gmail.walles.johan.headsetharry.LoggingUtil;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.nio.charset.Charset;
+
 import timber.log.Timber;
 
 /**
@@ -46,7 +48,9 @@ public class MmsReceiver extends BroadcastReceiver {
             return;
         }
 
-        @NonNls String incomingNumber = new String(buffer);
+        // FIXME: That the charset of incoming numbers is the default Android encoding (UTF-8) is
+        // really just a guess
+        @NonNls String incomingNumber = new String(buffer, Charset.defaultCharset());
         Timber.d("Incoming MMS number, raw: <%s>", incomingNumber);
 
         // From: http://stackoverflow.com/q/14452808/473672

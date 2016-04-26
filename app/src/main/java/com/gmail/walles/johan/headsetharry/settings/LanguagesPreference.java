@@ -93,8 +93,8 @@ public class LanguagesPreference
                 new AlertDialog.Builder(getContext()).
                     setTitle("Can't speak " + locale.getDisplayName()).
                     setMessage(String.format(
-                        "No Text-to-speech support for %s.\n" +
-                        "\n" +
+                        "No Text-to-speech support for %s.%n" +
+                        "%n" +
                         "You can either try to get a new TTS engine from Google Play Store " +
                         "or try to configure your existing TTS engines.",
                         locale.getDisplayName())).

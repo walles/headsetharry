@@ -3,7 +3,8 @@ Reads events through a connected headset.
 
 Events can be:
 * Incoming SMS
-* Calendar event
+* Incoming MMS
+* Wireless network connected / disconnected
 * ...
 
 One core concept is that Headset Harry will try to be smart about what
@@ -28,7 +29,6 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Getting Beta Users
-* Add Findbugs to the Travis build
 * Don't log to Crashlytics if running in the emulator
 * Set app version code from `git` somehow
 * Make up a release process and document it
@@ -36,7 +36,8 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 # TODO Before Releasing on Android Market
 * Add pre-commit and pre-push hooks that run lint, Findbugs and unit
 tests, possibly copy from Battery Logger.
-* Add a license
+* Protect the master branch on GitHub
+* Add a license and put copyright headers in all files
 * Properly internationalize LanguagesPreference.java
 * Verify that we work OK even for locales that we don't have any
 translations for (whatever "OK" means in this case).
@@ -120,3 +121,4 @@ just receiving broadcasts, nothing that needs to be restarted for that.
 * Think about whether we think we'll survive device reboots. Yes, we're
 just receiving broadcasts, nothing that needs to be restarted for that.
 * Add a `.travis.yml` configuration to run lint and the unit tests
+* Add Findbugs to the Travis build

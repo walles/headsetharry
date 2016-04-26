@@ -12,6 +12,7 @@ buildscript {
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
+apply plugin: 'findbugs'
 
 repositories {
     mavenCentral()
@@ -86,6 +87,36 @@ android {
         htmlReport true
         htmlOutput file("$project.buildDir/reports/lint.html")
     }
+}
+
+// Getting text output from Findbugs is broken in the Gradle plugin
+// (https://issues.gradle.org/browse/GRADLE-2994), so if people want to diagnose a FindBugs
+// problem they'll just have to run "gradle check" locally.
+//
+// When that problem is fixed we should update this code to print a text report on stdout.
+task findbugs(type: FindBugs) {
+    reports {
+        // What we really want here is text on stdout but that doesn't work:
+        // https://issues.gradle.org/browse/GRADLE-2994
+        xml.enabled = false
+        html.enabled = true
+    }
+
+    ignoreFailures = false
+    effort = "max"
+    reportLevel = "low"
+    excludeFilter = new File("${project.rootDir}/config/findbugs-filter.xml")
+    classes = files("${project.rootDir}/app/build/intermediates/classes")
+
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+
+    classpath = files()
+}
+
+check.doLast {
+    project.tasks.getByName("findbugs").execute()
 }
 
 dependencies {

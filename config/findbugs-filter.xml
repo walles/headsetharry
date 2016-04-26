@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FindBugsFilter
+    xmlns="http://findbugs.sourceforge.net/filter/3.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://findbugs.sourceforge.net/filter/3.0.0 https://findbugs.googlecode.com/git/findbugs/etc/findbugsfilter.xsd">
+    <Match>
+        <Class name="~.*\.R\$.*"/>
+    </Match>
+    <Match>
+        <Class name="~.*\.Manifest\$.*"/>
+    </Match>
+    <Match>
+        <Class name="~.*\.*Test" />
+    </Match>
+    <Match>
+        <!-- If this fails the code is wrong, we'll be informed through Crashlytics and fix it properly -->
+        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    </Match>
+    <Match>
+        <!-- This seems so not worth the effort to fix -->
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+    </Match>
+    <Match>
+        <!-- Fix things discovered by profiling; this is a premature-optimization suggestion IMO -->
+        <Bug pattern="SBSC_USE_STRINGBUFFER_CONCATENATION"/>
+    </Match>
+</FindBugsFilter>
