@@ -1,3 +1,6 @@
+# Disabling sudo lets us use the "new" Travis infrastructure
+sudo: false
+
 language: android
 script: ./gradlew check --continue
 android:
