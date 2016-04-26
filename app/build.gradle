@@ -102,6 +102,23 @@ android {
         htmlReport true
         htmlOutput file("$project.buildDir/reports/lint.html")
     }
+
+    signingConfigs {
+        release {
+            if (System.console() && System.getenv('CI') != "true") {
+                storeFile file(System.console().readLine("\n\$ Enter keystore path: "))
+                storePassword System.console().readLine("\n\$ Enter keystore password: ")
+                keyAlias System.console().readLine("\n\$ Enter key alias: ")
+                keyPassword System.console().readLine("\n\$ Enter key password: ")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
 }
 
 // Getting text output from Findbugs is broken in the Gradle plugin
