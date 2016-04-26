@@ -69,6 +69,14 @@ android {
         // fine by itself.
         disable("IconMissingDensityFolder")
 
+        // The problematic language-detector code seems not to be called by us, never mind. Could
+        // probably easily be fixed upstream.
+        //
+        // Somewhat touched upon here: https://github.com/optimaize/language-detector/issues/13
+        //
+        //noinspection InvalidPackage
+        disable("InvalidPackage")
+
         abortOnError true
         warningsAsErrors true
 
