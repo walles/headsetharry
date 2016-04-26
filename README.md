@@ -30,7 +30,7 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 # TODO Before Getting Beta Users
 * Add a `.travis.yml` configuration to lint, Findbugs and run the unit
 tests
-* Set app version name from `git` somehow
+* Set app version code from `git` somehow
 * Make up a release process and document it
 
 # TODO Before Releasing on Android Market
