@@ -4,6 +4,9 @@ buildscript {
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
+        // The dynamic version here is explicitly recommended by the Crashlytics docs:
+        // https://docs.fabric.io/android/fabric/integration.html#modify-build-gradle
+        //noinspection GradleDynamicVersion
         classpath 'io.fabric.tools:gradle:1.+'
     }
 }
