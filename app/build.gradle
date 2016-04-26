@@ -36,6 +36,21 @@ def getVersionName = { ->
     }
 }
 
+// From: http://stackoverflow.com/questions/17097263/automatically-versioning-android-project-from-git-describe-with-android-studio-g
+def getVersionCode = { ->
+    try {
+        def code = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'tag', '--list', 'version-*'
+            standardOutput = code
+        }
+        return code.toString().split("\n").size()
+    }
+    catch (ignored) {
+        return -1;
+    }
+}
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
@@ -48,7 +63,7 @@ android {
         minSdkVersion 20
 
         targetSdkVersion 23
-        versionCode 1
+        versionCode getVersionCode()
         versionName getVersionName()
     }
 
