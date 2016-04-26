@@ -28,12 +28,14 @@ The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
 # TODO Before Getting Beta Users
-* Add a `.travis.yml` configuration to lint, Findbugs and run the unit
-tests
-* Set app version name from `git` somehow
+* Add Findbugs to the Travis build
+* Don't log to Crashlytics if running in the emulator
+* Set app version code from `git` somehow
 * Make up a release process and document it
 
 # TODO Before Releasing on Android Market
+* Add pre-commit and pre-push hooks that run lint, Findbugs and unit
+tests, possibly copy from Battery Logger.
 * Add a license
 * Properly internationalize LanguagesPreference.java
 * Verify that we work OK even for locales that we don't have any
@@ -117,3 +119,4 @@ are already looked up.
 just receiving broadcasts, nothing that needs to be restarted for that.
 * Think about whether we think we'll survive device reboots. Yes, we're
 just receiving broadcasts, nothing that needs to be restarted for that.
+* Add a `.travis.yml` configuration to run lint and the unit tests

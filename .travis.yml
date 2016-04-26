@@ -1,0 +1,18 @@
+# Disabling sudo lets us use the "new" Travis infrastructure
+sudo: false
+
+language: android
+
+# Give Crashlytics a dummy key, this is needed for the build to pass
+before_script: echo apiKey=0 > app/fabric.properties
+
+script: ./gradlew check --continue
+
+android:
+    components:
+        - platform-tools
+        - tools
+        - build-tools-23.0.3
+        - android-23
+        - extra-android-m2repository
+        - extra-google-m2repository
