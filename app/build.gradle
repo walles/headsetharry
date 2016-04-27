@@ -29,6 +29,15 @@ buildscript {
         classpath 'io.fabric.tools:gradle:1.+'
     }
 }
+
+plugins {
+    // Add jacocoTestReportDebug task to generate unit test coverage data
+    id "com.vanniktech.android.junit.jacoco" version "0.4.0"
+
+    // Add coveralls task to uploads unit test coverage data to coveralls.io
+    id "com.github.kt3k.coveralls" version "2.6.3"
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'findbugs'

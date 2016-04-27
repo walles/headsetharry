@@ -16,3 +16,5 @@ android:
         - android-23
         - extra-android-m2repository
         - extra-google-m2repository
+
+after_success: ./gradlew jacocoTestReportDebug coveralls
