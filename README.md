@@ -36,7 +36,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
-* Add a license and put copyright headers in all files
 * Properly internationalize LanguagesPreference.java
 * Verify that we work OK even for locales that we don't have any
 translations for (whatever "OK" means in this case).
@@ -127,3 +126,4 @@ just receiving broadcasts, nothing that needs to be restarted for that.
 * Make up a release process and document it
 * Protect the master branch on GitHub
 * Add pre-commit and pre-push hooks that verifies stuff
+* Add a license and put copyright headers in all files
