@@ -3,6 +3,10 @@ sudo: false
 
 language: android
 
+# Avoid permgen problems
+jdk:
+  - oraclejdk8
+
 # Give Crashlytics a dummy key, this is needed for the build to pass
 before_script: echo apiKey=0 > app/fabric.properties
 
