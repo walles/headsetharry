@@ -28,8 +28,12 @@ apiKey=YOUR_API_KEY_HERE_
 The values can be retrieved from https://fabric.io/settings/organizations
 by clicking the (very small) `API Key` and `Build Secret` links.
 
-# TODO Before Getting Beta Users
-* Make up a release process and document it
+## Releasing
+1. Do ```git tag``` and think about what the next version number should be.
+2. Do ```git tag --annotate version-1.2.3``` to set the next version number.
+3. ```env JAVA_OPTS=-Xmx512m ./gradlew --no-daemon build```
+4. Upload ```app/build/outputs/apk/app-release.apk``` to Google Play
+5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
 * Add pre-commit and pre-push hooks that run lint, Findbugs and unit
@@ -52,6 +56,7 @@ message is being read.
     https://play.google.com/store/search?q=tts&c=apps
 
 # TODO Misc
+* Enable PMD NLS warnings if it has those
 * When a message comes in, enqueue it if a phone call is in progress.
 * When a phone call ends, read all events received during the call
 * Read any text parts of MMS messages. To get the contents, maybe watch
@@ -122,3 +127,4 @@ just receiving broadcasts, nothing that needs to be restarted for that.
 * Add Findbugs to the Travis build
 * Don't log to Crashlytics if running in the emulator
 * Set app version code from `git` somehow
+* Make up a release process and document it
