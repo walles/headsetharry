@@ -37,6 +37,7 @@ plugins {
     // Add coveralls task to uploads unit test coverage data to coveralls.io
     id "com.github.kt3k.coveralls" version "2.6.3"
 }
+coveralls.jacocoReportPath = 'app/build/reports/jacoco/debug/jacoco.xml'
 
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
