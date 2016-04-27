@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.text.TextUtils;
 
 import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
@@ -76,14 +77,13 @@ public class WifiPresenter extends Presenter {
             return;
         }
 
-        if (!ssid.startsWith("\"")) {
+        // Trim surrounding double quotes if applicable
+        ssid = spacify(ssid.replaceAll("^\"|\"$", "")).toString();
+        if (TextUtils.isEmpty(ssid)) {
             locale = Optional.absent();
             announcement = context.getString(R.string.connected_to_unnamed_network);
             return;
         }
-
-        // Trim surrounding double quotes
-        ssid = spacify(ssid.replaceAll("^\"|\"$", "")).toString();
 
         locale = identifyLanguage(ssid);
         announcement = createWifiAnnouncement(ssid);
