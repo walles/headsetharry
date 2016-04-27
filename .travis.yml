@@ -22,3 +22,11 @@ android:
         - extra-google-m2repository
 
 after_success: ./gradlew jacocoTestReportDebug coveralls
+
+# From: https://github.com/travis-ci/docs-travis-ci-com/issues/358#issuecomment-142981773
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
