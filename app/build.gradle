@@ -22,21 +22,6 @@ repositories {
     }
 }
 
-def getVersionName = { ->
-    try {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'sh', '-c',
-                    'git describe --tags --dirty --first-parent'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim()
-    }
-    catch (ignored) {
-        return null;
-    }
-}
-
 // From: http://stackoverflow.com/questions/17097263/automatically-versioning-android-project-from-git-describe-with-android-studio-g
 def getVersionCode = { ->
     try {
@@ -49,6 +34,21 @@ def getVersionCode = { ->
     }
     catch (ignored) {
         return -1;
+    }
+}
+
+def getVersionName = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'sh', '-c',
+                    'git describe --dirty --first-parent --match="version-*"|sed \'s/^version-//\''
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }
+    catch (ignored) {
+        return null;
     }
 }
 
