@@ -13,6 +13,7 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'findbugs'
+apply plugin: 'pmd'
 
 repositories {
     mavenCentral()
@@ -121,6 +122,17 @@ android {
     }
 }
 
+task pmd (type: Pmd, dependsOn: assembleDebug) {
+    ruleSetFiles = files("${project.rootDir}/config/pmd-ruleset.xml")
+    ignoreFailures = false
+    consoleOutput = true
+    ruleSets = []
+
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+}
+
 // Getting text output from Findbugs is broken in the Gradle plugin
 // (https://issues.gradle.org/browse/GRADLE-2994), so if people want to diagnose a FindBugs
 // problem they'll just have to run "gradle check" locally.
@@ -149,6 +161,7 @@ task findbugs(type: FindBugs) {
 
 check.doLast {
     project.tasks.getByName("findbugs").execute()
+    project.tasks.getByName("pmd").execute()
 }
 
 dependencies {

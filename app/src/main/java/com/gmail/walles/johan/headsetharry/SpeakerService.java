@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -15,10 +14,6 @@ import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.WifiPresenter;
 
 import org.jetbrains.annotations.NonNls;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import timber.log.Timber;
 

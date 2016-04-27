@@ -260,7 +260,7 @@ public class LanguagesPreference
                 continue;
             }
 
-            return Optional.of(ldLocale.toString());
+            return Optional.of(ldLocale.toString()); //NOPMD
         }
 
         return Optional.absent();

@@ -60,7 +60,7 @@ public class MmsReceiver extends BroadcastReceiver {
         if(index > 0 && (index - 15) > 0){
             int newIndex = index - 15;
             incomingNumber = incomingNumber.substring(newIndex, index);
-            index = incomingNumber.indexOf("+");
+            index = incomingNumber.indexOf('+');
             if(index > 0){
                 incomingNumber = incomingNumber.substring(index);
             }
