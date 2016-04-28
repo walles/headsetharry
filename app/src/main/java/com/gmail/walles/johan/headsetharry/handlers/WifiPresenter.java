@@ -35,9 +35,14 @@ import org.jetbrains.annotations.NonNls;
 import java.util.Locale;
 import java.util.Map;
 
+import timber.log.Timber;
+
 public class WifiPresenter extends Presenter {
     @NonNls
     public final static String TYPE = "WiFi";
+
+    @NonNls
+    public final static String EXTRA_CONNECTED = "com.gmail.walles.johan.headsetharry.connected";
 
     private final Optional<Locale> locale;
     private final String announcement;
@@ -45,10 +50,11 @@ public class WifiPresenter extends Presenter {
     /**
      * Speak current WiFi connectivity status.
      */
-    public static void speakStatus(Context context) {
+    public static void speakStatus(Context context, boolean connected) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
         intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
+        intent.putExtra(EXTRA_CONNECTED, connected);
         context.startService(intent);
     }
 
@@ -62,8 +68,19 @@ public class WifiPresenter extends Presenter {
         return announcement;
     }
 
-    public WifiPresenter(Context context) {
+    public WifiPresenter(Context context, Intent intent) {
         super(context);
+
+        if (!intent.hasExtra(EXTRA_CONNECTED)) {
+            throw new IllegalArgumentException("Wifi intent without connected status");
+        }
+        boolean connected = intent.getBooleanExtra(EXTRA_CONNECTED, false);
+
+        if (!connected) {
+            locale = Optional.absent();
+            announcement = context.getString(R.string.wifi_disconnected);
+            return;
+        }
 
         WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -72,6 +89,8 @@ public class WifiPresenter extends Presenter {
         // Explanation of the "<unknown ssid>" magic constant:
         // http://developer.android.com/reference/android/net/wifi/WifiInfo.html#getSSID()
         if ("<unknown ssid>".equals(ssid)) {
+            @NonNls String problem = "Got Wifi-connected event but wifi seems disconnected";
+            Timber.w(new Exception(problem), problem);
             locale = Optional.absent();
             announcement = context.getString(R.string.wifi_disconnected);
             return;
@@ -80,6 +99,8 @@ public class WifiPresenter extends Presenter {
         // Trim surrounding double quotes if applicable
         ssid = spacify(ssid.replaceAll("^\"|\"$", "")).toString();
         if (TextUtils.isEmpty(ssid)) {
+            @NonNls String problem = "Got empty SSID when supposedly connected";
+            Timber.w(new Exception(problem), problem);
             locale = Optional.absent();
             announcement = context.getString(R.string.connected_to_unnamed_network);
             return;

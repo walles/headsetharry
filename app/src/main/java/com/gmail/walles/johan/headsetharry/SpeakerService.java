@@ -163,14 +163,19 @@ public class SpeakerService extends Service {
         }
 
         Presenter presenter;
-        if (SmsPresenter.TYPE.equals(type)) {
-            presenter = new SmsPresenter(this, intent);
-        } else if (MmsPresenter.TYPE.equals(type)) {
-            presenter = new MmsPresenter(this, intent);
-        } else if (WifiPresenter.TYPE.equals(type)) {
-            presenter = new WifiPresenter(this);
-        } else {
-            Timber.w("Ignoring incoming intent of type %s", type);
+        try {
+            if (SmsPresenter.TYPE.equals(type)) {
+                presenter = new SmsPresenter(this, intent);
+            } else if (MmsPresenter.TYPE.equals(type)) {
+                presenter = new MmsPresenter(this, intent);
+            } else if (WifiPresenter.TYPE.equals(type)) {
+                presenter = new WifiPresenter(this, intent);
+            } else {
+                Timber.w("Ignoring incoming intent of type %s", type);
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            Timber.e(e, "Error parsing intent: %s", intent);
             return;
         }
 
