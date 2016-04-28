@@ -36,22 +36,14 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
-* Properly internationalize LanguagesPreference.java
 * Verify that we work OK even for locales that we don't have any
 translations for (whatever "OK" means in this case).
-* If the user is playing music, pause or turn down the music while the
-message is being read.
 * Make an icon / all the other graphics needed by Market
-* Add a Settings activity where:
-    * OK: You can see what languages are available
-    * You can see what languages are enabled (there's a TTS voice for the
-    language)
-    * Clicking a checkbox next to an available but not enabled language
-    takes you to the setup for the corresponding speech engine
-    * There's a button for installing more languages, taking you to
-    https://play.google.com/store/search?q=tts&c=apps
 
 # TODO Misc
+* If the user is playing music, pause or turn down the music while the
+message is being read.
+* Properly internationalize LanguagesPreference.java
 * Enable PMD NLS warnings if it has those
 * When a message comes in, enqueue it if a phone call is in progress.
 * When a phone call ends, read all events received during the call
