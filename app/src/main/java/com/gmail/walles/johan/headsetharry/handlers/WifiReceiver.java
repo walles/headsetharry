@@ -47,22 +47,22 @@ public class WifiReceiver extends BroadcastReceiver {
         @SuppressWarnings("HardCodedStringLiteral")
         String background =
             String.format(Locale.ENGLISH, "action=<%s> type=<%s> detailed state=<%s>",
-                intent.getAction(), intent.getType(), networkInfo.getDetailedState());
+                intent.getAction(), networkInfo.getType(), networkInfo.getDetailedState());
 
         // These if statements and this functionality is heavily inspired by
         // http://stackoverflow.com/a/5890104/473672
         if(WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
             if(networkInfo.getDetailedState() == NetworkInfo.DetailedState.CONNECTED) {
-                Timber.i("WifiReceiver speaking status for: %s", background);
-                WifiPresenter.speakStatus(context);
+                Timber.i("WifiReceiver speaking connected status for: %s", background);
+                WifiPresenter.speakStatus(context, true);
                 return;
             }
         } else if(ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
             if(networkInfo.getType() == ConnectivityManager.TYPE_WIFI &&
                 networkInfo.getDetailedState() == NetworkInfo.DetailedState.DISCONNECTED)
             {
-                Timber.i("WifiReceiver speaking status for: %s", background);
-                WifiPresenter.speakStatus(context);
+                Timber.i("WifiReceiver speaking disconnected status for: %s", background);
+                WifiPresenter.speakStatus(context, false);
                 return;
             }
         } else {
