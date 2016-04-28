@@ -52,7 +52,7 @@ public class WifiReceiver extends BroadcastReceiver {
         // These if statements and this functionality is heavily inspired by
         // http://stackoverflow.com/a/5890104/473672
         if(WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
-            if(networkInfo.isConnected()) {
+            if(networkInfo.getDetailedState() == NetworkInfo.DetailedState.CONNECTED) {
                 Timber.i("WifiReceiver speaking status for: %s", background);
                 WifiPresenter.speakStatus(context);
                 return;
