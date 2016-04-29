@@ -56,15 +56,32 @@ public class TtsUtil {
             this.locale = locale;
             this.text = text;
         }
+
+        public List<TextWithLocale> toList() {
+            List<TextWithLocale> list = new LinkedList<>();
+            list.add(this);
+            return list;
+        }
+
+        @Override
+        public String toString() {
+            return locale.toString() + ": " + text;
+        }
     }
 
     /**
-     * Speak the given text using the given TTS, then shut down the TTS.
+     * Speak the given texts.
+     * <p/>
+     * Start by speaking the first one in texts using the provided TTS, then recurse into the other
+     * ones from the done-callback.
      */
     private static void speakAndShutdown(
-        final Context context, final TextToSpeech tts, final CharSequence text, final boolean bluetoothSco)
+        final Context context,
+        final TextToSpeech tts,
+        final List<TextWithLocale> texts,
+        final boolean bluetoothSco)
     {
-        speakAndShutdown(context, tts, text, bluetoothSco, null);
+        speakAndShutdown(context, tts, texts, bluetoothSco, null);
     }
 
     /**
@@ -74,10 +91,18 @@ public class TtsUtil {
      */
     private static void speakAndShutdown(final Context context,
                                          final TextToSpeech tts,
-                                         final CharSequence text,
+                                         final List<TextWithLocale> texts,
                                          final boolean bluetoothSco,
                                          @Nullable final CompletionListener completionListener)
     {
+        if (texts.isEmpty()) {
+            Timber.w("Got empty speech request");
+            tts.shutdown();
+            return;
+        }
+
+        final TextWithLocale toSpeak = texts.get(0);
+
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId) {
@@ -89,7 +114,17 @@ public class TtsUtil {
                 Timber.v("Speech successfully completed");
                 tts.shutdown();
 
-                stopBluetoothSco();
+                List<TextWithLocale> remainingTexts = new LinkedList<>(texts);
+                remainingTexts.remove(0);
+                if (!remainingTexts.isEmpty()) {
+                    Timber.v("Speaking remaining texts: %s", remainingTexts);
+                    speak(context, remainingTexts, bluetoothSco);
+                    return;
+                }
+
+                if (bluetoothSco) {
+                    stopBluetoothSco(context);
+                }
 
                 if (completionListener != null) {
                     completionListener.onSuccess(tts);
@@ -98,26 +133,16 @@ public class TtsUtil {
 
             @Override
             public void onError(String utteranceId) {
-                @NonNls String message = "Speech failed: <" + text + ">";
+                @NonNls String message = "Speech failed: <" + toSpeak + ">";
                 Timber.e(new Exception(message), message);
                 tts.shutdown();
 
-                stopBluetoothSco();
+                if (bluetoothSco) {
+                    stopBluetoothSco(context);
+                }
 
                 if (completionListener != null) {
                     completionListener.onFailure(message);
-                }
-            }
-
-            private void stopBluetoothSco() {
-                if (bluetoothSco) {
-                    AudioManager audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
-                    if (audioManager != null) {
-                        @NonNls String status = audioManager.isBluetoothScoOn() ? "enabled": "disabled";
-                        Timber.d("Disabling SCO, was %s", status);
-                        audioManager.setBluetoothScoOn(false);
-                        audioManager.stopBluetoothSco();
-                    }
                 }
             }
         });
@@ -133,17 +158,36 @@ public class TtsUtil {
         }
 
         //noinspection deprecation
-        tts.speak(text.toString(), TextToSpeech.QUEUE_ADD, params);
+        tts.speak(toSpeak.toString(), TextToSpeech.QUEUE_ADD, params);
+    }
+
+    private static void stopBluetoothSco(Context context) {
+        AudioManager audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            @NonNls String status = audioManager.isBluetoothScoOn() ? "enabled": "disabled";
+            Timber.d("Disabling SCO, was %s", status);
+            audioManager.setBluetoothScoOn(false);
+            audioManager.stopBluetoothSco();
+        }
     }
 
     public static void speak(
-        final Context context, final TextWithLocale text, final boolean bluetoothSco)
+        final Context context, final List<TextWithLocale> texts, final boolean bluetoothSco)
     {
+        if (texts.isEmpty()) {
+            @NonNls String message = "Nothing to say, never mind";
+            Timber.w(new Exception(message), message);
+            stopBluetoothSco(context);
+            return;
+        }
+
+        final TextWithLocale text = texts.get(0);
+
         Timber.i("Speaking in locale <%s>: <%s>", text.locale, text.text);
         getEngineForLocale(context, text.locale, new CompletionListener() {
             @Override
             public void onSuccess(TextToSpeech textToSpeech) {
-                speakAndShutdown(context, textToSpeech, text.text, bluetoothSco);
+                speakAndShutdown(context, textToSpeech, texts, bluetoothSco);
             }
 
             @Override
@@ -152,7 +196,8 @@ public class TtsUtil {
                 if (lowerPrecisionLocale.isPresent()) {
                     Timber.i("Speech failed for locale <%s>, trying <%s>: %s",
                         text.locale, lowerPrecisionLocale.get(), message);
-                    speak(context, new TextWithLocale(text.text, lowerPrecisionLocale.get()), bluetoothSco);
+
+                    speak(context, texts, bluetoothSco);
                     return;
                 }
 
@@ -177,6 +222,7 @@ public class TtsUtil {
         return Optional.absent();
     }
 
+    // FIXME: Rewrite this with some call to the public speak() method
     public static void testSpeakLocales(final Context context,
                                         Collection<Locale> locales,
                                         final TestFailureListener testFailureListener,
@@ -193,7 +239,8 @@ public class TtsUtil {
         getEngineForLocale(context, locale, new CompletionListener() {
             @Override
             public void onSuccess(TextToSpeech textToSpeech) {
-                speakAndShutdown(context, textToSpeech, locale.getDisplayName(locale), bluetoothSco,
+                TextWithLocale toSpeak = new TextWithLocale(locale.getDisplayName(locale), locale);
+                speakAndShutdown(context, textToSpeech, toSpeak.toList(), bluetoothSco,
                     new CompletionListener() {
                         @Override
                         public void onSuccess(TextToSpeech textToSpeech) {
