@@ -25,6 +25,8 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.Nullable;
 
+import com.google.common.base.Optional;
+
 import org.jetbrains.annotations.NonNls;
 
 import java.util.ArrayList;
@@ -127,9 +129,33 @@ public class TtsUtil {
 
             @Override
             public void onFailure(String message) {
+                Optional<Locale> lowerPrecisionLocale = getLowerPrecisionLocale(locale);
+                if (lowerPrecisionLocale.isPresent()) {
+                    Timber.i("Speech failed for locale <%s>, trying <%s>: %s",
+                        locale, lowerPrecisionLocale.get(), message);
+                    speak(context, text, lowerPrecisionLocale.get(), bluetoothSco);
+                    return;
+                }
+
                 Timber.e(new Exception(message), "Speech failed: %s", message);
             }
         });
+    }
+
+    static Optional<Locale> getLowerPrecisionLocale(Locale higherPrecision) {
+        String variant = higherPrecision.getVariant();
+        String country = higherPrecision.getCountry();
+        String language = higherPrecision.getLanguage();
+
+        if (variant != null && !variant.isEmpty()) {
+            return Optional.of(new Locale(language, country));
+        }
+
+        if (country != null && !country.isEmpty()) {
+            return Optional.of(new Locale(language));
+        }
+
+        return Optional.absent();
     }
 
     public static void testSpeakLocales(final Context context,
