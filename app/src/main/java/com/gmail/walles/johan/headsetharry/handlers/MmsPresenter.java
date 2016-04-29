@@ -27,6 +27,7 @@ import com.gmail.walles.johan.headsetharry.LookupUtils;
 import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
+import com.gmail.walles.johan.headsetharry.TtsUtil;
 
 import org.jetbrains.annotations.NonNls;
 
@@ -59,13 +60,8 @@ public class MmsPresenter extends Presenter {
     }
 
     @Override
-    public Locale getAnnouncementLocale() {
-        return Locale.getDefault();
-    }
-
-    @Override
-    public String getAnnouncement() {
-        return announcement;
+    public TtsUtil.TextWithLocale getAnnouncement() {
+        return new TtsUtil.TextWithLocale(announcement, Locale.getDefault());
     }
 
     private String createAnnouncement(@Nullable CharSequence sender) {

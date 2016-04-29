@@ -39,6 +39,25 @@ import java.util.Locale;
 import timber.log.Timber;
 
 public class TtsUtil {
+    public interface CompletionListener {
+        void onSuccess(TextToSpeech textToSpeech);
+        void onFailure(@NonNls String message);
+    }
+
+    public interface TestFailureListener {
+        void onTestSpeakLocaleFailed(Locale locale);
+    }
+
+    public static class TextWithLocale {
+        public final String text;
+        public final Locale locale;
+
+        public TextWithLocale(String text, Locale locale) {
+            this.locale = locale;
+            this.text = text;
+        }
+    }
+
     /**
      * Speak the given text using the given TTS, then shut down the TTS.
      */
@@ -118,22 +137,22 @@ public class TtsUtil {
     }
 
     public static void speak(
-        final Context context, final CharSequence text, final Locale locale, final boolean bluetoothSco)
+        final Context context, final TextWithLocale text, final boolean bluetoothSco)
     {
-        Timber.i("Speaking in locale <%s>: <%s>", locale, text);
-        getEngineForLocale(context, locale, new CompletionListener() {
+        Timber.i("Speaking in locale <%s>: <%s>", text.locale, text.text);
+        getEngineForLocale(context, text.locale, new CompletionListener() {
             @Override
             public void onSuccess(TextToSpeech textToSpeech) {
-                speakAndShutdown(context, textToSpeech, text, bluetoothSco);
+                speakAndShutdown(context, textToSpeech, text.text, bluetoothSco);
             }
 
             @Override
             public void onFailure(String message) {
-                Optional<Locale> lowerPrecisionLocale = getLowerPrecisionLocale(locale);
+                Optional<Locale> lowerPrecisionLocale = getLowerPrecisionLocale(text.locale);
                 if (lowerPrecisionLocale.isPresent()) {
                     Timber.i("Speech failed for locale <%s>, trying <%s>: %s",
-                        locale, lowerPrecisionLocale.get(), message);
-                    speak(context, text, lowerPrecisionLocale.get(), bluetoothSco);
+                        text.locale, lowerPrecisionLocale.get(), message);
+                    speak(context, new TextWithLocale(text.text, lowerPrecisionLocale.get()), bluetoothSco);
                     return;
                 }
 
@@ -199,15 +218,6 @@ public class TtsUtil {
                 testFailureListener.onTestSpeakLocaleFailed(locale);
             }
         });
-    }
-
-    public interface CompletionListener {
-        void onSuccess(TextToSpeech textToSpeech);
-        void onFailure(@NonNls String message);
-    }
-
-    public interface TestFailureListener {
-        void onTestSpeakLocaleFailed(Locale locale);
     }
 
     private static class EngineGetter {

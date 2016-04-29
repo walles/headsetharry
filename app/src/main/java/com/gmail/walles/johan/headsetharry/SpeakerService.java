@@ -181,7 +181,6 @@ public class SpeakerService extends Service {
 
         TtsUtil.speak(this,
             presenter.getAnnouncement(),
-            presenter.getAnnouncementLocale(),
             bluetoothSco);
     }
 

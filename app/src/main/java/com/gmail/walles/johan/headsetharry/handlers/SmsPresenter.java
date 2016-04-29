@@ -28,6 +28,7 @@ import com.gmail.walles.johan.headsetharry.LookupUtils;
 import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
+import com.gmail.walles.johan.headsetharry.TtsUtil;
 import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
@@ -57,13 +58,8 @@ public class SmsPresenter extends Presenter {
     }
 
     @Override
-    public Locale getAnnouncementLocale() {
-        return locale.or(Locale.getDefault());
-    }
-
-    @Override
-    public String getAnnouncement() {
-        return announcement;
+    public TtsUtil.TextWithLocale getAnnouncement() {
+        return new TtsUtil.TextWithLocale(announcement, locale.or(Locale.getDefault()));
     }
 
     public SmsPresenter(Context context, Intent intent) {
@@ -83,7 +79,7 @@ public class SmsPresenter extends Presenter {
 
     private String createAnnouncement(CharSequence body, @Nullable CharSequence sender)
     {
-        Map<Integer, String> translations = getStringsForLocale(getAnnouncementLocale(),
+        Map<Integer, String> translations = getStringsForLocale(getAnnouncement().locale,
             R.string.sms,
             R.string.empty_sms,
             R.string.unknown_language_sms,
