@@ -40,12 +40,8 @@ import timber.log.Timber;
 
 public class TtsUtil {
     public interface CompletionListener {
-        void onSuccess(TextToSpeech textToSpeech);
-        void onFailure(@NonNls String message);
-    }
-
-    public interface TestFailureListener {
-        void onTestSpeakLocaleFailed(Locale locale);
+        void onSuccess();
+        void onFailure(TextWithLocale text, @NonNls String errorMessage);
     }
 
     public static class TextWithLocale {
@@ -55,6 +51,14 @@ public class TtsUtil {
         public TextWithLocale(String text, Locale locale) {
             this.locale = locale;
             this.text = text;
+        }
+
+        /**
+         * Set text to the name of the locale in the locale's language.
+         */
+        public TextWithLocale(Locale locale) {
+            this.locale = locale;
+            this.text = locale.getDisplayName(locale);
         }
 
         public List<TextWithLocale> toList() {
@@ -127,14 +131,14 @@ public class TtsUtil {
                 }
 
                 if (completionListener != null) {
-                    completionListener.onSuccess(tts);
+                    completionListener.onSuccess();
                 }
             }
 
             @Override
             public void onError(String utteranceId) {
-                @NonNls String message = "Speech failed: <" + toSpeak + ">";
-                Timber.e(new Exception(message), message);
+                @NonNls String errorMessage = "Speech failed: <" + toSpeak + ">";
+                Timber.e(new Exception(errorMessage), errorMessage);
                 tts.shutdown();
 
                 if (bluetoothSco) {
@@ -142,7 +146,7 @@ public class TtsUtil {
                 }
 
                 if (completionListener != null) {
-                    completionListener.onFailure(message);
+                    completionListener.onFailure(toSpeak, errorMessage);
                 }
             }
         });
@@ -158,7 +162,7 @@ public class TtsUtil {
         }
 
         //noinspection deprecation
-        tts.speak(toSpeak.toString(), TextToSpeech.QUEUE_ADD, params);
+        tts.speak(toSpeak.text, TextToSpeech.QUEUE_ADD, params);
     }
 
     private static void stopBluetoothSco(Context context) {
@@ -184,24 +188,25 @@ public class TtsUtil {
         final TextWithLocale text = texts.get(0);
 
         Timber.i("Speaking in locale <%s>: <%s>", text.locale, text.text);
-        getEngineForLocale(context, text.locale, new CompletionListener() {
+        getEngineForLocale(context, text.locale, new EngineResultListener() {
             @Override
-            public void onSuccess(TextToSpeech textToSpeech) {
+            public void onFound(TextToSpeech textToSpeech) {
                 speakAndShutdown(context, textToSpeech, texts, bluetoothSco);
             }
 
             @Override
-            public void onFailure(String message) {
+            public void onNotFound() {
                 Optional<Locale> lowerPrecisionLocale = getLowerPrecisionLocale(text.locale);
                 if (lowerPrecisionLocale.isPresent()) {
-                    Timber.i("Speech failed for locale <%s>, trying <%s>: %s",
-                        text.locale, lowerPrecisionLocale.get(), message);
+                    Timber.i("No engine found for locale <%s>, trying <%s>",
+                        text.locale, lowerPrecisionLocale.get());
 
                     speak(context, texts, bluetoothSco);
                     return;
                 }
 
-                Timber.e(new Exception(message), "Speech failed: %s", message);
+                @NonNls String message = "No speech engine found for " + text.locale;
+                Timber.e(new Exception(message), "%s", message);
             }
         });
     }
@@ -225,7 +230,7 @@ public class TtsUtil {
     // FIXME: Rewrite this with some call to the public speak() method
     public static void testSpeakLocales(final Context context,
                                         Collection<Locale> locales,
-                                        final TestFailureListener testFailureListener,
+                                        final CompletionListener completionListener,
                                         final boolean bluetoothSco)
     {
         Timber.i("Test speaking locales <%s>", locales);
@@ -236,46 +241,52 @@ public class TtsUtil {
 
         final List<Locale> fewerLocales = new LinkedList<>(locales);
         final Locale locale = fewerLocales.remove(0);
-        getEngineForLocale(context, locale, new CompletionListener() {
+        getEngineForLocale(context, locale, new EngineResultListener() {
             @Override
-            public void onSuccess(TextToSpeech textToSpeech) {
-                TextWithLocale toSpeak = new TextWithLocale(locale.getDisplayName(locale), locale);
+            public void onFound(TextToSpeech textToSpeech) {
+                TextWithLocale toSpeak = new TextWithLocale(locale);
                 speakAndShutdown(context, textToSpeech, toSpeak.toList(), bluetoothSco,
                     new CompletionListener() {
                         @Override
-                        public void onSuccess(TextToSpeech textToSpeech) {
+                        public void onSuccess() {
                             if (fewerLocales.isEmpty()) {
                                 // Done!
                                 return;
                             }
 
-                            testSpeakLocales(context, fewerLocales, testFailureListener, bluetoothSco);
+                            testSpeakLocales(context, fewerLocales, completionListener, bluetoothSco);
                         }
 
                         @Override
-                        public void onFailure(@NonNls String message) {
-                            testFailureListener.onTestSpeakLocaleFailed(locale);
+                        public void onFailure(TextWithLocale text, @NonNls String message) {
+                            completionListener.onFailure(text, message);
                         }
                     });
             }
 
             @Override
-            public void onFailure(String message) {
-                Timber.e(new Exception(message), "Speech failed: %s", message);
-                testFailureListener.onTestSpeakLocaleFailed(locale);
+            public void onNotFound() {
+                @NonNls String message = "No engine found for " + locale;
+                Timber.e(new Exception(message), "%s", message);
+                completionListener.onFailure(new TextWithLocale(locale), message);
             }
         });
+    }
+
+    private interface EngineResultListener {
+        void onFound(TextToSpeech tts);
+        void onNotFound();
     }
 
     private static class EngineGetter {
         private final Context context;
         private final Locale locale;
-        private final CompletionListener callback;
+        private final EngineResultListener callback;
         private TextToSpeech candidate;
         private List<String> remainingEnginePackageNames;
 
         public EngineGetter(
-            Context context, Locale locale, CompletionListener callback)
+            Context context, Locale locale, EngineResultListener callback)
         {
             this.context = context;
             this.locale = locale;
@@ -335,7 +346,7 @@ public class TtsUtil {
 
             if (remainingEnginePackageNames.isEmpty()) {
                 Timber.w("No TTS engine seems to support %s", locale);
-                callback.onFailure("No engine found for " + locale);
+                callback.onNotFound();
                 return;
             }
             final String engine = remainingEnginePackageNames.get(0);
@@ -356,7 +367,7 @@ public class TtsUtil {
                     if (isSetLanguageOk(result)) {
                         Timber.i("TTS engine %s set to %s for locale %s",
                             engine, candidate.getLanguage(), locale);
-                        callback.onSuccess(candidate);
+                        callback.onFound(candidate);
                         return;
                     }
 
@@ -384,7 +395,7 @@ public class TtsUtil {
         throw new UnsupportedOperationException("Utility class, don't instantiate");
     }
 
-    private static void getEngineForLocale(Context context, Locale locale, CompletionListener callback) {
+    private static void getEngineForLocale(Context context, Locale locale, EngineResultListener callback) {
         new EngineGetter(context, locale, callback).getEngine();
     }
 }

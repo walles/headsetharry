@@ -106,17 +106,22 @@ public class LanguagesPreference
         for (String languageName: configuredLanguageNames) {
             locales.add(parseLocale(languageName));
         }
-        TtsUtil.testSpeakLocales(getContext(), locales, new TtsUtil.TestFailureListener() {
+        TtsUtil.testSpeakLocales(getContext(), locales, new TtsUtil.CompletionListener() {
             @Override
-            public void onTestSpeakLocaleFailed(Locale locale) {
+            public void onSuccess() {
+                // This method intentionally left blank
+            }
+
+            @Override
+            public void onFailure(TtsUtil.TextWithLocale text, @NonNls String errorMessage) {
                 new AlertDialog.Builder(getContext()).
-                    setTitle("Can't speak " + locale.getDisplayName()).
+                    setTitle("Can't speak " + text.locale.getDisplayName()).
                     setMessage(String.format(
                         "No Text-to-speech support for %s.%n" +
                         "%n" +
                         "You can either try to get a new TTS engine from Google Play Store " +
                         "or try to configure your existing TTS engines.",
-                        locale.getDisplayName())).
+                        text.locale.getDisplayName())).
                     setPositiveButton("Install TTS", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
