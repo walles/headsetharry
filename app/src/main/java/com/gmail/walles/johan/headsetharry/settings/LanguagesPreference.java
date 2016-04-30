@@ -102,16 +102,11 @@ public class LanguagesPreference
 
     private void testSpeakConfiguredLanguages() {
         Set<String> configuredLanguageNames = getValues(getContext());
-        List<Locale> locales = new ArrayList<>(configuredLanguageNames.size());
+        List<TtsUtil.TextWithLocale> localeNames = new ArrayList<>(configuredLanguageNames.size());
         for (String languageName: configuredLanguageNames) {
-            locales.add(parseLocale(languageName));
+            localeNames.add(new TtsUtil.TextWithLocale(parseLocale(languageName)));
         }
-        TtsUtil.testSpeakLocales(getContext(), locales, new TtsUtil.CompletionListener() {
-            @Override
-            public void onSuccess() {
-                // This method intentionally left blank
-            }
-
+        TtsUtil.speak(getContext(), localeNames, false, new TtsUtil.FailureListener() {
             @Override
             public void onFailure(TtsUtil.TextWithLocale text, @NonNls String errorMessage) {
                 new AlertDialog.Builder(getContext()).
@@ -157,7 +152,7 @@ public class LanguagesPreference
                     setCancelable(true).
                     show();
             }
-        }, false);
+        });
     }
 
     private void updateSummary() {

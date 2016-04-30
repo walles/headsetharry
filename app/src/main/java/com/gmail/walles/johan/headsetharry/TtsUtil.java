@@ -30,7 +30,6 @@ import com.google.common.base.Optional;
 import org.jetbrains.annotations.NonNls;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,8 +38,7 @@ import java.util.Locale;
 import timber.log.Timber;
 
 public class TtsUtil {
-    public interface CompletionListener {
-        void onSuccess();
+    public interface FailureListener {
         void onFailure(TextWithLocale text, @NonNls String errorMessage);
     }
 
@@ -74,30 +72,15 @@ public class TtsUtil {
     }
 
     /**
-     * Speak the given texts.
-     * <p/>
-     * Start by speaking the first one in texts using the provided TTS, then recurse into the other
-     * ones from the done-callback.
-     */
-    private static void speakAndShutdown(
-        final Context context,
-        final TextToSpeech tts,
-        final List<TextWithLocale> texts,
-        final boolean bluetoothSco)
-    {
-        speakAndShutdown(context, tts, texts, bluetoothSco, null);
-    }
-
-    /**
      * Speak the given text using the given TTS, then shut down the TTS.
      *
-     * @param completionListener If non-null, will be called after speaking is done
+     * @param failureListener If non-null, will be called if speech fails
      */
     private static void speakAndShutdown(final Context context,
                                          final TextToSpeech tts,
                                          final List<TextWithLocale> texts,
                                          final boolean bluetoothSco,
-                                         @Nullable final CompletionListener completionListener)
+                                         @Nullable final FailureListener failureListener)
     {
         if (texts.isEmpty()) {
             Timber.w("Got empty speech request");
@@ -115,23 +98,20 @@ public class TtsUtil {
 
             @Override
             public void onDone(String utteranceId) {
-                Timber.v("Speech successfully completed");
+                Timber.v("One phrase done, shutting down TTS");
                 tts.shutdown();
 
                 List<TextWithLocale> remainingTexts = new LinkedList<>(texts);
                 remainingTexts.remove(0);
                 if (!remainingTexts.isEmpty()) {
                     Timber.v("Speaking remaining texts: %s", remainingTexts);
-                    speak(context, remainingTexts, bluetoothSco);
+                    speak(context, remainingTexts, bluetoothSco, failureListener);
                     return;
                 }
 
+                Timber.v("Speech successfully completed");
                 if (bluetoothSco) {
                     stopBluetoothSco(context);
-                }
-
-                if (completionListener != null) {
-                    completionListener.onSuccess();
                 }
             }
 
@@ -145,8 +125,8 @@ public class TtsUtil {
                     stopBluetoothSco(context);
                 }
 
-                if (completionListener != null) {
-                    completionListener.onFailure(toSpeak, errorMessage);
+                if (failureListener != null) {
+                    failureListener.onFailure(toSpeak, errorMessage);
                 }
             }
         });
@@ -175,8 +155,10 @@ public class TtsUtil {
         }
     }
 
-    public static void speak(
-        final Context context, final List<TextWithLocale> texts, final boolean bluetoothSco)
+    public static void speak(final Context context,
+                             final List<TextWithLocale> texts,
+                             final boolean bluetoothSco,
+                             @Nullable final FailureListener failureListener)
     {
         if (texts.isEmpty()) {
             @NonNls String message = "Nothing to say, never mind";
@@ -191,7 +173,7 @@ public class TtsUtil {
         getEngineForLocale(context, text.locale, new EngineResultListener() {
             @Override
             public void onFound(TextToSpeech textToSpeech) {
-                speakAndShutdown(context, textToSpeech, texts, bluetoothSco);
+                speakAndShutdown(context, textToSpeech, texts, bluetoothSco, failureListener);
             }
 
             @Override
@@ -201,12 +183,13 @@ public class TtsUtil {
                     Timber.i("No engine found for locale <%s>, trying <%s>",
                         text.locale, lowerPrecisionLocale.get());
 
-                    speak(context, texts, bluetoothSco);
+                    speak(context, texts, bluetoothSco, failureListener);
                     return;
                 }
 
-                @NonNls String message = "No speech engine found for " + text.locale;
-                Timber.e(new Exception(message), "%s", message);
+                if (failureListener != null) {
+                    failureListener.onFailure(text, "No speech engine found for " + text.locale);
+                }
             }
         });
     }
@@ -225,52 +208,6 @@ public class TtsUtil {
         }
 
         return Optional.absent();
-    }
-
-    // FIXME: Rewrite this with some call to the public speak() method
-    public static void testSpeakLocales(final Context context,
-                                        Collection<Locale> locales,
-                                        final CompletionListener completionListener,
-                                        final boolean bluetoothSco)
-    {
-        Timber.i("Test speaking locales <%s>", locales);
-        if (locales.isEmpty()) {
-            Timber.i("Not speaking, empty locales list");
-            return;
-        }
-
-        final List<Locale> fewerLocales = new LinkedList<>(locales);
-        final Locale locale = fewerLocales.remove(0);
-        getEngineForLocale(context, locale, new EngineResultListener() {
-            @Override
-            public void onFound(TextToSpeech textToSpeech) {
-                TextWithLocale toSpeak = new TextWithLocale(locale);
-                speakAndShutdown(context, textToSpeech, toSpeak.toList(), bluetoothSco,
-                    new CompletionListener() {
-                        @Override
-                        public void onSuccess() {
-                            if (fewerLocales.isEmpty()) {
-                                // Done!
-                                return;
-                            }
-
-                            testSpeakLocales(context, fewerLocales, completionListener, bluetoothSco);
-                        }
-
-                        @Override
-                        public void onFailure(TextWithLocale text, @NonNls String message) {
-                            completionListener.onFailure(text, message);
-                        }
-                    });
-            }
-
-            @Override
-            public void onNotFound() {
-                @NonNls String message = "No engine found for " + locale;
-                Timber.e(new Exception(message), "%s", message);
-                completionListener.onFailure(new TextWithLocale(locale), message);
-            }
-        });
     }
 
     private interface EngineResultListener {

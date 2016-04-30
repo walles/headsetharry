@@ -181,9 +181,13 @@ public class SpeakerService extends Service {
             return;
         }
 
-        TtsUtil.speak(this,
-            presenter.getAnnouncement().toList(),
-            bluetoothSco);
+        TtsUtil.speak(this, presenter.getAnnouncement().toList(), bluetoothSco,
+            new TtsUtil.FailureListener() {
+                @Override
+                public void onFailure(TtsUtil.TextWithLocale text, @NonNls String errorMessage) {
+                    Timber.e(new Exception(errorMessage), "%s", errorMessage);
+                }
+            });
     }
 
     @Nullable
