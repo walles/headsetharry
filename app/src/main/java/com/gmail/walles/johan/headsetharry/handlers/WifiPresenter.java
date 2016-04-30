@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
+import com.gmail.walles.johan.headsetharry.TtsUtil;
 import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
@@ -42,7 +43,7 @@ public class WifiPresenter extends Presenter {
     public final static String TYPE = "WiFi";
 
     @NonNls
-    public final static String EXTRA_CONNECTED = "com.gmail.walles.johan.headsetharry.connected";
+    private final static String EXTRA_CONNECTED = "com.gmail.walles.johan.headsetharry.connected";
 
     private final Optional<Locale> locale;
     private final String announcement;
@@ -59,13 +60,8 @@ public class WifiPresenter extends Presenter {
     }
 
     @Override
-    public Locale getAnnouncementLocale() {
-        return locale.or(Locale.getDefault());
-    }
-
-    @Override
-    public String getAnnouncement() {
-        return announcement;
+    public TtsUtil.TextWithLocale getAnnouncement() {
+        return new TtsUtil.TextWithLocale(announcement, locale.or(Locale.getDefault()));
     }
 
     public WifiPresenter(Context context, Intent intent) {
@@ -149,7 +145,7 @@ public class WifiPresenter extends Presenter {
     }
 
     private String createWifiAnnouncement(String ssid) {
-        Map<Integer, String> translations = getStringsForLocale(getAnnouncementLocale(),
+        Map<Integer, String> translations = getStringsForLocale(getAnnouncement().locale,
             R.string.connected_to_networkname);
         return String.format(translations.get(R.string.connected_to_networkname), ssid);
     }

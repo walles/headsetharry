@@ -46,9 +46,7 @@ import java.util.Map;
 import timber.log.Timber;
 
 public abstract class Presenter {
-    public abstract Locale getAnnouncementLocale();
-
-    public abstract String getAnnouncement();
+    public abstract TtsUtil.TextWithLocale getAnnouncement();
 
     protected final Context context;
 

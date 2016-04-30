@@ -133,11 +133,13 @@ public class SpeakerService extends Service {
             Timber.d("Speaking, A2DP enabled");
             handleIntent(intent, false);
             return Service.START_NOT_STICKY;
-        } else if (audioManager.isWiredHeadsetOn()) {
+        } else //noinspection deprecation
+            if (audioManager.isWiredHeadsetOn())
+        {
             // isWiredHeadsetOn() is deprecated because "This is not a valid indication that audio
             // playback is actually over the wired headset", but I've decided to keep using it until
             // somebody can demonstrate to me what concrete problems can arise from using it for
-            // detecting where our speech will actually end up.
+            // detecting where our speech will end up.
             Timber.d("Speaking, wired headphones connected");
             handleIntent(intent, false);
             return Service.START_NOT_STICKY;
@@ -179,10 +181,13 @@ public class SpeakerService extends Service {
             return;
         }
 
-        TtsUtil.speak(this,
-            presenter.getAnnouncement(),
-            presenter.getAnnouncementLocale(),
-            bluetoothSco);
+        TtsUtil.speak(this, presenter.getAnnouncement().toList(), bluetoothSco,
+            new TtsUtil.FailureListener() {
+                @Override
+                public void onFailure(TtsUtil.TextWithLocale text, @NonNls String errorMessage) {
+                    Timber.e(new Exception(errorMessage), "%s", errorMessage);
+                }
+            });
     }
 
     @Nullable
