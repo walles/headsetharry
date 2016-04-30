@@ -23,7 +23,6 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
-import android.support.annotation.Nullable;
 
 import com.google.common.base.Optional;
 
@@ -80,10 +79,11 @@ public class TtsUtil {
                                          final TextToSpeech tts,
                                          final List<TextWithLocale> texts,
                                          final boolean bluetoothSco,
-                                         @Nullable final FailureListener failureListener)
+                                         final FailureListener failureListener)
     {
         if (texts.isEmpty()) {
-            Timber.w("Got empty speech request");
+            @NonNls String message = "Got empty speech request internally";
+            Timber.e(new Exception(message), message);
             tts.shutdown();
             return;
         }
@@ -125,9 +125,7 @@ public class TtsUtil {
                     stopBluetoothSco(context);
                 }
 
-                if (failureListener != null) {
-                    failureListener.onFailure(toSpeak, errorMessage);
-                }
+                failureListener.onFailure(toSpeak, errorMessage);
             }
         });
 
@@ -158,7 +156,7 @@ public class TtsUtil {
     public static void speak(final Context context,
                              final List<TextWithLocale> texts,
                              final boolean bluetoothSco,
-                             @Nullable final FailureListener failureListener)
+                             final FailureListener failureListener)
     {
         if (texts.isEmpty()) {
             @NonNls String message = "Nothing to say, never mind";
@@ -187,9 +185,7 @@ public class TtsUtil {
                     return;
                 }
 
-                if (failureListener != null) {
-                    failureListener.onFailure(text, "No speech engine found for " + text.locale);
-                }
+                failureListener.onFailure(text, "No speech engine found for " + text.locale);
             }
         });
     }
