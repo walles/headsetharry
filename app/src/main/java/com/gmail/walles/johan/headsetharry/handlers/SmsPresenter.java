@@ -33,6 +33,7 @@ import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.util.List;
 import java.util.Locale;
 
 public class SmsPresenter extends Presenter {
@@ -44,8 +45,7 @@ public class SmsPresenter extends Presenter {
     @NonNls
     public static final String TYPE = "SMS";
 
-    private final Optional<Locale> locale;
-    private final String announcement;
+    private final TextWithLocale announcement;
 
     public static void speak(Context context, CharSequence body, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -57,8 +57,8 @@ public class SmsPresenter extends Presenter {
     }
 
     @Override
-    public TextWithLocale getAnnouncement() {
-        return new TextWithLocale(locale.or(Locale.getDefault()), announcement);
+    public List<TextWithLocale> getAnnouncement() {
+        return announcement.toList();
     }
 
     public SmsPresenter(Context context, Intent intent) {
@@ -71,14 +71,14 @@ public class SmsPresenter extends Presenter {
 
         // It's OK for the sender to be null, we'll just say it's unknown
         CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
-        locale = identifyLanguage(body);
 
         announcement = createAnnouncement(body, sender);
     }
 
-    private String createAnnouncement(CharSequence body, @Nullable CharSequence sender)
+    private TextWithLocale createAnnouncement(CharSequence body, @Nullable CharSequence sender)
     {
-        Translations translations = new Translations(context, getAnnouncement().locale,
+        Optional<Locale> locale = identifyLanguage(body);
+        Translations translations = new Translations(context, locale.or(Locale.getDefault()),
             R.string.sms,
             R.string.empty_sms,
             R.string.unknown_language_sms,
@@ -94,7 +94,7 @@ public class SmsPresenter extends Presenter {
         }
 
         if (TextUtils.isEmpty(body)) {
-            return String.format(translations.getString(R.string.what_from_where_colon_body),
+            return TextWithLocale.format(Locale.getDefault(), translations.getString(R.string.what_from_where_colon_body),
                 translations.getString(R.string.empty_sms), sender, body);
         }
 
@@ -104,6 +104,7 @@ public class SmsPresenter extends Presenter {
         } else {
             sms = translations.getString(R.string.unknown_language_sms);
         }
-        return String.format(translations.getString(R.string.what_from_where_colon_body), sms, sender, body);
+        return TextWithLocale.format(locale.or(Locale.getDefault()),
+            translations.getString(R.string.what_from_where_colon_body), sms, sender, body);
     }
 }

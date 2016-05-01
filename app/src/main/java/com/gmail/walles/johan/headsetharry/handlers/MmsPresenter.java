@@ -30,6 +30,7 @@ import com.gmail.walles.johan.headsetharry.TextWithLocale;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.util.List;
 import java.util.Locale;
 
 public class MmsPresenter extends Presenter {
@@ -39,7 +40,7 @@ public class MmsPresenter extends Presenter {
     @NonNls
     public static final String TYPE = "MMS";
 
-    private final String announcement;
+    private final TextWithLocale announcement;
 
     public static void speak(Context context, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -59,15 +60,15 @@ public class MmsPresenter extends Presenter {
     }
 
     @Override
-    public TextWithLocale getAnnouncement() {
-        return new TextWithLocale(Locale.getDefault(), announcement);
+    public List<TextWithLocale> getAnnouncement() {
+        return announcement.toList();
     }
 
-    private String createAnnouncement(@Nullable CharSequence sender) {
+    private TextWithLocale createAnnouncement(@Nullable CharSequence sender) {
         sender =
             LookupUtils.getNameForNumber(context, sender)
                 .or(context.getString(R.string.unknown_sender));
 
-        return String.format(context.getString(R.string.mms_from_x), sender);
+        return TextWithLocale.format(Locale.getDefault(), context.getString(R.string.mms_from_x), sender);
     }
 }
