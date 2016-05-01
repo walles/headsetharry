@@ -19,6 +19,7 @@
   -->
 
 <resources>
+    <string name="locale">sv</string>
     <string name="empty_sms">Tomt SMS</string>
     <string name="unknown_language_sms">SMS på okänt språk</string>
     <string name="unknown_sender">okänd avsändare</string>

@@ -20,8 +20,6 @@
 package com.gmail.walles.johan.headsetharry;
 
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
@@ -37,11 +35,9 @@ import com.optimaize.langdetect.profiles.LanguageProfileReader;
 import org.jetbrains.annotations.NonNls;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -95,27 +91,5 @@ public abstract class Presenter {
         }
 
         return Optional.of(new Locale(ldLocale.get().toString()));
-    }
-
-    // From: http://stackoverflow.com/a/9475663/473672
-    protected Map<Integer, String> getStringsForLocale(Locale locale, int ... resourceIds) {
-        Map<Integer, String> returnMe = new HashMap<>();
-
-        Resources res = context.getResources();
-        Configuration conf = res.getConfiguration();
-        Locale savedLocale = conf.locale;
-        conf.locale = locale;
-        res.updateConfiguration(conf, null); // second arg null means don't change
-
-        // retrieve resources from desired locale
-        for (int resourceId: resourceIds) {
-            returnMe.put(resourceId, res.getString(resourceId));
-        }
-
-        // restore original locale
-        conf.locale = savedLocale;
-        res.updateConfiguration(conf, null);
-
-        return returnMe;
     }
 }

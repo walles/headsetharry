@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.gmail.walles.johan.headsetharry.Translations;
 import com.gmail.walles.johan.headsetharry.LookupUtils;
 import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
@@ -34,7 +35,6 @@ import com.google.common.base.Optional;
 import org.jetbrains.annotations.NonNls;
 
 import java.util.Locale;
-import java.util.Map;
 
 public class SmsPresenter extends Presenter {
     @NonNls
@@ -79,7 +79,7 @@ public class SmsPresenter extends Presenter {
 
     private String createAnnouncement(CharSequence body, @Nullable CharSequence sender)
     {
-        Map<Integer, String> translations = getStringsForLocale(getAnnouncement().locale,
+        Translations translations = new Translations(context, getAnnouncement().locale,
             R.string.sms,
             R.string.empty_sms,
             R.string.unknown_language_sms,
@@ -87,24 +87,24 @@ public class SmsPresenter extends Presenter {
             R.string.what_from_where_colon_body);
 
         if (TextUtils.isEmpty(sender)) {
-            sender = translations.get(R.string.unknown_sender);
+            sender = translations.getString(R.string.unknown_sender);
         } else {
             sender =
                 LookupUtils.getNameForNumber(context, sender.toString())
-                    .or(translations.get(R.string.unknown_sender));
+                    .or(translations.getString(R.string.unknown_sender));
         }
 
         if (TextUtils.isEmpty(body)) {
-            return String.format(translations.get(R.string.what_from_where_colon_body),
-                translations.get(R.string.empty_sms), sender, body);
+            return String.format(translations.getString(R.string.what_from_where_colon_body),
+                translations.getString(R.string.empty_sms), sender, body);
         }
 
         String sms;
         if (locale.isPresent()) {
-            sms = translations.get(R.string.sms);
+            sms = translations.getString(R.string.sms);
         } else {
-            sms = translations.get(R.string.unknown_language_sms);
+            sms = translations.getString(R.string.unknown_language_sms);
         }
-        return String.format(translations.get(R.string.what_from_where_colon_body), sms, sender, body);
+        return String.format(translations.getString(R.string.what_from_where_colon_body), sms, sender, body);
     }
 }

@@ -28,13 +28,13 @@ import android.text.TextUtils;
 import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
+import com.gmail.walles.johan.headsetharry.Translations;
 import com.gmail.walles.johan.headsetharry.TtsUtil;
 import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 
 import java.util.Locale;
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -145,8 +145,8 @@ public class WifiPresenter extends Presenter {
     }
 
     private String createWifiAnnouncement(String ssid) {
-        Map<Integer, String> translations = getStringsForLocale(getAnnouncement().locale,
+        Translations translations = new Translations(context, getAnnouncement().locale,
             R.string.connected_to_networkname);
-        return String.format(translations.get(R.string.connected_to_networkname), ssid);
+        return String.format(translations.getString(R.string.connected_to_networkname), ssid);
     }
 }
