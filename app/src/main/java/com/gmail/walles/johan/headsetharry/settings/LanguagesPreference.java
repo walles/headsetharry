@@ -34,6 +34,7 @@ import android.util.AttributeSet;
 import android.widget.Toast;
 
 import com.gmail.walles.johan.headsetharry.LocaleUtils;
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
 import com.gmail.walles.johan.headsetharry.TtsUtil;
 import com.google.common.base.Optional;
 import com.optimaize.langdetect.i18n.LdLocale;
@@ -103,13 +104,13 @@ public class LanguagesPreference
 
     private void testSpeakConfiguredLanguages() {
         Set<String> configuredLanguageNames = getValues(getContext());
-        List<TtsUtil.TextWithLocale> localeNames = new ArrayList<>(configuredLanguageNames.size());
+        List<TextWithLocale> localeNames = new ArrayList<>(configuredLanguageNames.size());
         for (String languageName: configuredLanguageNames) {
-            localeNames.add(new TtsUtil.TextWithLocale(LocaleUtils.parseLocaleString(languageName)));
+            localeNames.add(new TextWithLocale(LocaleUtils.parseLocaleString(languageName)));
         }
         TtsUtil.speak(getContext(), localeNames, false, new TtsUtil.FailureListener() {
             @Override
-            public void onFailure(TtsUtil.TextWithLocale text, @NonNls String errorMessage) {
+            public void onFailure(TextWithLocale text, @NonNls String errorMessage) {
                 new AlertDialog.Builder(getContext()).
                     setTitle("Can't speak " + text.locale.getDisplayName()).
                     setMessage(String.format(

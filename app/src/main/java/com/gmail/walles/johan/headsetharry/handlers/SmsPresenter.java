@@ -24,12 +24,11 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
 import com.gmail.walles.johan.headsetharry.Translations;
 import com.gmail.walles.johan.headsetharry.LookupUtils;
-import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
-import com.gmail.walles.johan.headsetharry.TtsUtil;
 import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
@@ -58,8 +57,8 @@ public class SmsPresenter extends Presenter {
     }
 
     @Override
-    public TtsUtil.TextWithLocale getAnnouncement() {
-        return new TtsUtil.TextWithLocale(announcement, locale.or(Locale.getDefault()));
+    public TextWithLocale getAnnouncement() {
+        return new TextWithLocale(locale.or(Locale.getDefault()), announcement);
     }
 
     public SmsPresenter(Context context, Intent intent) {

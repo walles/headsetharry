@@ -17,12 +17,13 @@
  * along with Headset Harry.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.gmail.walles.johan.headsetharry;
+package com.gmail.walles.johan.headsetharry.handlers;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
 import com.gmail.walles.johan.headsetharry.settings.LanguagesPreference;
 import com.google.common.base.Optional;
 import com.optimaize.langdetect.LanguageDetector;
@@ -42,7 +43,7 @@ import java.util.Locale;
 import timber.log.Timber;
 
 public abstract class Presenter {
-    public abstract TtsUtil.TextWithLocale getAnnouncement();
+    public abstract TextWithLocale getAnnouncement();
 
     protected final Context context;
 

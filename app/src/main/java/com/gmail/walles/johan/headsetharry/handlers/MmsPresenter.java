@@ -24,10 +24,9 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import com.gmail.walles.johan.headsetharry.LookupUtils;
-import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
-import com.gmail.walles.johan.headsetharry.TtsUtil;
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
 
 import org.jetbrains.annotations.NonNls;
 
@@ -60,8 +59,8 @@ public class MmsPresenter extends Presenter {
     }
 
     @Override
-    public TtsUtil.TextWithLocale getAnnouncement() {
-        return new TtsUtil.TextWithLocale(announcement, Locale.getDefault());
+    public TextWithLocale getAnnouncement() {
+        return new TextWithLocale(Locale.getDefault(), announcement);
     }
 
     private String createAnnouncement(@Nullable CharSequence sender) {

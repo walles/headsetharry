@@ -41,35 +41,6 @@ public class TtsUtil {
         void onFailure(TextWithLocale text, @NonNls String errorMessage);
     }
 
-    public static class TextWithLocale {
-        public final String text;
-        public final Locale locale;
-
-        public TextWithLocale(String text, Locale locale) {
-            this.locale = locale;
-            this.text = text;
-        }
-
-        /**
-         * Set text to the name of the locale in the locale's language.
-         */
-        public TextWithLocale(Locale locale) {
-            this.locale = locale;
-            this.text = locale.getDisplayName(locale);
-        }
-
-        public List<TextWithLocale> toList() {
-            List<TextWithLocale> list = new LinkedList<>();
-            list.add(this);
-            return list;
-        }
-
-        @Override
-        public String toString() {
-            return locale.toString() + ": " + text;
-        }
-    }
-
     /**
      * Speak the given text using the given TTS, then shut down the TTS.
      *

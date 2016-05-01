@@ -25,11 +25,10 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 
-import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
 import com.gmail.walles.johan.headsetharry.Translations;
-import com.gmail.walles.johan.headsetharry.TtsUtil;
 import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
@@ -60,8 +59,8 @@ public class WifiPresenter extends Presenter {
     }
 
     @Override
-    public TtsUtil.TextWithLocale getAnnouncement() {
-        return new TtsUtil.TextWithLocale(announcement, locale.or(Locale.getDefault()));
+    public TextWithLocale getAnnouncement() {
+        return new TextWithLocale(locale.or(Locale.getDefault()), announcement);
     }
 
     public WifiPresenter(Context context, Intent intent) {

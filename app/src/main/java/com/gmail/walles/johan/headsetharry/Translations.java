@@ -41,6 +41,8 @@ public class Translations {
      * is done by calling {@link #getLocale()}.
      */
     // From: http://stackoverflow.com/a/9475663/473672
+    // FIXME: If requested language was unavailable try the system default language. If that as well
+    // is unavailable, go for the fallback locale.
     public Translations(Context context, Locale locale, int ... resourceIds) {
         idToStrings = new HashMap<>();
 
