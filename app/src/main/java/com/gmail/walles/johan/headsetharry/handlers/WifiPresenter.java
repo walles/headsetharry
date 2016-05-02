@@ -142,10 +142,10 @@ public class WifiPresenter extends Presenter {
     }
 
     private List<TextWithLocale> createWifiAnnouncement(String ssid) {
-        Locale locale = identifyLanguage(ssid).or(Locale.getDefault());
-        Translations translations = new Translations(context, locale,
+        Locale ssidLocale = identifyLanguage(ssid).or(Locale.getDefault());
+        Translations translations = new Translations(context, ssidLocale,
             R.string.connected_to_networkname);
-        return TextWithLocale.format(locale,
-            translations.getString(R.string.connected_to_networkname), ssid);
+        return TextWithLocale.format(translations.getLocale(),
+            translations.getString(R.string.connected_to_networkname), ssidLocale, ssid);
     }
 }

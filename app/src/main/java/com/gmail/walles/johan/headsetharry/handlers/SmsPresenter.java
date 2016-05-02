@@ -77,8 +77,8 @@ public class SmsPresenter extends Presenter {
 
     private List<TextWithLocale> createAnnouncement(CharSequence body, @Nullable CharSequence sender)
     {
-        Optional<Locale> locale = identifyLanguage(body);
-        Translations translations = new Translations(context, locale.or(Locale.getDefault()),
+        Optional<Locale> smsBodyLocale = identifyLanguage(body);
+        Translations translations = new Translations(context, smsBodyLocale.or(Locale.getDefault()),
             R.string.sms,
             R.string.empty_sms,
             R.string.unknown_language_sms,
@@ -99,12 +99,12 @@ public class SmsPresenter extends Presenter {
         }
 
         String sms;
-        if (locale.isPresent()) {
+        if (smsBodyLocale.isPresent()) {
             sms = translations.getString(R.string.sms);
         } else {
             sms = translations.getString(R.string.unknown_language_sms);
         }
-        return TextWithLocale.format(locale.or(Locale.getDefault()),
-            translations.getString(R.string.what_from_where_colon_body), sms, sender, body);
+        return TextWithLocale.format(translations.getLocale(),
+            translations.getString(R.string.what_from_where_colon_body), sms, sender, smsBodyLocale.or(Locale.getDefault()), body);
     }
 }
