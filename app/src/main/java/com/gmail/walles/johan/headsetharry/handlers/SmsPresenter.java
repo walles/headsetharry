@@ -24,17 +24,17 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
+import com.gmail.walles.johan.headsetharry.Translations;
 import com.gmail.walles.johan.headsetharry.LookupUtils;
-import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
-import com.gmail.walles.johan.headsetharry.TtsUtil;
 import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class SmsPresenter extends Presenter {
     @NonNls
@@ -45,8 +45,7 @@ public class SmsPresenter extends Presenter {
     @NonNls
     public static final String TYPE = "SMS";
 
-    private final Optional<Locale> locale;
-    private final String announcement;
+    private final List<TextWithLocale> announcement;
 
     public static void speak(Context context, CharSequence body, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -58,8 +57,8 @@ public class SmsPresenter extends Presenter {
     }
 
     @Override
-    public TtsUtil.TextWithLocale getAnnouncement() {
-        return new TtsUtil.TextWithLocale(announcement, locale.or(Locale.getDefault()));
+    public List<TextWithLocale> getAnnouncement() {
+        return announcement;
     }
 
     public SmsPresenter(Context context, Intent intent) {
@@ -72,14 +71,14 @@ public class SmsPresenter extends Presenter {
 
         // It's OK for the sender to be null, we'll just say it's unknown
         CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
-        locale = identifyLanguage(body);
 
         announcement = createAnnouncement(body, sender);
     }
 
-    private String createAnnouncement(CharSequence body, @Nullable CharSequence sender)
+    private List<TextWithLocale> createAnnouncement(CharSequence body, @Nullable CharSequence sender)
     {
-        Map<Integer, String> translations = getStringsForLocale(getAnnouncement().locale,
+        Optional<Locale> smsBodyLocale = identifyLanguage(body);
+        Translations translations = new Translations(context, smsBodyLocale.or(Locale.getDefault()),
             R.string.sms,
             R.string.empty_sms,
             R.string.unknown_language_sms,
@@ -87,24 +86,25 @@ public class SmsPresenter extends Presenter {
             R.string.what_from_where_colon_body);
 
         if (TextUtils.isEmpty(sender)) {
-            sender = translations.get(R.string.unknown_sender);
+            sender = translations.getString(R.string.unknown_sender);
         } else {
             sender =
                 LookupUtils.getNameForNumber(context, sender.toString())
-                    .or(translations.get(R.string.unknown_sender));
+                    .or(translations.getString(R.string.unknown_sender));
         }
 
         if (TextUtils.isEmpty(body)) {
-            return String.format(translations.get(R.string.what_from_where_colon_body),
-                translations.get(R.string.empty_sms), sender, body);
+            return TextWithLocale.format(Locale.getDefault(), translations.getString(R.string.what_from_where_colon_body),
+                translations.getString(R.string.empty_sms), sender, body);
         }
 
         String sms;
-        if (locale.isPresent()) {
-            sms = translations.get(R.string.sms);
+        if (smsBodyLocale.isPresent()) {
+            sms = translations.getString(R.string.sms);
         } else {
-            sms = translations.get(R.string.unknown_language_sms);
+            sms = translations.getString(R.string.unknown_language_sms);
         }
-        return String.format(translations.get(R.string.what_from_where_colon_body), sms, sender, body);
+        return TextWithLocale.format(translations.getLocale(),
+            translations.getString(R.string.what_from_where_colon_body), sms, sender, smsBodyLocale.or(Locale.getDefault()), body);
     }
 }

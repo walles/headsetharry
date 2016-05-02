@@ -19,6 +19,7 @@
 
 <resources>
     <string name="app_name" translatable="false">Headset Harry</string>
+    <string name="locale">en</string>
 
     <string name="mms_from_x">MMS from %s</string>
 

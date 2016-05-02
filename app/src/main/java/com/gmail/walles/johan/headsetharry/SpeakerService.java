@@ -29,6 +29,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.gmail.walles.johan.headsetharry.handlers.MmsPresenter;
+import com.gmail.walles.johan.headsetharry.handlers.Presenter;
 import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.WifiPresenter;
 
@@ -181,10 +182,10 @@ public class SpeakerService extends Service {
             return;
         }
 
-        TtsUtil.speak(this, presenter.getAnnouncement().toList(), bluetoothSco,
+        TtsUtil.speak(this, presenter.getAnnouncement(), bluetoothSco,
             new TtsUtil.FailureListener() {
                 @Override
-                public void onFailure(TtsUtil.TextWithLocale text, @NonNls String errorMessage) {
+                public void onFailure(TextWithLocale text, @NonNls String errorMessage) {
                     Timber.e(new Exception(errorMessage), "%s", errorMessage);
                 }
             });

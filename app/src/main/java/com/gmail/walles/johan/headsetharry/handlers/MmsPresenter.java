@@ -24,13 +24,13 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import com.gmail.walles.johan.headsetharry.LookupUtils;
-import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
-import com.gmail.walles.johan.headsetharry.TtsUtil;
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.util.List;
 import java.util.Locale;
 
 public class MmsPresenter extends Presenter {
@@ -40,7 +40,7 @@ public class MmsPresenter extends Presenter {
     @NonNls
     public static final String TYPE = "MMS";
 
-    private final String announcement;
+    private final List<TextWithLocale> announcement;
 
     public static void speak(Context context, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -60,15 +60,15 @@ public class MmsPresenter extends Presenter {
     }
 
     @Override
-    public TtsUtil.TextWithLocale getAnnouncement() {
-        return new TtsUtil.TextWithLocale(announcement, Locale.getDefault());
+    public List<TextWithLocale> getAnnouncement() {
+        return announcement;
     }
 
-    private String createAnnouncement(@Nullable CharSequence sender) {
+    private List<TextWithLocale> createAnnouncement(@Nullable CharSequence sender) {
         sender =
             LookupUtils.getNameForNumber(context, sender)
                 .or(context.getString(R.string.unknown_sender));
 
-        return String.format(context.getString(R.string.mms_from_x), sender);
+        return TextWithLocale.format(Locale.getDefault(), context.getString(R.string.mms_from_x), sender);
     }
 }

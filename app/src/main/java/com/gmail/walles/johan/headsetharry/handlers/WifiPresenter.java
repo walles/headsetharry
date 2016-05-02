@@ -25,16 +25,15 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 
-import com.gmail.walles.johan.headsetharry.Presenter;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
-import com.gmail.walles.johan.headsetharry.TtsUtil;
-import com.google.common.base.Optional;
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
+import com.gmail.walles.johan.headsetharry.Translations;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -45,8 +44,7 @@ public class WifiPresenter extends Presenter {
     @NonNls
     private final static String EXTRA_CONNECTED = "com.gmail.walles.johan.headsetharry.connected";
 
-    private final Optional<Locale> locale;
-    private final String announcement;
+    private final List<TextWithLocale> announcement;
 
     /**
      * Speak current WiFi connectivity status.
@@ -60,8 +58,8 @@ public class WifiPresenter extends Presenter {
     }
 
     @Override
-    public TtsUtil.TextWithLocale getAnnouncement() {
-        return new TtsUtil.TextWithLocale(announcement, locale.or(Locale.getDefault()));
+    public List<TextWithLocale> getAnnouncement() {
+        return announcement;
     }
 
     public WifiPresenter(Context context, Intent intent) {
@@ -73,8 +71,8 @@ public class WifiPresenter extends Presenter {
         boolean connected = intent.getBooleanExtra(EXTRA_CONNECTED, false);
 
         if (!connected) {
-            locale = Optional.absent();
-            announcement = context.getString(R.string.wifi_disconnected);
+            announcement = new TextWithLocale(
+                Locale.getDefault(), context.getString(R.string.wifi_disconnected)).toList();
             return;
         }
 
@@ -87,8 +85,8 @@ public class WifiPresenter extends Presenter {
         if ("<unknown ssid>".equals(ssid)) {
             @NonNls String problem = "Got Wifi-connected event but wifi seems disconnected";
             Timber.w(new Exception(problem), problem);
-            locale = Optional.absent();
-            announcement = context.getString(R.string.wifi_disconnected);
+            announcement = new TextWithLocale(
+                Locale.getDefault(), context.getString(R.string.wifi_disconnected)).toList();
             return;
         }
 
@@ -97,12 +95,11 @@ public class WifiPresenter extends Presenter {
         if (TextUtils.isEmpty(ssid)) {
             @NonNls String problem = "Got empty SSID when supposedly connected";
             Timber.w(new Exception(problem), problem);
-            locale = Optional.absent();
-            announcement = context.getString(R.string.connected_to_unnamed_network);
+            announcement = new TextWithLocale(
+                Locale.getDefault(), context.getString(R.string.connected_to_unnamed_network)).toList();
             return;
         }
 
-        locale = identifyLanguage(ssid);
         announcement = createWifiAnnouncement(ssid);
     }
 
@@ -144,9 +141,11 @@ public class WifiPresenter extends Presenter {
         return returnMe;
     }
 
-    private String createWifiAnnouncement(String ssid) {
-        Map<Integer, String> translations = getStringsForLocale(getAnnouncement().locale,
+    private List<TextWithLocale> createWifiAnnouncement(String ssid) {
+        Locale ssidLocale = identifyLanguage(ssid).or(Locale.getDefault());
+        Translations translations = new Translations(context, ssidLocale,
             R.string.connected_to_networkname);
-        return String.format(translations.get(R.string.connected_to_networkname), ssid);
+        return TextWithLocale.format(translations.getLocale(),
+            translations.getString(R.string.connected_to_networkname), ssidLocale, ssid);
     }
 }

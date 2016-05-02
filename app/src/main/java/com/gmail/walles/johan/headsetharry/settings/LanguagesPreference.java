@@ -33,6 +33,8 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.Toast;
 
+import com.gmail.walles.johan.headsetharry.LocaleUtils;
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
 import com.gmail.walles.johan.headsetharry.TtsUtil;
 import com.google.common.base.Optional;
 import com.optimaize.langdetect.i18n.LdLocale;
@@ -102,13 +104,13 @@ public class LanguagesPreference
 
     private void testSpeakConfiguredLanguages() {
         Set<String> configuredLanguageNames = getValues(getContext());
-        List<TtsUtil.TextWithLocale> localeNames = new ArrayList<>(configuredLanguageNames.size());
+        List<TextWithLocale> localeNames = new ArrayList<>(configuredLanguageNames.size());
         for (String languageName: configuredLanguageNames) {
-            localeNames.add(new TtsUtil.TextWithLocale(parseLocale(languageName)));
+            localeNames.add(new TextWithLocale(LocaleUtils.parseLocaleString(languageName)));
         }
         TtsUtil.speak(getContext(), localeNames, false, new TtsUtil.FailureListener() {
             @Override
-            public void onFailure(TtsUtil.TextWithLocale text, @NonNls String errorMessage) {
+            public void onFailure(TextWithLocale text, @NonNls String errorMessage) {
                 new AlertDialog.Builder(getContext()).
                     setTitle("Can't speak " + text.locale.getDisplayName()).
                     setMessage(String.format(
@@ -166,7 +168,7 @@ public class LanguagesPreference
 
         List<String> names = new ArrayList<>(values.size());
         for (String value: values) {
-            names.add(parseLocale(value).getDisplayName());
+            names.add(LocaleUtils.parseLocaleString(value).getDisplayName());
         }
         Collections.sort(names);
 
@@ -200,34 +202,12 @@ public class LanguagesPreference
         CharSequence values[] = new CharSequence[available.length];
         for (int i = 0; i < available.length; i++) {
             LdLocale current = available[i];
-            entries[i] = parseLocale(current.toString()).getDisplayName();
+            entries[i] = LocaleUtils.parseLocaleString(current.toString()).getDisplayName();
             values[i] = current.toString();
         }
 
         setEntries(entries);
         setEntryValues(values);
-    }
-
-    private static Locale parseLocale(String string) {
-        String parts[] = string.split("_", -1);
-        if (parts.length == 1) {
-            parts = string.split("-", -1);
-        }
-
-        if (parts.length == 1) {
-            return new Locale(parts[0]);
-        }
-
-        if (parts.length == 2
-            || (parts.length == 3 && parts[2].startsWith("#"))) {
-            return new Locale(parts[0], parts[1]);
-        }
-
-        if (parts.length == 3) {
-            return new Locale(parts[0], parts[1], parts[2]);
-        }
-
-        throw new IllegalArgumentException("Failed to parse locale string: <" + string + ">");
     }
 
     /**
