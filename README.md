@@ -36,8 +36,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
-* Verify that we work OK even for locales that we don't have any
-translations for (whatever "OK" means in this case).
 * Make an icon / all the other graphics needed by Market
 
 # TODO Misc
@@ -119,3 +117,4 @@ just receiving broadcasts, nothing that needs to be restarted for that.
 * Protect the master branch on GitHub
 * Add pre-commit and pre-push hooks that verifies stuff
 * Add a license and put copyright headers in all files
+* Handle announcing in locales we don't have translations for.

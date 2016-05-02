@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import timber.log.Timber;
+
 /**
  * Fetch strings for a given locale.
  */
@@ -39,29 +41,48 @@ public class Translations {
      * <p/>
      * Note that before using these strings you may want to check what locale you actually got. That
      * is done by calling {@link #getLocale()}.
+     * <p/>
+     * Locales are tried in the following order:<ol>
+     * <li>First we try to find strings for the requested locale
+     * <li>If that fails, we try to find strings for the system locale
+     * <li>If that fails, we use strings from the fallback locale ("en")
+     * </ol>
      */
     // From: http://stackoverflow.com/a/9475663/473672
-    // FIXME: If requested language was unavailable try the system default language. If that as well
-    // is unavailable, go for the fallback locale.
     public Translations(Context context, Locale locale, int ... resourceIds) {
         idToStrings = new HashMap<>();
 
         Resources res = context.getResources();
         Configuration conf = res.getConfiguration();
         Locale savedLocale = conf.locale;
-        conf.locale = locale;
-        res.updateConfiguration(conf, null); // second arg null means don't change display metrics
 
-        this.locale = LocaleUtils.parseLocaleString(res.getString(R.string.locale));
+        try {
+            conf.locale = locale;
+            res.updateConfiguration(conf, null); // second arg null means don't change display metrics
+            Locale foundLocale = LocaleUtils.parseLocaleString(res.getString(R.string.locale));
 
-        // retrieve resources from desired locale
-        for (int resourceId: resourceIds) {
-            idToStrings.put(resourceId, res.getString(resourceId));
+            if (!foundLocale.getLanguage().equals(locale.getLanguage())) {
+                String message =
+                    String.format(
+                        "No translations for locale <%s>, trying system locale <%s>", //NON-NLS
+                        locale, Locale.getDefault());
+                Timber.w(new Exception(message), message);
+
+                conf.locale = Locale.getDefault();
+                res.updateConfiguration(conf, null); // second arg null means don't change display metrics
+                foundLocale = LocaleUtils.parseLocaleString(res.getString(R.string.locale));
+            }
+            this.locale = foundLocale;
+
+            // retrieve resources from desired locale
+            for (int resourceId: resourceIds) {
+                idToStrings.put(resourceId, res.getString(resourceId));
+            }
+        } finally {
+            // restore original locale
+            conf.locale = savedLocale;
+            res.updateConfiguration(conf, null);
         }
-
-        // restore original locale
-        conf.locale = savedLocale;
-        res.updateConfiguration(conf, null);
     }
 
     /**
