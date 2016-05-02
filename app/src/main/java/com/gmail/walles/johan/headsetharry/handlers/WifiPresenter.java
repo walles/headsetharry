@@ -44,7 +44,7 @@ public class WifiPresenter extends Presenter {
     @NonNls
     private final static String EXTRA_CONNECTED = "com.gmail.walles.johan.headsetharry.connected";
 
-    private final TextWithLocale announcement;
+    private final List<TextWithLocale> announcement;
 
     /**
      * Speak current WiFi connectivity status.
@@ -59,7 +59,7 @@ public class WifiPresenter extends Presenter {
 
     @Override
     public List<TextWithLocale> getAnnouncement() {
-        return announcement.toList();
+        return announcement;
     }
 
     public WifiPresenter(Context context, Intent intent) {
@@ -72,7 +72,7 @@ public class WifiPresenter extends Presenter {
 
         if (!connected) {
             announcement = new TextWithLocale(
-                Locale.getDefault(), context.getString(R.string.wifi_disconnected));
+                Locale.getDefault(), context.getString(R.string.wifi_disconnected)).toList();
             return;
         }
 
@@ -86,7 +86,7 @@ public class WifiPresenter extends Presenter {
             @NonNls String problem = "Got Wifi-connected event but wifi seems disconnected";
             Timber.w(new Exception(problem), problem);
             announcement = new TextWithLocale(
-                Locale.getDefault(), context.getString(R.string.wifi_disconnected));
+                Locale.getDefault(), context.getString(R.string.wifi_disconnected)).toList();
             return;
         }
 
@@ -96,7 +96,7 @@ public class WifiPresenter extends Presenter {
             @NonNls String problem = "Got empty SSID when supposedly connected";
             Timber.w(new Exception(problem), problem);
             announcement = new TextWithLocale(
-                Locale.getDefault(), context.getString(R.string.connected_to_unnamed_network));
+                Locale.getDefault(), context.getString(R.string.connected_to_unnamed_network)).toList();
             return;
         }
 
@@ -141,7 +141,7 @@ public class WifiPresenter extends Presenter {
         return returnMe;
     }
 
-    private TextWithLocale createWifiAnnouncement(String ssid) {
+    private List<TextWithLocale> createWifiAnnouncement(String ssid) {
         Locale locale = identifyLanguage(ssid).or(Locale.getDefault());
         Translations translations = new Translations(context, locale,
             R.string.connected_to_networkname);

@@ -45,7 +45,7 @@ public class SmsPresenter extends Presenter {
     @NonNls
     public static final String TYPE = "SMS";
 
-    private final TextWithLocale announcement;
+    private final List<TextWithLocale> announcement;
 
     public static void speak(Context context, CharSequence body, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -58,7 +58,7 @@ public class SmsPresenter extends Presenter {
 
     @Override
     public List<TextWithLocale> getAnnouncement() {
-        return announcement.toList();
+        return announcement;
     }
 
     public SmsPresenter(Context context, Intent intent) {
@@ -75,7 +75,7 @@ public class SmsPresenter extends Presenter {
         announcement = createAnnouncement(body, sender);
     }
 
-    private TextWithLocale createAnnouncement(CharSequence body, @Nullable CharSequence sender)
+    private List<TextWithLocale> createAnnouncement(CharSequence body, @Nullable CharSequence sender)
     {
         Optional<Locale> locale = identifyLanguage(body);
         Translations translations = new Translations(context, locale.or(Locale.getDefault()),

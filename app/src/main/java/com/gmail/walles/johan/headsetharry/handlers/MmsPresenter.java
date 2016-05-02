@@ -40,7 +40,7 @@ public class MmsPresenter extends Presenter {
     @NonNls
     public static final String TYPE = "MMS";
 
-    private final TextWithLocale announcement;
+    private final List<TextWithLocale> announcement;
 
     public static void speak(Context context, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -61,10 +61,10 @@ public class MmsPresenter extends Presenter {
 
     @Override
     public List<TextWithLocale> getAnnouncement() {
-        return announcement.toList();
+        return announcement;
     }
 
-    private TextWithLocale createAnnouncement(@Nullable CharSequence sender) {
+    private List<TextWithLocale> createAnnouncement(@Nullable CharSequence sender) {
         sender =
             LookupUtils.getNameForNumber(context, sender)
                 .or(context.getString(R.string.unknown_sender));

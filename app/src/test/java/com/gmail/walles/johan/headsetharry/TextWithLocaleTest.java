@@ -22,12 +22,49 @@ package com.gmail.walles.johan.headsetharry;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Locale;
 
 public class TextWithLocaleTest {
     @Test
     public void testFormat() {
-        TextWithLocale testMe = TextWithLocale.format(Locale.ENGLISH, "%d %d", 1, 2);
-        Assert.assertEquals(testMe.text, "1 2");
+        List<TextWithLocale> testMe = TextWithLocale.format(Locale.ENGLISH, "");
+        Assert.assertEquals(1, testMe.size());
+        Assert.assertEquals(testMe.get(0).text, "");
+    }
+
+    @Test
+    public void testFormat1() {
+        List<TextWithLocale> testMe = TextWithLocale.format(Locale.ENGLISH, "%d %d", 1, 2);
+        Assert.assertEquals(1, testMe.size());
+        Assert.assertEquals(testMe.get(0).text, "1 2");
+    }
+
+    @Test
+    public void testFormatMultiLocale() {
+        List<TextWithLocale> testMe =
+            TextWithLocale.format(Locale.ENGLISH, "German: %s", Locale.GERMAN, "Deutsch");
+        Assert.assertEquals(2, testMe.size());
+        Assert.assertEquals(new TextWithLocale(Locale.ENGLISH, "German: "), testMe.get(0));
+        Assert.assertEquals(new TextWithLocale(Locale.GERMAN, "Deutsch"), testMe.get(1));
+    }
+
+    @Test
+    public void testFormatMergeMultiLocale() {
+        List<TextWithLocale> testMe =
+            TextWithLocale.format(Locale.ENGLISH, "English: %s", Locale.ENGLISH, "Really English");
+        Assert.assertEquals(1, testMe.size());
+        Assert.assertEquals(new TextWithLocale(Locale.ENGLISH, "English: Really English"), testMe.get(0));
+    }
+
+    @Test
+    public void testFormatBadMultiLocale() {
+        try {
+            TextWithLocale.format(Locale.ENGLISH, "x %s y", Locale.GERMAN, "z");
+            Assert.fail("Expected exception");
+        } catch (IllegalArgumentException e) {
+            Assert.assertEquals(
+                "Format string must end with %s when providing a secondary locale: <x %s y>", e.getMessage());
+        }
     }
 }
