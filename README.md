@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/walles/headsetharry.svg?branch=master)](https://travis-ci.org/walles/headsetharry)
+
 # Headset Harry
 Reads events through a connected headset.
 
