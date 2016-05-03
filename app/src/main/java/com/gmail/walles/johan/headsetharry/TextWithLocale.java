@@ -68,6 +68,8 @@ public class TextWithLocale {
      * extra locale.
      * <p/>
      * With no extra Locale argument, this method works just like String.format().
+     *
+     * @see Translations#format(int, Object...)
      */
     public static List<TextWithLocale> format(Locale locale, String format, Object... args) {
         if (args.length >= 2 && args[args.length - 2] instanceof Locale) {
@@ -117,7 +119,7 @@ public class TextWithLocale {
         this.text = locale.getDisplayName(locale);
     }
 
-    public List<TextWithLocale> toList() {
+    private List<TextWithLocale> toList() {
         List<TextWithLocale> list = new LinkedList<>();
         list.add(this);
         return list;

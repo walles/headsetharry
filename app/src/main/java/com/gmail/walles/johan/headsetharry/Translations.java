@@ -22,8 +22,10 @@ package com.gmail.walles.johan.headsetharry;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.support.annotation.StringRes;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -49,7 +51,7 @@ public class Translations {
      * </ol>
      */
     // From: http://stackoverflow.com/a/9475663/473672
-    public Translations(Context context, Locale locale, int ... resourceIds) {
+    public Translations(Context context, Locale locale, @StringRes int ... resourceIds) {
         idToStrings = new HashMap<>();
 
         Resources res = context.getResources();
@@ -88,7 +90,7 @@ public class Translations {
     /**
      * Retrieve a string for the locale returned by {@link #getLocale()}.
      */
-    public String getString(int resourceId) {
+    public String getString(@StringRes int resourceId) {
         String string = idToStrings.get(resourceId);
         if (string == null) {
             throw new IllegalArgumentException("Invalid resource ID " + resourceId);
@@ -101,5 +103,12 @@ public class Translations {
      */
     public Locale getLocale() {
         return locale;
+    }
+
+    /**
+     * @see TextWithLocale#format(Locale, String, Object...)
+     */
+    public List<TextWithLocale> format(@StringRes int resourceId, Object ... args) {
+        return TextWithLocale.format(getLocale(), getString(resourceId), args);
     }
 }

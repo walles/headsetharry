@@ -34,13 +34,16 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 1. Do ```git tag``` and think about what the next version number should be.
 2. Do ```git tag --annotate version-1.2.3``` to set the next version number.
 3. ```env JAVA_OPTS=-Xmx512m ./gradlew --no-daemon build```
-4. Upload ```app/build/outputs/apk/app-release.apk``` to Google Play
+4. Upload ```app/build/outputs/apk/app-release.apk``` to [Google Play](https://play.google.com/apps/publish/)
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
 * Make an icon / all the other graphics needed by Market
 
 # TODO Misc
+* Report battery status for attached bluetooth devices,
+http://stackoverflow.com/a/19701412/473672,
+https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
 * If the user is playing music, pause or turn down the music while the
 message is being read.
 * Properly internationalize LanguagesPreference.java

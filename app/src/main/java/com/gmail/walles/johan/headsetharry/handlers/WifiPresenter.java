@@ -70,9 +70,12 @@ public class WifiPresenter extends Presenter {
         }
         boolean connected = intent.getBooleanExtra(EXTRA_CONNECTED, false);
 
+        Translations translations = new Translations(context, Locale.getDefault(),
+            R.string.wifi_disconnected,
+            R.string.connected_to_unnamed_network);
+
         if (!connected) {
-            announcement = new TextWithLocale(
-                Locale.getDefault(), context.getString(R.string.wifi_disconnected)).toList();
+            announcement = translations.format(R.string.wifi_disconnected);
             return;
         }
 
@@ -85,8 +88,7 @@ public class WifiPresenter extends Presenter {
         if ("<unknown ssid>".equals(ssid)) {
             @NonNls String problem = "Got Wifi-connected event but wifi seems disconnected";
             Timber.w(new Exception(problem), problem);
-            announcement = new TextWithLocale(
-                Locale.getDefault(), context.getString(R.string.wifi_disconnected)).toList();
+            announcement = translations.format(R.string.wifi_disconnected);
             return;
         }
 
@@ -95,8 +97,7 @@ public class WifiPresenter extends Presenter {
         if (TextUtils.isEmpty(ssid)) {
             @NonNls String problem = "Got empty SSID when supposedly connected";
             Timber.w(new Exception(problem), problem);
-            announcement = new TextWithLocale(
-                Locale.getDefault(), context.getString(R.string.connected_to_unnamed_network)).toList();
+            announcement = translations.format(R.string.connected_to_unnamed_network);
             return;
         }
 
@@ -145,7 +146,6 @@ public class WifiPresenter extends Presenter {
         Locale ssidLocale = identifyLanguage(ssid).or(Locale.getDefault());
         Translations translations = new Translations(context, ssidLocale,
             R.string.connected_to_networkname);
-        return TextWithLocale.format(translations.getLocale(),
-            translations.getString(R.string.connected_to_networkname), ssidLocale, ssid);
+        return translations.format(R.string.connected_to_networkname, ssidLocale, ssid);
     }
 }

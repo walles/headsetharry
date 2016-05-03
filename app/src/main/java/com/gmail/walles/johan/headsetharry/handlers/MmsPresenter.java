@@ -27,6 +27,7 @@ import com.gmail.walles.johan.headsetharry.LookupUtils;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
 import com.gmail.walles.johan.headsetharry.TextWithLocale;
+import com.gmail.walles.johan.headsetharry.Translations;
 
 import org.jetbrains.annotations.NonNls;
 
@@ -69,6 +70,7 @@ public class MmsPresenter extends Presenter {
             LookupUtils.getNameForNumber(context, sender)
                 .or(context.getString(R.string.unknown_sender));
 
-        return TextWithLocale.format(Locale.getDefault(), context.getString(R.string.mms_from_x), sender);
+        Translations translations = new Translations(context, Locale.getDefault(), R.string.mms_from_x);
+        return translations.format(R.string.mms_from_x, sender);
     }
 }

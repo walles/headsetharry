@@ -94,7 +94,7 @@ public class SmsPresenter extends Presenter {
         }
 
         if (TextUtils.isEmpty(body)) {
-            return TextWithLocale.format(Locale.getDefault(), translations.getString(R.string.what_from_where_colon_body),
+            return translations.format(R.string.what_from_where_colon_body,
                 translations.getString(R.string.empty_sms), sender, body);
         }
 
@@ -104,7 +104,6 @@ public class SmsPresenter extends Presenter {
         } else {
             sms = translations.getString(R.string.unknown_language_sms);
         }
-        return TextWithLocale.format(translations.getLocale(),
-            translations.getString(R.string.what_from_where_colon_body), sms, sender, smsBodyLocale.or(Locale.getDefault()), body);
+        return translations.format(R.string.what_from_where_colon_body, sms, sender, smsBodyLocale.or(Locale.getDefault()), body);
     }
 }
