@@ -41,8 +41,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 * Make an icon / all the other graphics needed by Market
 
 # TODO Misc
-* Request A2DP just like we do with SCO, rather than just assume it's
-set up already.
 * If the user is playing music, pause or turn down the music while the
 message is being read.
 * Report battery status for attached bluetooth devices,
