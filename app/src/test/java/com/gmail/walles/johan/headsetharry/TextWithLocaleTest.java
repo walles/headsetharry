@@ -30,14 +30,14 @@ public class TextWithLocaleTest {
     public void testFormat() {
         List<TextWithLocale> testMe = TextWithLocale.format(Locale.ENGLISH, "");
         Assert.assertEquals(1, testMe.size());
-        Assert.assertEquals(testMe.get(0).text, "");
+        Assert.assertEquals("", testMe.get(0).text);
     }
 
     @Test
     public void testFormat1() {
         List<TextWithLocale> testMe = TextWithLocale.format(Locale.ENGLISH, "%d %d", 1, 2);
         Assert.assertEquals(1, testMe.size());
-        Assert.assertEquals(testMe.get(0).text, "1 2");
+        Assert.assertEquals("1 2", testMe.get(0).text);
     }
 
     @Test
