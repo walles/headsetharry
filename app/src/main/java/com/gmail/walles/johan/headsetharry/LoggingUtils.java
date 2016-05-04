@@ -30,16 +30,16 @@ import org.jetbrains.annotations.NonNls;
 import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
-public class LoggingUtil {
+public class LoggingUtils {
     private static Class<Timber> initializedLoggingClass = null;
 
-    private LoggingUtil() {
+    private LoggingUtils() {
         // Don't let people instantiate this class
     }
 
     public static void setUpLogging(Context context) {
         Timber.Tree tree;
-        if (EmulatorUtil.isRunningOnEmulator()) {
+        if (EmulatorUtils.isRunningOnEmulator()) {
             tree = new LocalTree();
         } else {
             tree = new CrashlyticsTree();
@@ -50,7 +50,7 @@ public class LoggingUtil {
             Timber.plant(tree);
         }
 
-        if (!EmulatorUtil.isRunningOnEmulator()) {
+        if (!EmulatorUtils.isRunningOnEmulator()) {
             Fabric.with(context, new Crashlytics());
         }
     }

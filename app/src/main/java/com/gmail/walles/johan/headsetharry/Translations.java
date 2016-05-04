@@ -42,7 +42,8 @@ public class Translations {
      * Fetch strings for a given locale.
      * <p/>
      * Note that before using these strings you may want to check what locale you actually got. That
-     * is done by calling {@link #getLocale()}.
+     * is done by calling {@link #getLocale()}, or by using {@link #format(int, Object...)} to
+     * format your output.
      * <p/>
      * Locales are tried in the following order:<ol>
      * <li>First we try to find strings for the requested locale

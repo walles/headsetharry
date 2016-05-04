@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class EmulatorUtil {
-    private EmulatorUtil() {
+public class EmulatorUtils {
+    private EmulatorUtils() {
         throw new UnsupportedOperationException("Utility class, please don't instantiate");
     }
 
