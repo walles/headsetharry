@@ -36,7 +36,7 @@ import android.widget.Toast;
 
 import com.gmail.walles.johan.headsetharry.LocaleUtils;
 import com.gmail.walles.johan.headsetharry.TextWithLocale;
-import com.gmail.walles.johan.headsetharry.TtsUtil;
+import com.gmail.walles.johan.headsetharry.TtsUtils;
 import com.google.common.base.Optional;
 import com.optimaize.langdetect.i18n.LdLocale;
 import com.optimaize.langdetect.profiles.BuiltInLanguages;
@@ -109,7 +109,7 @@ public class LanguagesPreference
         for (String languageName: configuredLanguageNames) {
             localeNames.add(new TextWithLocale(LocaleUtils.parseLocaleString(languageName)));
         }
-        TtsUtil.speak(getContext(), localeNames, AudioManager.STREAM_NOTIFICATION, new TtsUtil.CompletionListener() {
+        TtsUtils.speak(getContext(), localeNames, AudioManager.STREAM_NOTIFICATION, new TtsUtils.CompletionListener() {
             @Override
             public void onSuccess() {
                 // This method intentionally left blank

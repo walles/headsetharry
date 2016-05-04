@@ -25,7 +25,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 
-import com.gmail.walles.johan.headsetharry.LoggingUtil;
+import com.gmail.walles.johan.headsetharry.LoggingUtils;
 
 import org.jetbrains.annotations.NonNls;
 
@@ -37,7 +37,7 @@ import timber.log.Timber;
 public class SmsReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        LoggingUtil.setUpLogging(context);
+        LoggingUtils.setUpLogging(context);
 
         @NonNls final Bundle bundle = intent.getExtras();
         if (bundle == null) {

@@ -26,7 +26,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 
-import com.gmail.walles.johan.headsetharry.LoggingUtil;
+import com.gmail.walles.johan.headsetharry.LoggingUtils;
 
 import java.util.Locale;
 
@@ -35,7 +35,7 @@ import timber.log.Timber;
 public class WifiReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        LoggingUtil.setUpLogging(context);
+        LoggingUtils.setUpLogging(context);
 
         NetworkInfo networkInfo =
             intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);

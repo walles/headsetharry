@@ -36,7 +36,7 @@ import java.util.Locale;
 
 import timber.log.Timber;
 
-public class TtsUtil {
+public class TtsUtils {
     public interface CompletionListener {
         void onSuccess();
         void onFailure(@Nullable Locale locale, @NonNls String errorMessage);
@@ -277,7 +277,7 @@ public class TtsUtil {
         }
     }
 
-    private TtsUtil() {
+    private TtsUtils() {
         throw new UnsupportedOperationException("Utility class, don't instantiate");
     }
 

@@ -24,17 +24,17 @@ import org.junit.Test;
 
 import java.util.Locale;
 
-public class TtsUtilTest {
+public class TtsUtilsTest {
     @Test
     public void testGetLowerPrecisionLocale() {
         Assert.assertEquals(
             new Locale("xx", "yy"),
-            TtsUtil.getLowerPrecisionLocale(new Locale("xx", "yy", "zz")).get());
+            TtsUtils.getLowerPrecisionLocale(new Locale("xx", "yy", "zz")).get());
 
         Assert.assertEquals(
             new Locale("xx"),
-            TtsUtil.getLowerPrecisionLocale(new Locale("xx", "yy")).get());
+            TtsUtils.getLowerPrecisionLocale(new Locale("xx", "yy")).get());
 
-        Assert.assertFalse(TtsUtil.getLowerPrecisionLocale(new Locale("xx")).isPresent());
+        Assert.assertFalse(TtsUtils.getLowerPrecisionLocale(new Locale("xx")).isPresent());
     }
 }
