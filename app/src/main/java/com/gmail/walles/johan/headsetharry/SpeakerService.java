@@ -28,6 +28,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.gmail.walles.johan.headsetharry.handlers.MmsPresenter;
+import com.gmail.walles.johan.headsetharry.handlers.NotificationPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.Presenter;
 import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.WifiPresenter;
@@ -139,6 +140,8 @@ public class SpeakerService extends Service {
                 presenter = new SmsPresenter(this, intent);
             } else if (MmsPresenter.TYPE.equals(type)) {
                 presenter = new MmsPresenter(this, intent);
+            } else if (NotificationPresenter.TYPE.equals(type)) {
+                presenter = new NotificationPresenter(this, intent);
             } else if (WifiPresenter.TYPE.equals(type)) {
                 presenter = new WifiPresenter(this, intent);
                 if (isDuplicate(presenter.getAnnouncement())) {

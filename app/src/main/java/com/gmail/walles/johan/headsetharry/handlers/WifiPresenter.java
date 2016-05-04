@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.gmail.walles.johan.headsetharry.R;
@@ -57,6 +58,7 @@ public class WifiPresenter extends Presenter {
         context.startService(intent);
     }
 
+    @NonNull
     @Override
     public List<TextWithLocale> getAnnouncement() {
         return announcement;

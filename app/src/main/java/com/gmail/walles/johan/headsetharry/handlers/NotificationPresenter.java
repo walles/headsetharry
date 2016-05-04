@@ -22,43 +22,43 @@ package com.gmail.walles.johan.headsetharry.handlers;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import com.gmail.walles.johan.headsetharry.LookupUtils;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
 import com.gmail.walles.johan.headsetharry.TextWithLocale;
 import com.gmail.walles.johan.headsetharry.Translations;
+import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 
 import java.util.List;
 import java.util.Locale;
 
-public class MmsPresenter extends Presenter {
+public class NotificationPresenter extends Presenter {
     @NonNls
-    private static final String EXTRA_SENDER = "com.gmail.walles.johan.headsetharry.sender";
+    public static final String TYPE = "Notification";
 
     @NonNls
-    public static final String TYPE = "MMS";
+    private static final String EXTRA_TICKER_TEXT = "com.gmail.walles.johan.headsetharry.tickertext";
 
     private final List<TextWithLocale> announcement;
 
-    public static void speak(Context context, CharSequence sender) {
+    public static void speak(Context context, CharSequence tickerText) {
+        if (tickerText == null) {
+            // Never mind
+            return;
+        }
+
+        if (tickerText.length() == 0) {
+            // Never mind
+            return;
+        }
+
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
         intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
-        intent.putExtra(EXTRA_SENDER, sender);
+        intent.putExtra(EXTRA_TICKER_TEXT, tickerText);
         context.startService(intent);
-    }
-
-    public MmsPresenter(Context context, Intent intent) {
-        super(context);
-
-        // It's OK for the sender to be null, we'll just say it's unknown
-        CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
-
-        announcement = createAnnouncement(sender);
     }
 
     @NonNull
@@ -67,12 +67,25 @@ public class MmsPresenter extends Presenter {
         return announcement;
     }
 
-    private List<TextWithLocale> createAnnouncement(@Nullable CharSequence sender) {
-        sender =
-            LookupUtils.getNameForNumber(context, sender)
-                .or(context.getString(R.string.unknown_sender));
+    public NotificationPresenter(Context context, Intent intent) {
+        super(context);
 
-        Translations translations = new Translations(context, Locale.getDefault(), R.string.mms_from_x);
-        return translations.format(R.string.mms_from_x, sender);
+        CharSequence tickerText = intent.getCharSequenceExtra(EXTRA_TICKER_TEXT);
+        if (tickerText == null) {
+            throw new IllegalArgumentException("Got notification with null ticker text");
+        }
+        if (tickerText.length() == 0) {
+            throw new IllegalArgumentException("Got notification with empty ticker text");
+        }
+
+        announcement = createAnnouncement(tickerText);
+    }
+
+    private List<TextWithLocale> createAnnouncement(CharSequence tickerText) {
+        Optional<Locale> tickerTextLocale = identifyLanguage(tickerText);
+        Translations translations = new Translations(context, tickerTextLocale.or(Locale.getDefault()),
+            R.string.system_notification);
+        return translations.format(R.string.system_notification,
+            tickerTextLocale.or(Locale.getDefault()), tickerText);
     }
 }

@@ -43,6 +43,7 @@ import java.util.Locale;
 import timber.log.Timber;
 
 public abstract class Presenter {
+    @NonNull
     public abstract List<TextWithLocale> getAnnouncement();
 
     protected final Context context;
