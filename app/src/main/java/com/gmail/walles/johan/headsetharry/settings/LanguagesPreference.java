@@ -109,7 +109,11 @@ public class LanguagesPreference
         for (String languageName: configuredLanguageNames) {
             localeNames.add(new TextWithLocale(LocaleUtils.parseLocaleString(languageName)));
         }
-        TtsUtils.speak(getContext(), localeNames, AudioManager.STREAM_NOTIFICATION, new TtsUtils.CompletionListener() {
+
+        // If a headset is connected, STREAM_MUSIC goes only to the headset, which makes sense in
+        // our case. STREAM_NOTIFICATION goes both to the headset and to the phone's speaker, which
+        // we want to avoid.
+        TtsUtils.speak(getContext(), localeNames, AudioManager.STREAM_MUSIC, new TtsUtils.CompletionListener() {
             @Override
             public void onSuccess() {
                 // This method intentionally left blank

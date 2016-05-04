@@ -121,7 +121,9 @@ public class SpeakerService extends Service {
         if (bluetoothSco) {
             audioManagerStream = AudioManager.STREAM_VOICE_CALL;
         } else {
-            audioManagerStream = AudioManager.STREAM_NOTIFICATION;
+            // With A2DP enabled, STREAM_MUSIC goes to the headset only. STREAM_NOTIFICATION goes to
+            // the phone's speaker as well, and we don't want that.
+            audioManagerStream = AudioManager.STREAM_MUSIC;
         }
 
         TtsUtils.speak(this, presenter.getAnnouncement(), audioManagerStream,
