@@ -33,7 +33,9 @@ import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.WifiPresenter;
 
 import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.TestOnly;
 
+import java.util.List;
 import java.util.Locale;
 
 import timber.log.Timber;
@@ -44,6 +46,10 @@ public class SpeakerService extends Service {
 
     @NonNls
     public static final String EXTRA_TYPE = "com.gmail.walles.johan.headsetharry.type";
+
+    private long isDuplicateTimeoutMs = 10000;
+    private List<TextWithLocale> duplicateBase;
+    private long duplicateBaseTimestamp;
 
     @Override
     public void onCreate() {
@@ -93,6 +99,33 @@ public class SpeakerService extends Service {
         }
     }
 
+    boolean isDuplicate(List<TextWithLocale> announcement) {
+        if (!announcement.equals(duplicateBase)) {
+            // Not the same message, start over
+            duplicateBase = announcement;
+            duplicateBaseTimestamp = System.currentTimeMillis();
+            return false;
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - duplicateBaseTimestamp > isDuplicateTimeoutMs) {
+            // This is the same message, but our duplicate has timed out, start over
+            duplicateBase = announcement;
+            duplicateBaseTimestamp = System.currentTimeMillis();
+            return false;
+        }
+
+        return true;
+    }
+
+    @TestOnly
+    void setIsDuplicateTimeoutMs(long timeoutMillis) {
+        if (timeoutMillis < 0) {
+            throw new IllegalArgumentException("Timeout must be >= 0, was " + timeoutMillis);
+        }
+        isDuplicateTimeoutMs = timeoutMillis;
+    }
+
     private void handleIntent(Intent intent, final boolean bluetoothSco) {
         String type = intent.getStringExtra(EXTRA_TYPE);
         if (TextUtils.isEmpty(type)) {
@@ -108,6 +141,10 @@ public class SpeakerService extends Service {
                 presenter = new MmsPresenter(this, intent);
             } else if (WifiPresenter.TYPE.equals(type)) {
                 presenter = new WifiPresenter(this, intent);
+                if (isDuplicate(presenter.getAnnouncement())) {
+                    Timber.w("Ignoring duplicate Wifi announcement <%s>", presenter.getAnnouncement());
+                    return;
+                }
             } else {
                 Timber.w("Ignoring incoming intent of type %s", type);
                 return;
