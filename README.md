@@ -41,26 +41,19 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 * Make an icon / all the other graphics needed by Market
 
 # TODO Misc
+* Request A2DP just like we do with SCO, rather than just assume it's
+set up already.
+* If the user is playing music, pause or turn down the music while the
+message is being read.
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
-* If the user is playing music, pause or turn down the music while the
-message is being read.
-* Properly internationalize LanguagesPreference.java
-* Enable PMD NLS warnings if it has those
 * When a message comes in, enqueue it if a phone call is in progress.
 * When a phone call ends, read all events received during the call
-* Read any text parts of MMS messages. To get the contents, maybe watch
-the MMS database: http://stackoverflow.com/a/6152073/473672
-* Make sure people don't deselect all languages.
 * What do we do if there's no TTS for a configured language when we try
 to say something? Something notification based perhaps.
 * Enable selecting language flavors. US or GB English? Swedish or
 Finnish Swedish?
-* In the language selection activity, should we test-speak a language
-when it's chosen? Then, if that doesn't work, refer people to the
-system language settings or to Google Play Store for installing more
-engines / languages.
 * Maybe we should simply read notifications instead of trying to solve
 everything ourselves? Maybe read the `Notification.tickerText` to the
 user.
@@ -73,8 +66,10 @@ likely language?
 we read?
 * Think about multipart messages, how do we handle them? How should we
 handle them?
-* In the Settings, should it be possible to order TTS engines in order
-of preference?
+* Properly internationalize LanguagesPreference.java
+* Enable PMD NLS warnings if it has those
+* Read any text parts of MMS messages. To get the contents, maybe watch
+the MMS database: http://stackoverflow.com/a/6152073/473672
 
 # DONE
 * Log to Crashlytics
@@ -123,3 +118,8 @@ just receiving broadcasts, nothing that needs to be restarted for that.
 * Add pre-commit and pre-push hooks that verifies stuff
 * Add a license and put copyright headers in all files
 * Handle announcing in locales we don't have translations for.
+* Make sure people don't deselect all languages.
+* In the language selection activity, test-speak a language when it's
+chosen. Then, if that doesn't work, refer people to the system language
+settings or to Google Play Store for installing more engines /
+languages.

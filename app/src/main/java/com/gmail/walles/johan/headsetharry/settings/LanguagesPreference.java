@@ -26,6 +26,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.preference.MultiSelectListPreference;
 import android.preference.PreferenceManager;
@@ -108,17 +109,24 @@ public class LanguagesPreference
         for (String languageName: configuredLanguageNames) {
             localeNames.add(new TextWithLocale(LocaleUtils.parseLocaleString(languageName)));
         }
-        TtsUtil.speak(getContext(), localeNames, false, new TtsUtil.FailureListener() {
+        TtsUtil.speak(getContext(), localeNames, AudioManager.STREAM_NOTIFICATION, new TtsUtil.CompletionListener() {
             @Override
-            public void onFailure(TextWithLocale text, @NonNls String errorMessage) {
+            public void onSuccess() {
+                // This method intentionally left blank
+            }
+
+            // Fixing this is on the TODO list in README.md
+            @SuppressWarnings("HardCodedStringLiteral")
+            @Override
+            public void onFailure(Locale locale, @NonNls String errorMessage) {
                 new AlertDialog.Builder(getContext()).
-                    setTitle("Can't speak " + text.locale.getDisplayName()).
+                    setTitle("Can't speak " + locale.getDisplayName()).
                     setMessage(String.format(
                         "No Text-to-speech support for %s.%n" +
                         "%n" +
                         "You can either try to get a new TTS engine from Google Play Store " +
                         "or try to configure your existing TTS engines.",
-                        text.locale.getDisplayName())).
+                        locale.getDisplayName())).
                     setPositiveButton("Install TTS", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

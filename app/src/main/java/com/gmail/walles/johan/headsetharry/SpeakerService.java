@@ -35,6 +35,8 @@ import com.gmail.walles.johan.headsetharry.handlers.WifiPresenter;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.util.Locale;
+
 import timber.log.Timber;
 
 public class SpeakerService extends Service {
@@ -158,7 +160,7 @@ public class SpeakerService extends Service {
         }
     }
 
-    private void handleIntent(Intent intent, boolean bluetoothSco) {
+    private void handleIntent(Intent intent, final boolean bluetoothSco) {
         String type = intent.getStringExtra(EXTRA_TYPE);
         if (TextUtils.isEmpty(type)) {
             Timber.e("Speak action with no type");
@@ -182,13 +184,41 @@ public class SpeakerService extends Service {
             return;
         }
 
-        TtsUtil.speak(this, presenter.getAnnouncement(), bluetoothSco,
-            new TtsUtil.FailureListener() {
+        int audioManagerStream;
+        if (bluetoothSco) {
+            audioManagerStream = AudioManager.STREAM_VOICE_CALL;
+        } else {
+            audioManagerStream = AudioManager.STREAM_NOTIFICATION;
+        }
+
+        TtsUtil.speak(this, presenter.getAnnouncement(), audioManagerStream,
+            new TtsUtil.CompletionListener() {
                 @Override
-                public void onFailure(TextWithLocale text, @NonNls String errorMessage) {
+                public void onSuccess() {
+                    if (bluetoothSco) {
+                        stopBluetoothSco();
+                    }
+                }
+
+                @Override
+                public void onFailure(Locale locale, @NonNls String errorMessage) {
                     Timber.e(new Exception(errorMessage), "%s", errorMessage);
+
+                    if (bluetoothSco) {
+                        stopBluetoothSco();
+                    }
                 }
             });
+    }
+
+    private void stopBluetoothSco() {
+        AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            @NonNls String status = audioManager.isBluetoothScoOn() ? "enabled": "disabled";
+            Timber.d("Disabling SCO, was %s", status);
+            audioManager.setBluetoothScoOn(false);
+            audioManager.stopBluetoothSco();
+        }
     }
 
     @Nullable
