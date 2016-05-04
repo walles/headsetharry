@@ -22,11 +22,31 @@ package com.gmail.walles.johan.headsetharry.handlers;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
+import com.gmail.walles.johan.headsetharry.LoggingUtils;
+
+import timber.log.Timber;
+
 public class NotificationListener extends NotificationListenerService {
     @Override
+    public void onCreate() {
+        LoggingUtils.setUpLogging(this);
+        super.onCreate();
+    }
+
+    @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        // FIXME: Only speak removable / transient / whatever they are called notifications
-        NotificationPresenter.speak(this, sbn.getNotification().tickerText);
+        if (sbn.isOngoing()) {
+            // Just read transient notifications
+            return;
+        }
+
+        CharSequence tickerText = sbn.getNotification().tickerText;
+        if (tickerText == null || tickerText.length() == 0) {
+            Timber.i("Ignoring tickerText-less notification from %s", sbn.getPackageName());
+            return;
+        }
+
+        NotificationPresenter.speak(this, tickerText);
     }
 
     @Override
