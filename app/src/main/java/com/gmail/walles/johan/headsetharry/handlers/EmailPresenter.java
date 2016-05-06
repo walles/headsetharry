@@ -42,6 +42,8 @@ import org.jetbrains.annotations.NonNls;
 import java.util.List;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 public class EmailPresenter extends Presenter {
     @NonNls
     private static final String GOOGLE_INBOX_PACKAGE_NAME = "com.google.android.apps.inbox";
@@ -235,9 +237,13 @@ public class EmailPresenter extends Presenter {
         CharSequence sender, @Nullable CharSequence subject, @Nullable CharSequence body)
     {
         Optional<Locale> emailLocale = identifyLanguage(subject);
-        if (!emailLocale.isPresent()) {
-            if (!TextUtils.isEmpty(body)) {
-                emailLocale = identifyLanguage(body);
+        boolean hasBody = !TextUtils.isEmpty(body);
+        if (hasBody && !emailLocale.isPresent()) {
+            emailLocale = identifyLanguage(body);
+            if (emailLocale.isPresent()) {
+                Timber.d("Email locale identified from body: %s", emailLocale.get());
+            } else {
+                Timber.d("Failed to identify email locale from body");
             }
         }
 
