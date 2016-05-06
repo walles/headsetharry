@@ -20,12 +20,16 @@
 package com.gmail.walles.johan.headsetharry.handlers;
 
 import android.app.Notification;
+import android.content.Intent;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
 
 import com.gmail.walles.johan.headsetharry.LoggingUtils;
+import com.gmail.walles.johan.headsetharry.settings.NotificationsPreference;
 
 import timber.log.Timber;
 
@@ -86,5 +90,27 @@ public class NotificationListener extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         // This method intentionally left blank
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        Timber.i("Getting Notification notifications");
+        IBinder result = super.onBind(intent);
+        PreferenceManager.getDefaultSharedPreferences(this).
+            edit().
+            putBoolean(NotificationsPreference.RECEIVING_NOTIFICATIONS_PREF, true).
+            apply();
+        return result;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Timber.w("Not getting Notification notifications any more");
+        boolean result = super.onUnbind(intent);
+        PreferenceManager.getDefaultSharedPreferences(this).
+            edit().
+            putBoolean(NotificationsPreference.RECEIVING_NOTIFICATIONS_PREF, false).
+            apply();
+        return result;
     }
 }
