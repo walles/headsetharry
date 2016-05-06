@@ -41,26 +41,31 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 # TODO Before Releasing on Android Market
 * Make an icon / all the other graphics needed by Market
 
+# TODO Notifications
+* Maybe we should simply read notifications instead of trying to solve
+everything ourselves?
+* OK: Google Inbox: "Mail from NN: SUBJECT"
+* OK: Test with multiple pending Inbox messages.
+* Add a preferences checkbox for allowing us to read notifications.
+
 # TODO Misc
 * If the user is playing music, pause or turn down the music while the
 message is being read.
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
+* If we get multiple notifications at the same time, enqueue them and
+read them one after the other.
 * When a message comes in, enqueue it if a phone call is in progress.
 * When a phone call ends, read all events received during the call
 * What do we do if there's no TTS for a configured language when we try
 to say something? Something notification based perhaps.
 * Enable selecting language flavors. US or GB English? Swedish or
 Finnish Swedish?
-* Maybe we should simply read notifications instead of trying to solve
-everything ourselves? Maybe read the `Notification.tickerText` to the
-user.
 * In Settings, should it be possible to tag contacts with their most
 likely language?
 * "Phone call from NN" (NN is name if in contacts, not number)
 * "Calendar event: ..."
-* Google Inbox: "Mail from NN: SUBJECT"
 * Think about long messages, should we have an upper limit on how much
 we read?
 * Think about multipart messages, how do we handle them? How should we

@@ -19,8 +19,10 @@
 
 package com.gmail.walles.johan.headsetharry.handlers;
 
+import android.app.Notification;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.text.SpannableString;
 
 import com.gmail.walles.johan.headsetharry.LoggingUtils;
 
@@ -40,13 +42,38 @@ public class NotificationListener extends NotificationListenerService {
             return;
         }
 
-        CharSequence tickerText = sbn.getNotification().tickerText;
-        if (tickerText == null || tickerText.length() == 0) {
-            Timber.i("Ignoring tickerText-less notification from %s", sbn.getPackageName());
-            return;
-        }
+        logIncomingNotification(sbn);
 
-        NotificationPresenter.speak(this, tickerText);
+        if (!EmailPresenter.speak(this, sbn)) {
+            Timber.d("No handler for %s notification", sbn.getPackageName());
+        }
+    }
+
+    private void logIncomingNotification(StatusBarNotification sbn) {
+        Timber.i("Incoming notification from %s with extras <%s>",
+            sbn.getPackageName(), sbn.getNotification().extras);
+        CharSequence[] textLines = sbn.getNotification().extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
+        if (textLines != null) {
+            for (CharSequence textLine: textLines) {
+                Timber.i("  Text line <%s>: <%s>", textLine.getClass(), textLine);
+                if (textLine instanceof SpannableString) {
+                    SpannableString spannable = (SpannableString)textLine;
+                    Object[] spans = spannable.getSpans(0, spannable.length() - 1, Object.class);
+                    for (Object span: spans) {
+                        int from = spannable.getSpanStart(span);
+                        int to = spannable.getSpanEnd(span);
+                        int flags = spannable.getSpanFlags(span);
+                        Timber.i("    Span %d-%d, flags=%d: %s", from, to, flags, span);
+                    }
+                }
+            }
+        }
+        CharSequence[] people = sbn.getNotification().extras.getCharSequenceArray(Notification.EXTRA_PEOPLE);
+        if (people != null) {
+            for (CharSequence person: people) {
+                Timber.i("  Person: <%s>", person);
+            }
+        }
     }
 
     @Override

@@ -30,4 +30,5 @@
     <string name="connected_to_unnamed_network">Ansluten till namnlöst nätverk</string>
     <string name="connected_to_networkname">Ansluten till %s</string>
     <string name="system_notification">Systemmeddelande: %s</string>
+    <string name="email_from_who_colon_subject">Elektrisk post från %1$s: %2$s</string>
 </resources>
