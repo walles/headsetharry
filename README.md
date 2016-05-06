@@ -46,7 +46,7 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 everything ourselves?
 * OK: Google Inbox: "Mail from NN: SUBJECT"
 * OK: Test with multiple pending Inbox messages.
-* Google Inbox: "1 ny i Uppdateringar   Travis CI"
+* OK: Google Inbox: "1 ny i Uppdateringar   Travis CI"
 * Add a preferences checkbox for allowing us to read notifications.
 
 # TODO Misc

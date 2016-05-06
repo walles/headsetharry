@@ -106,6 +106,36 @@ public class EmailPresenter extends Presenter {
           Span 0-12, flags=0: android.text.style.TextAppearanceSpan@13afbe5d
         Text line <class android.text.SpannableString>: <Johan Walles   Test subject>
           Span 0-12, flags=0: android.text.style.TextAppearanceSpan@6c293d2
+
+
+        Multi e-mail announcement from Google Inbox, with some message being announced by folder
+        name only. Notice how the folder-only spans reach to the end of the multi-whitespace part,
+        but the other spans go to the start of that region:
+
+        Incoming notification from com.google.android.apps.inbox with extras
+        <Bundle[{android.title=3 nya meddelanden,
+                 android.textLines=[Ljava.lang.CharSequence;@1540cb2a,
+                 android.subText=null,
+                 android.template=android.app.Notification$InboxStyle,
+                 android.showChronometer=false,
+                 android.icon=2130837711,
+                 android.text=johan.walles@gmail.com,
+                 android.progress=0,
+                 android.progressMax=0,
+                 android.showWhen=true,
+                 android.rebuild.applicationInfo=ApplicationInfo{16f97d1b com.google.android.apps.inbox},
+                 android.people=[Ljava.lang.String;@2a3aaeb8,
+                 android.infoText=3,
+                 android.originatingUserId=0,
+                 android.progressIndeterminate=false,
+                 android.summaryText=johan.walles@gmail.com}]>
+        Text line <class android.text.SpannableString>: <1 ny i Uppdateringar   Travis CI>
+          Span 0-23, flags=0, style=0: android.text.style.TextAppearanceSpan@3688a491
+        Text line <class android.text.SpannableString>: <Johan Walles   Testmeddelande på svenska>
+          Span 0-12, flags=0, style=0: android.text.style.TextAppearanceSpan@33786ff6
+        Text line <class android.text.SpannableString>: <Johan Walles   Test subject>
+          Span 0-12, flags=0, style=0: android.text.style.TextAppearanceSpan@2aa8cff7
+        Person: <mailto:walles@spotify.com>
         */
 
         Intent intent = new Intent(context, SpeakerService.class);
@@ -138,8 +168,16 @@ public class EmailPresenter extends Presenter {
 
             Object[] spans = mostRecentLine.getSpans(0, mostRecentLine.length() - 1, Object.class);
             int firstSpanEnd = mostRecentLine.getSpanEnd(spans[0]);
-            sender = mostRecentLine.subSequence(0, firstSpanEnd);
-            subject = mostRecentLine.subSequence(firstSpanEnd, mostRecentLine.length());
+
+            // See comment above with full dumps of bundle contents for where this test comes from
+            boolean isSenderAndSubject = mostRecentLine.charAt(firstSpanEnd - 1) != ' ';
+            if (isSenderAndSubject) {
+                sender = mostRecentLine.subSequence(0, firstSpanEnd);
+                subject = mostRecentLine.subSequence(firstSpanEnd, mostRecentLine.length());
+            } else {
+                sender = mostRecentLine.subSequence(firstSpanEnd, mostRecentLine.length());
+                subject = null;
+            }
 
             // Multi-e-mail announcements don't come with any bodies
             body = null;
@@ -178,10 +216,8 @@ public class EmailPresenter extends Presenter {
             throw new IllegalArgumentException("Sender must not be empty: " + sender);
         }
 
+        // We don't always get the subject from Google Inbox
         CharSequence subject = intent.getCharSequenceExtra(EXTRA_SUBJECT);
-        if (TextUtils.isEmpty(subject)) {
-            throw new IllegalArgumentException("Subject must not be empty: " + subject);
-        }
 
         // It's OK for the body to be empty; we don't always get it and we don't need to present it
         CharSequence body = intent.getCharSequenceExtra(EXTRA_BODY);
@@ -196,7 +232,7 @@ public class EmailPresenter extends Presenter {
     }
 
     private List<TextWithLocale> createAnnouncement(
-        CharSequence sender, CharSequence subject, @Nullable CharSequence body)
+        CharSequence sender, @Nullable CharSequence subject, @Nullable CharSequence body)
     {
         Optional<Locale> emailLocale = identifyLanguage(subject);
         if (!emailLocale.isPresent()) {
@@ -206,7 +242,13 @@ public class EmailPresenter extends Presenter {
         }
 
         Translations translations = new Translations(context, emailLocale.or(Locale.getDefault()),
-            R.string.email_from_who_colon_subject);
-        return translations.format(R.string.email_from_who_colon_subject, sender, subject);
+            R.string.email_from_who_colon_subject,
+            R.string.email_from_whom);
+        if (TextUtils.isEmpty(subject)) {
+            return translations.format(R.string.email_from_whom, sender);
+        } else {
+            return translations.format(R.string.email_from_who_colon_subject,
+                sender, emailLocale.or(Locale.getDefault()), subject);
+        }
     }
 }
