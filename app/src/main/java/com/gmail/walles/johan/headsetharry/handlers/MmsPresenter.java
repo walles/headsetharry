@@ -21,6 +21,7 @@ package com.gmail.walles.johan.headsetharry.handlers;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.gmail.walles.johan.headsetharry.LookupUtils;
@@ -60,6 +61,7 @@ public class MmsPresenter extends Presenter {
         announcement = createAnnouncement(sender);
     }
 
+    @NonNull
     @Override
     public List<TextWithLocale> getAnnouncement() {
         return announcement;

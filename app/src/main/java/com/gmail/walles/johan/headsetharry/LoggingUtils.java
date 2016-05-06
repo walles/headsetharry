@@ -42,20 +42,21 @@ public class LoggingUtils {
         if (EmulatorUtils.isRunningOnEmulator()) {
             tree = new LocalTree();
         } else {
-            tree = new CrashlyticsTree();
+            tree = new CrashlyticsTree(context);
         }
 
         if (initializedLoggingClass != Timber.class) {
             initializedLoggingClass = Timber.class;
             Timber.plant(tree);
-        }
-
-        if (!EmulatorUtils.isRunningOnEmulator()) {
-            Fabric.with(context, new Crashlytics());
+            Timber.v("Logging tree planted: %s", tree.getClass());
         }
     }
 
     private static class CrashlyticsTree extends Timber.Tree {
+        public CrashlyticsTree(Context context) {
+            Fabric.with(context, new Crashlytics());
+        }
+
         @Override
         protected void log(int priority, @NonNls String tag, String message, Throwable t) {
             if (BuildConfig.DEBUG) {

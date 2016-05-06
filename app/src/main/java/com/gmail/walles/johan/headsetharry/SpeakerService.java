@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.gmail.walles.johan.headsetharry.handlers.EmailPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.MmsPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.Presenter;
 import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
@@ -145,6 +146,8 @@ public class SpeakerService extends Service {
                     Timber.w("Ignoring duplicate Wifi announcement <%s>", presenter.getAnnouncement());
                     return;
                 }
+            } else if (EmailPresenter.TYPE.equals(type)) {
+                presenter = new EmailPresenter(this, intent);
             } else {
                 Timber.w("Ignoring incoming intent of type %s", type);
                 return;

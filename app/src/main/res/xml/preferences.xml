@@ -23,4 +23,6 @@
     <com.gmail.walles.johan.headsetharry.settings.LanguagesPreference
         android:title="Active Languages"
         android:key="activeLanguagesList"/>
+    <com.gmail.walles.johan.headsetharry.settings.NotificationsPreference
+        android:title="Announce Incoming E-mail"/>
 </PreferenceScreen>
