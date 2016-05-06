@@ -64,7 +64,12 @@ public class NotificationListener extends NotificationListenerService {
                         int from = spannable.getSpanStart(span);
                         int to = spannable.getSpanEnd(span);
                         int flags = spannable.getSpanFlags(span);
-                        int style = ((TextAppearanceSpan)span).getTextStyle();
+
+                        int style = 0;
+                        if (span instanceof TextAppearanceSpan) {
+                            style = ((TextAppearanceSpan)span).getTextStyle();
+                        }
+
                         Timber.i("    Span %d-%d, flags=%d, style=%d: %s", from, to, flags, style, span);
                     }
                 }
