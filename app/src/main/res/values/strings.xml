@@ -33,7 +33,5 @@
     <string name="connected_to_unnamed_network">Connected to unnamed network</string>
     <string name="connected_to_networkname">Connected to %s</string>
 
-    <string name="system_notification">System notification: %s</string>
-
     <string name="email_from_who_colon_subject">Email from %1$s: %2$s</string>
 </resources>
