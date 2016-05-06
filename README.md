@@ -46,11 +46,14 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 everything ourselves?
 * OK: Google Inbox: "Mail from NN: SUBJECT"
 * OK: Test with multiple pending Inbox messages.
+* Google Inbox: "1 ny i Uppdateringar   Travis CI"
 * Add a preferences checkbox for allowing us to read notifications.
 
 # TODO Misc
 * If the user is playing music, pause or turn down the music while the
 message is being read.
+* Report most popular notification apps to Google Analytics.
+* "Calendar event: ..."
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
@@ -64,8 +67,8 @@ to say something? Something notification based perhaps.
 Finnish Swedish?
 * In Settings, should it be possible to tag contacts with their most
 likely language?
+* GMail: "Mail from NN: SUBJECT"
 * "Phone call from NN" (NN is name if in contacts, not number)
-* "Calendar event: ..."
 * Think about long messages, should we have an upper limit on how much
 we read?
 * Think about multipart messages, how do we handle them? How should we

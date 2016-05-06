@@ -23,6 +23,7 @@ import android.app.Notification;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.SpannableString;
+import android.text.style.TextAppearanceSpan;
 
 import com.gmail.walles.johan.headsetharry.LoggingUtils;
 
@@ -63,7 +64,8 @@ public class NotificationListener extends NotificationListenerService {
                         int from = spannable.getSpanStart(span);
                         int to = spannable.getSpanEnd(span);
                         int flags = spannable.getSpanFlags(span);
-                        Timber.i("    Span %d-%d, flags=%d: %s", from, to, flags, span);
+                        int style = ((TextAppearanceSpan)span).getTextStyle();
+                        Timber.i("    Span %d-%d, flags=%d, style=%d: %s", from, to, flags, style, span);
                     }
                 }
             }
