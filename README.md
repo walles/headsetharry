@@ -65,7 +65,7 @@ likely language?
 we read?
 * Think about multipart messages, how do we handle them? How should we
 handle them?
-* Properly internationalize LanguagesPreference.java
+* Remove `HardCodedStringLiteral` suppressions and remedy all warnings
 * Enable PMD NLS warnings if it has those
 * Read any text parts of MMS messages. To get the contents, maybe watch
 the MMS database: http://stackoverflow.com/a/6152073/473672

@@ -20,9 +20,11 @@
 package com.gmail.walles.johan.headsetharry.settings;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.CheckBoxPreference;
+import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 
 import org.jetbrains.annotations.NonNls;
@@ -66,10 +68,24 @@ public class NotificationsPreference
         getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
 
+    @SuppressWarnings("HardCodedStringLiteral")
     @Override
     protected void onClick() {
-        Intent intent=new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS);
-        getContext().startActivity(intent);
+        new AlertDialog.Builder(getContext()).
+            setTitle("Need Notifications Access").
+            setMessage(String.format(
+                "Please enable Headset Harry in the following screen.%n" +
+                "%n" +
+                "E-mail notifications are done by reading system notifications from e-mail apps, " +
+                "and to do that we need to be able to read system notifications at all. That's " +
+                "what the next screen is about.")).
+            setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent intent=new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS);
+                    getContext().startActivity(intent);
+                }
+            }).show();
     }
 
     @Override
