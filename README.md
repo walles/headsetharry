@@ -45,7 +45,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 # TODO Misc
 * If the user is playing music, pause or turn down the music while the
 message is being read.
-* Report most popular notification apps to Google Analytics.
 * "Calendar event: ..."
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
@@ -126,3 +125,4 @@ languages.
 * Announce Google Inbox incoming e-mail by reading system notifications
 * If we get multiple events at once, speak one at a time rather than just
 messing up.
+* Report most popular notification apps to Crashlytics.
