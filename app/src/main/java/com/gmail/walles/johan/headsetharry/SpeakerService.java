@@ -34,6 +34,7 @@ import com.google.common.base.Optional;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.TestOnly;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -49,6 +50,13 @@ public class SpeakerService extends Service {
     private long isDuplicateTimeoutMs = 10000;
     private List<TextWithLocale> duplicateBase;
     private long duplicateBaseTimestamp;
+
+    private final List<List<TextWithLocale>> announcementQueue = new LinkedList<>();
+
+    /**
+     * 0 means not speaking.
+     */
+    private long speechStartTimestamp = 0;
 
     @Override
     public void onCreate() {
@@ -68,19 +76,55 @@ public class SpeakerService extends Service {
             return Service.START_NOT_STICKY;
         }
 
-        AudioUtils.speakOverHeadset(this, announcement.get(), new TtsUtils.CompletionListener() {
+        enqueue(announcement.get());
+
+        return START_NOT_STICKY;
+    }
+
+    private void enqueue(List<TextWithLocale> announcement) {
+        announcementQueue.add(announcement);
+        dequeue();
+    }
+
+    private void dequeue() {
+        if (isSpeaking()) {
+            return;
+        }
+        if (announcementQueue.isEmpty()) {
+            return;
+        }
+
+        List<TextWithLocale> announcement = announcementQueue.remove(0);
+        boolean speechStarted = AudioUtils.speakOverHeadset(this, announcement, new TtsUtils.CompletionListener() {
             @Override
             public void onSuccess() {
-                // This method intentionally left blank
+                speechStartTimestamp = 0;
+                dequeue();
             }
 
             @Override
             public void onFailure(@Nullable Locale locale, @NonNls String errorMessage) {
+                speechStartTimestamp = 0;
                 Timber.e(new Exception(errorMessage), "%s", errorMessage);
+                dequeue();
             }
         });
+        if (speechStarted) {
+            speechStartTimestamp = System.currentTimeMillis();
+        }
+    }
 
-        return START_NOT_STICKY;
+    private boolean isSpeaking() {
+        if (speechStartTimestamp == 0) {
+            return false;
+        }
+        long speechDurationMs = System.currentTimeMillis() - speechStartTimestamp;
+        if (speechDurationMs > 60000) {
+            @NonNls String message = "Still speaking after " + speechDurationMs + "ms, pretending we're done";
+            Timber.w(new Exception(message), "%s", message);
+            return false;
+        }
+        return true;
     }
 
     boolean isDuplicate(List<TextWithLocale> announcement) {
