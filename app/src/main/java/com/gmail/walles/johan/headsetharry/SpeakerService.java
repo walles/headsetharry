@@ -29,9 +29,9 @@ import android.text.TextUtils;
 
 import com.gmail.walles.johan.headsetharry.handlers.EmailPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.MmsPresenter;
-import com.gmail.walles.johan.headsetharry.handlers.Presenter;
 import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.WifiPresenter;
+import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.TestOnly;
@@ -127,33 +127,40 @@ public class SpeakerService extends Service {
         isDuplicateTimeoutMs = timeoutMillis;
     }
 
-    private void handleIntent(Intent intent, final boolean bluetoothSco) {
+    private Optional<List<TextWithLocale>> toAnnouncement(Intent intent) {
         String type = intent.getStringExtra(EXTRA_TYPE);
         if (TextUtils.isEmpty(type)) {
             Timber.e("Speak action with no type");
-            return;
+            return Optional.absent();
         }
 
-        Presenter presenter;
         try {
             if (SmsPresenter.TYPE.equals(type)) {
-                presenter = new SmsPresenter(this, intent);
+                return Optional.of(new SmsPresenter(this, intent).getAnnouncement());
             } else if (MmsPresenter.TYPE.equals(type)) {
-                presenter = new MmsPresenter(this, intent);
+                return Optional.of(new MmsPresenter(this, intent).getAnnouncement());
             } else if (WifiPresenter.TYPE.equals(type)) {
-                presenter = new WifiPresenter(this, intent);
-                if (isDuplicate(presenter.getAnnouncement())) {
-                    Timber.w("Ignoring duplicate Wifi announcement <%s>", presenter.getAnnouncement());
-                    return;
+                List<TextWithLocale> announcement = new WifiPresenter(this, intent).getAnnouncement();
+                if (isDuplicate(announcement)) {
+                    Timber.w("Ignoring duplicate Wifi announcement <%s>", announcement);
+                    return Optional.absent();
                 }
+                return Optional.of(announcement);
             } else if (EmailPresenter.TYPE.equals(type)) {
-                presenter = new EmailPresenter(this, intent);
+                return Optional.of(new EmailPresenter(this, intent).getAnnouncement());
             } else {
                 Timber.w("Ignoring incoming intent of type %s", type);
-                return;
+                return Optional.absent();
             }
         } catch (IllegalArgumentException e) {
             Timber.e(e, "Error parsing intent: %s", intent);
+            return Optional.absent();
+        }
+    }
+
+    private void handleIntent(Intent intent, final boolean bluetoothSco) {
+        Optional<List<TextWithLocale>> announcement = toAnnouncement(intent);
+        if (!announcement.isPresent()) {
             return;
         }
 
@@ -166,7 +173,7 @@ public class SpeakerService extends Service {
             audioManagerStream = AudioManager.STREAM_MUSIC;
         }
 
-        TtsUtils.speak(this, presenter.getAnnouncement(), audioManagerStream,
+        TtsUtils.speak(this, announcement.get(), audioManagerStream,
             new TtsUtils.CompletionListener() {
                 @Override
                 public void onSuccess() {

@@ -6,13 +6,14 @@ Reads events through a connected headset.
 Events can be:
 * Incoming SMS
 * Incoming MMS
+* Incoming e-mail
 * Wireless network connected / disconnected
 * ...
 
-One core concept is that Headset Harry will try to be smart about what
+One core concept is that Headset Harry tries to be smart about what
 language should be used for what events.
 
-Headset Harry will support all the languages you have TTS support for.
+Headset Harry supports all the languages you have TTS support for.
 
 # Building
 Before building the project you need to add an `app/fabric.properties`
@@ -33,7 +34,7 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 ## Releasing
 1. Do ```git tag``` and think about what the next version number should be.
 2. Do ```git tag --annotate version-1.2.3``` to set the next version number.
-3. ```./gradlew --no-daemon build```
+3. ```./gradlew --no-daemon clean build```
 4. Upload ```app/build/outputs/apk/app-release.apk``` to
   [Google Play](https://play.google.com/apps/publish/)
 5. ```git push --tags```
@@ -42,6 +43,8 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 * Make an icon / all the other graphics needed by Market
 
 # TODO Misc
+* If we get multiple events at once, speak one at a time rather than just
+messing up.
 * If the user is playing music, pause or turn down the music while the
 message is being read.
 * Report most popular notification apps to Google Analytics.
