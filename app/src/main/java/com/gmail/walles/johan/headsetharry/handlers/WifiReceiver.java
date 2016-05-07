@@ -22,7 +22,6 @@ package com.gmail.walles.johan.headsetharry.handlers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 
@@ -57,10 +56,7 @@ public class WifiReceiver extends BroadcastReceiver {
                 WifiPresenter.speakStatus(context, true);
                 return;
             }
-        } else if(ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
-            if(networkInfo.getType() == ConnectivityManager.TYPE_WIFI &&
-                networkInfo.getDetailedState() == NetworkInfo.DetailedState.DISCONNECTED)
-            {
+            if(networkInfo.getDetailedState() == NetworkInfo.DetailedState.DISCONNECTED) {
                 Timber.i("WifiReceiver speaking disconnected status for: %s", background);
                 WifiPresenter.speakStatus(context, false);
                 return;
