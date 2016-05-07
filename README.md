@@ -49,8 +49,6 @@ message is being read.
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
-* If we get multiple notifications at the same time, enqueue them and
-read them one after the other.
 * When a message comes in, enqueue it if a phone call is in progress.
 * When a phone call ends, read all events received during the call
 * What do we do if there's no TTS for a configured language when we try
