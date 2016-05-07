@@ -43,8 +43,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 * Make an icon / all the other graphics needed by Market
 
 # TODO Misc
-* If the user is playing music, pause or turn down the music while the
-message is being read.
 * "Calendar event: ..."
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
@@ -124,3 +122,5 @@ languages.
 * If we get multiple events at once, speak one at a time rather than just
 messing up.
 * Report most popular notification apps to Crashlytics.
+* If the user is playing music, pause or turn down the music while the
+message is being read.

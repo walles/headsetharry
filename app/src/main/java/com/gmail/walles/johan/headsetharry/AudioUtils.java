@@ -55,9 +55,14 @@ public class AudioUtils {
             return false;
         }
 
+        final AudioManager audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+        audioManager.requestAudioFocus(
+            null, audioManagerStream, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+
         TtsUtils.speak(context, announcement, audioManagerStream, new TtsUtils.CompletionListener() {
             @Override
             public void onSuccess() {
+                audioManager.abandonAudioFocus(null);
                 if (weEnabledBluetoothSco) {
                     stopBluetoothSco();
                 }
@@ -66,6 +71,7 @@ public class AudioUtils {
 
             @Override
             public void onFailure(@Nullable Locale locale, @NonNls String errorMessage) {
+                audioManager.abandonAudioFocus(null);
                 if (weEnabledBluetoothSco) {
                     stopBluetoothSco();
                 }
