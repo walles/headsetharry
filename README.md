@@ -43,8 +43,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 * Make an icon / all the other graphics needed by Market
 
 # TODO Misc
-* If we get multiple events at once, speak one at a time rather than just
-messing up.
 * If the user is playing music, pause or turn down the music while the
 message is being read.
 * Report most popular notification apps to Google Analytics.
@@ -126,3 +124,5 @@ chosen. Then, if that doesn't work, refer people to the system language
 settings or to Google Play Store for installing more engines /
 languages.
 * Announce Google Inbox incoming e-mail by reading system notifications
+* If we get multiple events at once, speak one at a time rather than just
+messing up.
