@@ -20,9 +20,7 @@
 package com.gmail.walles.johan.headsetharry;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -65,39 +63,24 @@ public class SpeakerService extends Service {
             return Service.START_NOT_STICKY;
         }
 
-        AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        int audioMode = audioManager.getMode();
-        if (audioManager.getMode() != AudioManager.MODE_NORMAL) {
-            Timber.i("Not speaking, audio mode not MODE_NORMAL: %d", audioMode);
-            return START_NOT_STICKY;
+        Optional<List<TextWithLocale>> announcement = toAnnouncement(intent);
+        if (!announcement.isPresent()) {
+            return Service.START_NOT_STICKY;
         }
 
-        if (audioManager.isBluetoothA2dpOn()) {
-            Timber.d("Speaking, A2DP enabled");
-            handleIntent(intent, false);
-            return Service.START_NOT_STICKY;
-        } else //noinspection deprecation
-            if (audioManager.isWiredHeadsetOn())
-        {
-            // isWiredHeadsetOn() is deprecated because "This is not a valid indication that audio
-            // playback is actually over the wired headset", but I've decided to keep using it until
-            // somebody can demonstrate to me what concrete problems can arise from using it for
-            // detecting where our speech will end up.
-            Timber.d("Speaking, wired headphones connected");
-            handleIntent(intent, false);
-            return Service.START_NOT_STICKY;
-        } else if (AudioUtils.enableBluetoothSco(this)) {
-            Timber.d("Speaking, SCO enabled");
-            handleIntent(intent, true);
-            return Service.START_NOT_STICKY;
-        } else if (EmulatorUtils.isRunningOnEmulator()) {
-            Timber.d("Speaking, running in emulator");
-            handleIntent(intent, false);
-            return Service.START_NOT_STICKY;
-        } else {
-            Timber.i("Not speaking; no headphones detected");
-            return START_NOT_STICKY;
-        }
+        AudioUtils.speakOverHeadset(this, announcement.get(), new TtsUtils.CompletionListener() {
+            @Override
+            public void onSuccess() {
+                // This method intentionally left blank
+            }
+
+            @Override
+            public void onFailure(@Nullable Locale locale, @NonNls String errorMessage) {
+                Timber.e(new Exception(errorMessage), "%s", errorMessage);
+            }
+        });
+
+        return START_NOT_STICKY;
     }
 
     boolean isDuplicate(List<TextWithLocale> announcement) {
@@ -155,51 +138,6 @@ public class SpeakerService extends Service {
         } catch (IllegalArgumentException e) {
             Timber.e(e, "Error parsing intent: %s", intent);
             return Optional.absent();
-        }
-    }
-
-    private void handleIntent(Intent intent, final boolean bluetoothSco) {
-        Optional<List<TextWithLocale>> announcement = toAnnouncement(intent);
-        if (!announcement.isPresent()) {
-            return;
-        }
-
-        int audioManagerStream;
-        if (bluetoothSco) {
-            audioManagerStream = AudioManager.STREAM_VOICE_CALL;
-        } else {
-            // With A2DP enabled, STREAM_MUSIC goes to the headset only. STREAM_NOTIFICATION goes to
-            // the phone's speaker as well, and we don't want that.
-            audioManagerStream = AudioManager.STREAM_MUSIC;
-        }
-
-        TtsUtils.speak(this, announcement.get(), audioManagerStream,
-            new TtsUtils.CompletionListener() {
-                @Override
-                public void onSuccess() {
-                    if (bluetoothSco) {
-                        stopBluetoothSco();
-                    }
-                }
-
-                @Override
-                public void onFailure(Locale locale, @NonNls String errorMessage) {
-                    Timber.e(new Exception(errorMessage), "%s", errorMessage);
-
-                    if (bluetoothSco) {
-                        stopBluetoothSco();
-                    }
-                }
-            });
-    }
-
-    private void stopBluetoothSco() {
-        AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager != null) {
-            @NonNls String status = audioManager.isBluetoothScoOn() ? "enabled": "disabled";
-            Timber.d("Disabling SCO, was %s", status);
-            audioManager.setBluetoothScoOn(false);
-            audioManager.stopBluetoothSco();
         }
     }
 
