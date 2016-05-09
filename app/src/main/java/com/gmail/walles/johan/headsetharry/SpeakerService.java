@@ -169,7 +169,7 @@ public class SpeakerService extends Service {
             } else if (MmsPresenter.TYPE.equals(type)) {
                 return Optional.of(new MmsPresenter(this, intent).getAnnouncement());
             } else if (WifiPresenter.TYPE.equals(type)) {
-                List<TextWithLocale> announcement = new WifiPresenter(this, intent).getAnnouncement();
+                List<TextWithLocale> announcement = new WifiPresenter(this).getAnnouncement();
                 if (isDuplicate(announcement)) {
                     Timber.w("Ignoring duplicate Wifi announcement <%s>", announcement);
                     return Optional.absent();

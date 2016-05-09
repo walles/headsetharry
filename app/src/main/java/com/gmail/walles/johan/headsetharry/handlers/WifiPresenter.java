@@ -42,19 +42,15 @@ public class WifiPresenter extends Presenter {
     @NonNls
     public final static String TYPE = "WiFi";
 
-    @NonNls
-    private final static String EXTRA_CONNECTED = "com.gmail.walles.johan.headsetharry.connected";
-
     private final List<TextWithLocale> announcement;
 
     /**
      * Speak current WiFi connectivity status.
      */
-    public static void speakStatus(Context context, boolean connected) {
+    public static void speakStatus(Context context) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
         intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
-        intent.putExtra(EXTRA_CONNECTED, connected);
         context.startService(intent);
     }
 
@@ -64,22 +60,12 @@ public class WifiPresenter extends Presenter {
         return announcement;
     }
 
-    public WifiPresenter(Context context, Intent intent) {
+    public WifiPresenter(Context context) {
         super(context);
-
-        if (!intent.hasExtra(EXTRA_CONNECTED)) {
-            throw new IllegalArgumentException("Wifi intent without connected status");
-        }
-        boolean connected = intent.getBooleanExtra(EXTRA_CONNECTED, false);
 
         Translations translations = new Translations(context, Locale.getDefault(),
             R.string.wifi_disconnected,
             R.string.connected_to_unnamed_network);
-
-        if (!connected) {
-            announcement = translations.format(R.string.wifi_disconnected);
-            return;
-        }
 
         WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -88,8 +74,6 @@ public class WifiPresenter extends Presenter {
         // Explanation of the "<unknown ssid>" magic constant:
         // http://developer.android.com/reference/android/net/wifi/WifiInfo.html#getSSID()
         if ("<unknown ssid>".equals(ssid)) {
-            @NonNls String problem = "Got Wifi-connected event but wifi seems disconnected";
-            Timber.w(new Exception(problem), problem);
             announcement = translations.format(R.string.wifi_disconnected);
             return;
         }

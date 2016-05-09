@@ -51,15 +51,12 @@ public class WifiReceiver extends BroadcastReceiver {
         // These if statements and this functionality is heavily inspired by
         // http://stackoverflow.com/a/5890104/473672
         if(WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
-            if(networkInfo.getDetailedState() == NetworkInfo.DetailedState.CONNECTED) {
-                Timber.i("WifiReceiver speaking connected status for: %s", background);
-                WifiPresenter.speakStatus(context, true);
-                return;
-            }
-            if(networkInfo.getDetailedState() == NetworkInfo.DetailedState.DISCONNECTED) {
-                Timber.i("WifiReceiver speaking disconnected status for: %s", background);
-                WifiPresenter.speakStatus(context, false);
-                return;
+            switch (networkInfo.getDetailedState()) {
+                case CONNECTED:
+                case DISCONNECTED:
+                    Timber.i("WifiReceiver speaking status for: %s", background);
+                    WifiPresenter.speakStatus(context);
+                    return;
             }
         } else {
             Timber.w("WifiReceiver got unexpected action %s", intent.getAction());
