@@ -99,9 +99,15 @@ public class CalendarPresenter extends Presenter {
     private List<TextWithLocale> createAnnouncementForEventId(int calendarEventId) {
         try (Cursor cursor = context.getContentResolver().query(
             CalendarContract.Events.CONTENT_URI,
+
             new String[]{CalendarContract.Events.TITLE, CalendarContract.Events.DESCRIPTION},
-            CalendarContract.Events._ID + "=?",
-            new String[]{Integer.toString(calendarEventId)}, null))
+
+            String.format(Locale.ENGLISH, "%s=? AND %s!=?", //NON-NLS
+                CalendarContract.Events._ID, CalendarContract.Events.SELF_ATTENDEE_STATUS),
+            new String[]{
+                Integer.toString(calendarEventId), Integer.toString(CalendarContract.Attendees.ATTENDEE_STATUS_DECLINED)},
+
+            null))
         {
             if (cursor == null) {
                 throw new NullPointerException("Got null cursor from calendar query <event from event ID>");
