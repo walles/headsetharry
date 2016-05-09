@@ -65,12 +65,12 @@ public class LoggingUtils {
                 tag = "HeadsetHarry";
             }
 
-            // This call logs to *both* Crashlytics and LogCat
+            // This call logs to *both* Crashlytics and LogCat, and will log the Exception backtrace
+            // to LogCat on exceptions.
             Crashlytics.log(priority, tag, message);
 
             if (t != null) {
                 Crashlytics.logException(t);
-                Log.println(priority, tag, message + "\n" + Log.getStackTraceString(t));
             }
         }
     }
