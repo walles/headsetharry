@@ -34,6 +34,7 @@ import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -49,7 +50,7 @@ public class CalendarPresenter extends Presenter {
 
     private final List<TextWithLocale> announcement;
 
-    public static void speak(Context context, long alarmTime) {
+    public static void speak(Context context, Date alarmTime) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
         intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
@@ -60,8 +61,8 @@ public class CalendarPresenter extends Presenter {
     public CalendarPresenter(Context context, Intent intent) {
         super(context);
 
-        long alarmTime = intent.getLongExtra(EXTRA_ALARM_TIME, -1);
-        if (alarmTime == -1) {
+        Date alarmTime = (Date)intent.getSerializableExtra(EXTRA_ALARM_TIME);
+        if (alarmTime == null) {
             throw new IllegalArgumentException(intent.toString());
         }
 
@@ -72,7 +73,7 @@ public class CalendarPresenter extends Presenter {
             CalendarContract.CalendarAlerts.CONTENT_URI_BY_INSTANCE,
             new String[]{CalendarContract.CalendarAlerts.EVENT_ID},
             CalendarContract.CalendarAlerts.ALARM_TIME + "=?",
-            new String[]{Long.toString(alarmTime)}, null))
+            new String[]{Long.toString(alarmTime.getTime())}, null))
         {
             if (cursor == null) {
                 throw new NullPointerException("Got null cursor from calendar query <id from alarm time>");
@@ -91,7 +92,7 @@ public class CalendarPresenter extends Presenter {
         }
 
         if (announcement.isEmpty()) {
-            throw new IllegalArgumentException("No calendar events found for alarm time " + alarmTime);
+            Timber.d("No non-declined events found for alarm time %s", alarmTime);
         }
     }
 

@@ -178,7 +178,15 @@ public class SpeakerService extends Service {
             } else if (EmailPresenter.TYPE.equals(type)) {
                 return Optional.of(new EmailPresenter(this, intent).getAnnouncement());
             } else if (CalendarPresenter.TYPE.equals(type)) {
-                return Optional.of(new CalendarPresenter(this, intent).getAnnouncement());
+                List<TextWithLocale> announcement = new CalendarPresenter(this, intent).getAnnouncement();
+                if (announcement.isEmpty()) {
+                    // There are two known causes for this:
+                    // 1. We were notified about a declined event
+                    // 2. When the user edits an event on the device, we get fake event notifications
+                    //   that we can only ignore
+                    return Optional.absent();
+                }
+                return Optional.of(announcement);
             } else {
                 Timber.w("Ignoring incoming intent of type %s", type);
                 return Optional.absent();

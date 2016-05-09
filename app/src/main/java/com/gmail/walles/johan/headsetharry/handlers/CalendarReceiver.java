@@ -27,6 +27,8 @@ import android.provider.CalendarContract;
 
 import com.gmail.walles.johan.headsetharry.LoggingUtils;
 
+import java.util.Date;
+
 import timber.log.Timber;
 
 public class CalendarReceiver extends BroadcastReceiver {
@@ -34,10 +36,21 @@ public class CalendarReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         LoggingUtils.setUpLogging(context);
 
+        // Findings: These are always the same:
+        // intent.getData().getLastPathSegment()
+        // intent.getExtras().get("alarmTime")
+        // intent.getExtras().get("android.intent.extra.ALARM_TARGET_TIME")
+        //
+        // That holds both for actual alarms and the fake ones we get when somebody modifies an
+        // event on the device.
+        //
+        // Regarding intent.getExtras().get("android.intent.extra.ALARM_TARGET_TIME"), I've only
+        // seen the value 1 for that, both for fake and for real alarms.
+        //   /johan.walles@gmail.com - 2016May09
         Timber.d("Got calendar intent: %s", intent);
         Timber.d("Calendar intent extras: %s", intent.getExtras());
         for (String key: intent.getExtras().keySet()) {
-            Timber.d("   Calendar intent extras key: %s", key);
+            Timber.d("   Calendar intent extras: %s=<%s>", key, intent.getExtras().get(key));
         }
 
         if (!intent.getAction().equals(CalendarContract.ACTION_EVENT_REMINDER)) {
@@ -45,7 +58,8 @@ public class CalendarReceiver extends BroadcastReceiver {
         }
 
         Uri uri = intent.getData();
-        String alarmTime = uri.getLastPathSegment();
-        CalendarPresenter.speak(context, Long.parseLong(alarmTime));
+        Date alarmTime = new Date(Long.parseLong(uri.getLastPathSegment()));
+        Timber.d("Got calendar reminder for %s", alarmTime);
+        CalendarPresenter.speak(context, alarmTime);
     }
 }
