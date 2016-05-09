@@ -35,6 +35,9 @@
     -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
+    <!-- For announcing calendar events -->
+    <uses-permission android:name="android.permission.READ_CALENDAR"/>
+
     <!-- For Crashlytics -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -75,6 +78,13 @@
         <receiver android:name=".handlers.WifiReceiver">
             <intent-filter>
                 <action android:name="android.net.wifi.STATE_CHANGE"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".handlers.CalendarReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.EVENT_REMINDER"/>
+                <data android:scheme="content"/>
             </intent-filter>
         </receiver>
 

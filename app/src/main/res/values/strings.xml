@@ -35,4 +35,6 @@
 
     <string name="email_from_who_colon_subject">Email from %1$s: %2$s</string>
     <string name="email_from_whom">Email from %s</string>
+
+    <string name="calendar_event_colon_what">Calendar event: %s</string>
 </resources>

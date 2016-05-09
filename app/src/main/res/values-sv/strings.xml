@@ -31,4 +31,5 @@
     <string name="connected_to_networkname">Ansluten till %s</string>
     <string name="email_from_who_colon_subject">Elektrisk post från %1$s: %2$s</string>
     <string name="email_from_whom">Elektrisk post från %s</string>
+    <string name="calendar_event_colon_what">Kalenderhändelse: %s</string>
 </resources>

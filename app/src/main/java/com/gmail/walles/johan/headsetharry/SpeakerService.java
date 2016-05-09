@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.gmail.walles.johan.headsetharry.handlers.CalendarPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.EmailPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.MmsPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
@@ -95,6 +96,7 @@ public class SpeakerService extends Service {
         }
 
         List<TextWithLocale> announcement = announcementQueue.remove(0);
+        // FIXME: Log to Crashlytics if the enqueued announcement has been in the queue for [too long]
         boolean speechStarted = AudioUtils.speakOverHeadset(this, announcement, new TtsUtils.CompletionListener() {
             @Override
             public void onSuccess() {
@@ -175,6 +177,8 @@ public class SpeakerService extends Service {
                 return Optional.of(announcement);
             } else if (EmailPresenter.TYPE.equals(type)) {
                 return Optional.of(new EmailPresenter(this, intent).getAnnouncement());
+            } else if (CalendarPresenter.TYPE.equals(type)) {
+                return Optional.of(new CalendarPresenter(this, intent).getAnnouncement());
             } else {
                 Timber.w("Ignoring incoming intent of type %s", type);
                 return Optional.absent();
