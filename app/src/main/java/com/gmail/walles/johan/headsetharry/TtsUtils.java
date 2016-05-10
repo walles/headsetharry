@@ -89,7 +89,15 @@ public class TtsUtils {
             @Override
             public void onError(String utteranceId) {
                 @NonNls String errorMessage = "Speech failed: <" + toSpeak + ">";
-                Timber.e(new Exception(errorMessage), errorMessage);
+                tts.shutdown();
+
+                completionListener.onFailure(toSpeak.locale, errorMessage);
+            }
+
+            @Override
+            public void onStop(String utteranceId, boolean interrupted) {
+                @NonNls String notCompleted = interrupted ? "interrupted" : "dropped";
+                @NonNls String errorMessage = "Speech " + notCompleted + ": <" + toSpeak + ">";
                 tts.shutdown();
 
                 completionListener.onFailure(toSpeak.locale, errorMessage);
@@ -103,7 +111,12 @@ public class TtsUtils {
             Integer.toString(audioManagerStream));
 
         //noinspection deprecation
-        tts.speak(toSpeak.text, TextToSpeech.QUEUE_ADD, params);
+        int speechStatus = tts.speak(toSpeak.text, TextToSpeech.QUEUE_ADD, params);
+        if (speechStatus != TextToSpeech.SUCCESS) {
+            completionListener.onFailure(
+                toSpeak.locale, "Speech enqueueing operation failed: " + speechStatus);
+            tts.shutdown();
+        }
     }
 
     public static void speak(final Context context,
@@ -112,9 +125,7 @@ public class TtsUtils {
                              final CompletionListener completionListener)
     {
         if (texts.isEmpty()) {
-            @NonNls String message = "Nothing to say, never mind";
-            Timber.w(new Exception(message), message);
-            completionListener.onFailure(null, "Nothing to say");
+            completionListener.onFailure(null, "Nothing to say, never mind");
             return;
         }
 

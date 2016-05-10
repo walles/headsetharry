@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import timber.log.Timber;
-
 /**
  * Fetch strings for a given locale.
  */
@@ -67,23 +65,17 @@ public class Translations {
             res.updateConfiguration(conf, null); // second arg null means don't change display metrics
             Locale foundLocale = LocaleUtils.parseLocaleString(res.getString(R.string.locale));
 
-            if (!foundLocale.getLanguage().equals(locale.getLanguage())) {
+            if (!foundLocale.getLanguage().equals(conf.locale.getLanguage())) {
                 Answers.getInstance().
                     logCustom(
                         new CustomEvent("Retrieve Translations"). //NON-NLS
                             putCustomAttribute("Requested Translations Missing", locale.toString())); //NON-NLS
 
-                String message =
-                    String.format(
-                        "No translations for locale <%s>, trying system locale <%s>", //NON-NLS
-                        locale, Locale.getDefault());
-                Timber.w(new Exception(message), message);
-
                 conf.locale = Locale.getDefault();
                 res.updateConfiguration(conf, null); // second arg null means don't change display metrics
                 foundLocale = LocaleUtils.parseLocaleString(res.getString(R.string.locale));
 
-                if (!foundLocale.getLanguage().equals(Locale.getDefault().getLanguage())) {
+                if (!foundLocale.getLanguage().equals(conf.locale.getLanguage())) {
                     Answers.getInstance().
                         logCustom(
                             new CustomEvent("Retrieve Translations"). //NON-NLS
