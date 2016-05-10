@@ -51,7 +51,17 @@ public class SpeakerService extends Service {
     private List<TextWithLocale> duplicateBase;
     private long duplicateBaseTimestamp;
 
-    private final List<List<TextWithLocale>> announcementQueue = new LinkedList<>();
+    private final List<TimestampedAnnouncement> announcementQueue = new LinkedList<>();
+
+    private static class TimestampedAnnouncement {
+        public final long timestamp;
+        public final List<TextWithLocale> announcement;
+
+        public TimestampedAnnouncement(List<TextWithLocale> announcement) {
+            this.timestamp = System.currentTimeMillis();
+            this.announcement = announcement;
+        }
+    }
 
     /**
      * 0 means not speaking.
@@ -82,7 +92,12 @@ public class SpeakerService extends Service {
     }
 
     private void enqueue(List<TextWithLocale> announcement) {
-        announcementQueue.add(announcement);
+        if (!announcementQueue.isEmpty()) {
+            long oldestAnnouncementAgeMs = System.currentTimeMillis() - announcementQueue.get(0).timestamp;
+            @NonNls String message = "Oldest enqueued announcement is " + oldestAnnouncementAgeMs + "ms old";
+            Timber.w(new Exception(message), "%s", message);
+        }
+        announcementQueue.add(new TimestampedAnnouncement(announcement));
         dequeue();
     }
 
@@ -94,7 +109,7 @@ public class SpeakerService extends Service {
             return;
         }
 
-        List<TextWithLocale> announcement = announcementQueue.remove(0);
+        List<TextWithLocale> announcement = announcementQueue.remove(0).announcement;
         boolean speechStarted = AudioUtils.speakOverHeadset(this, announcement, new TtsUtils.CompletionListener() {
             @Override
             public void onSuccess() {
