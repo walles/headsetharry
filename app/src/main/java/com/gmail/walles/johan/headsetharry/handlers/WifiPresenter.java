@@ -64,12 +64,18 @@ public class WifiPresenter extends Presenter {
         super(context);
 
         Translations translations = new Translations(context, Locale.getDefault(),
-            R.string.wifi_disconnected,
-            R.string.connected_to_unnamed_network);
+            R.string.wifi_disconnected);
 
         WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         @NonNls String ssid = wifiInfo.getSSID();
+
+        if (TextUtils.isEmpty(ssid)) {
+            // This is apparently how it used to work:
+            // https://code.google.com/p/android/issues/detail?id=43336
+            announcement = translations.format(R.string.wifi_disconnected);
+            return;
+        }
 
         // Explanation of the "<unknown ssid>" magic constant:
         // http://developer.android.com/reference/android/net/wifi/WifiInfo.html#getSSID()
@@ -81,9 +87,9 @@ public class WifiPresenter extends Presenter {
         // Trim surrounding double quotes if applicable
         ssid = spacify(ssid.replaceAll("^\"|\"$", "")).toString();
         if (TextUtils.isEmpty(ssid)) {
-            @NonNls String problem = "Got empty SSID when supposedly connected";
-            Timber.w(new Exception(problem), problem);
-            announcement = translations.format(R.string.connected_to_unnamed_network);
+            @NonNls String problem = "Got empty SSID when supposedly connected: " + ssid;
+            Timber.w(new Exception(problem), "%s", problem);
+            announcement = translations.format(R.string.wifi_disconnected);
             return;
         }
 
