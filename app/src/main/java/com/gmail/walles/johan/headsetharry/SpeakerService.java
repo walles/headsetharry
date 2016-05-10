@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.gmail.walles.johan.headsetharry.handlers.CalendarPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.EmailPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.MmsPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
@@ -190,6 +191,16 @@ public class SpeakerService extends Service {
                 return Optional.of(announcement);
             } else if (EmailPresenter.TYPE.equals(type)) {
                 return Optional.of(new EmailPresenter(this, intent).getAnnouncement());
+            } else if (CalendarPresenter.TYPE.equals(type)) {
+                List<TextWithLocale> announcement = new CalendarPresenter(this, intent).getAnnouncement();
+                if (announcement.isEmpty()) {
+                    // There are two known causes for this:
+                    // 1. We were notified about a declined event
+                    // 2. When the user edits an event on the device, we get fake event notifications
+                    //   that we can only ignore
+                    return Optional.absent();
+                }
+                return Optional.of(announcement);
             } else {
                 Timber.w("Ignoring incoming intent of type %s", type);
                 return Optional.absent();
