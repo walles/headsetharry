@@ -43,7 +43,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 * Make an icon / all the other graphics needed by Market
 
 # TODO Misc
-* "Calendar event: ..."
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
@@ -51,10 +50,8 @@ https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.
 * When a phone call ends, read all events received during the call
 * What do we do if there's no TTS for a configured language when we try
 to say something? Something notification based perhaps.
-* Enable selecting language flavors. US or GB English? Swedish or
-Finnish Swedish?
-* In Settings, should it be possible to tag contacts with their most
-likely language?
+* Enable selecting language flavors. US or GB English? Swedish Swedish
+or Finnish Swedish?
 * GMail: "Mail from NN: SUBJECT"
 * "Phone call from NN" (NN is name if in contacts, not number)
 * Think about long messages, should we have an upper limit on how much
@@ -124,3 +121,4 @@ messing up.
 * Report most popular notification apps to Crashlytics.
 * If the user is playing music, pause or turn down the music while the
 message is being read.
+* "Calendar event: ..."
