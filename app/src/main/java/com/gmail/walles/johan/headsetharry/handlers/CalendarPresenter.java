@@ -34,6 +34,7 @@ import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,6 +65,14 @@ public class CalendarPresenter extends Presenter {
         Date alarmTime = (Date)intent.getSerializableExtra(EXTRA_ALARM_TIME);
         if (alarmTime == null) {
             throw new IllegalArgumentException(intent.toString());
+        }
+
+        // We're getting announcements at random times for things, so unless this date is within a
+        // minute from or before [now] we should just drop it
+        if (Math.abs(alarmTime.getTime() - System.currentTimeMillis()) > 60000) {
+            Timber.i("Dropping calendar alarm for %s", alarmTime);
+            announcement = Collections.emptyList();
+            return;
         }
 
         announcement = new LinkedList<>();
