@@ -8,6 +8,7 @@ Events can be:
 * Incoming MMS
 * Incoming e-mail
 * Wireless network connected / disconnected
+* Calendar events
 * ...
 
 One core concept is that Headset Harry tries to be smart about what
@@ -40,6 +41,8 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
+* Make it possible for users to send me the most recent log excerpt when
+they think Harry misbehaves.
 * I have a feeling that after I started using this app, sometimes voice
 calls over Bluetooth SCO don't produce any sound. Try to repro this and
 determine if we should do something differently.

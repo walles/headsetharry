@@ -48,7 +48,7 @@ public class SpeakerService extends Service {
     @NonNls
     public static final String EXTRA_TYPE = "com.gmail.walles.johan.headsetharry.type";
 
-    private long isDuplicateTimeoutMs = 10000;
+    private long isDuplicateTimeoutMs = 60000;
     private List<TextWithLocale> duplicateBase;
     private long duplicateBaseTimestamp;
 
