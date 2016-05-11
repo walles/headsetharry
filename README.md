@@ -48,7 +48,6 @@ calls over Bluetooth SCO don't produce any sound. Try to repro this and
 determine if we should do something differently.
 * Get on top of not getting notifications when phrases end; we don't
 want to leave things hanging in our queue.
-* Make an icon / all the other graphics needed by Market
 
 # TODO Misc
 * Report battery status for attached bluetooth devices,
@@ -130,3 +129,4 @@ messing up.
 * If the user is playing music, pause or turn down the music while the
 message is being read.
 * "Calendar event: ..."
+* Make an icon / all the other graphics needed by Market
