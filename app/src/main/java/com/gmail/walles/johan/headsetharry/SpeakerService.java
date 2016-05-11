@@ -20,6 +20,7 @@
 package com.gmail.walles.johan.headsetharry;
 
 import android.app.Service;
+import android.content.ComponentCallbacks2;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -80,6 +81,13 @@ public class SpeakerService extends Service {
     public void onDestroy() {
         Timber.d("SpeakerService stopping");
         super.onDestroy();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        Timber.d("SpeakerService notified of low memory, level %d/%d",
+            level, ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+        super.onTrimMemory(level);
     }
 
     @Override
