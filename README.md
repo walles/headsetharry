@@ -40,6 +40,11 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
+* I have a feeling that after I started using this app, sometimes voice
+calls over Bluetooth SCO don't produce any sound. Try to repro this and
+determine if we should do something differently.
+* Get on top of not getting notifications when phrases end; we don't
+want to leave things hanging in our queue.
 * Make an icon / all the other graphics needed by Market
 
 # TODO Misc

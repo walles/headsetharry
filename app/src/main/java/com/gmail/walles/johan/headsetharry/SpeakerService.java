@@ -73,6 +73,13 @@ public class SpeakerService extends Service {
     public void onCreate() {
         super.onCreate();
         LoggingUtils.setUpLogging(this);
+        Timber.d("SpeakerService started");
+    }
+
+    @Override
+    public void onDestroy() {
+        Timber.d("SpeakerService stopping");
+        super.onDestroy();
     }
 
     @Override
