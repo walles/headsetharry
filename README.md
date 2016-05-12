@@ -46,9 +46,6 @@ they think Harry misbehaves.
 * I have a feeling that after I started using this app, sometimes voice
 calls over Bluetooth SCO don't produce any sound. Try to repro this and
 determine if we should do something differently.
-* Get on top of the UtteranceProgressListener not getting notified
-reliably when phrases end; we don't want to leave things hanging in our
-queue.
 
 # TODO Misc
 * Make a preferences checkbox for calendar events. If the user tries to
@@ -136,3 +133,6 @@ messing up.
 message is being read.
 * "Calendar event: ..."
 * Make an icon / all the other graphics needed by Market
+* Get on top of the UtteranceProgressListener not getting notified
+reliably when phrases end; we don't want to leave things hanging in our
+queue.
