@@ -259,7 +259,7 @@ public class LogCollector {
         for (File logFile : logFiles) {
             returnMe.append("Log file: ");
             returnMe.append(logFile.getAbsolutePath());
-            returnMe.append("\n");
+            returnMe.append('\n');
             try {
                 // Scanner trick to read whole file into string from:
                 // http://stackoverflow.com/a/7449797/473672
