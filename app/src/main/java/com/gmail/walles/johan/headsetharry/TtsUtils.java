@@ -230,6 +230,8 @@ public class TtsUtils {
                         sortEngines(someTts[0].getEngines(), someTts[0].getDefaultEngine());
                     Timber.d("System TTS packages: %s", remainingEnginePackageNames);
 
+                    // FIXME: Do someTts[0].shutdown(); here
+
                     // Start going through the remaining engine package names
                     tryNextEngine();
                 }

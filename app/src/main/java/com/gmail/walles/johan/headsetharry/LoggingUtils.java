@@ -50,6 +50,8 @@ public class LoggingUtils {
             Timber.plant(tree);
             Timber.v("Logging tree planted: %s", tree.getClass());
         }
+
+        LogCollector.keepAlive(context);
     }
 
     private static class CrashlyticsTree extends Timber.Tree {
