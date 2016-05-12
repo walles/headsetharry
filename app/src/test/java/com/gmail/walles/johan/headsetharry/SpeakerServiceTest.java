@@ -41,12 +41,12 @@ public class SpeakerServiceTest {
         SpeakerService testMe = new SpeakerService();
 
         // Tests that the initial comparison is false
-        Assert.assertFalse(testMe.isDuplicate(toList(SAMPLE_TEXT)));
-        Assert.assertTrue(testMe.isDuplicate(toList(SAMPLE_TEXT)));
+        Assert.assertFalse(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+        Assert.assertTrue(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
 
         // Tests that following comparisons are false
-        Assert.assertFalse(testMe.isDuplicate(toList("gris")));
-        Assert.assertTrue(testMe.isDuplicate(toList("gris")));
+        Assert.assertFalse(testMe.isDuplicate(toList("gris"), true));
+        Assert.assertTrue(testMe.isDuplicate(toList("gris"), true));
     }
 
     @Test
@@ -54,12 +54,29 @@ public class SpeakerServiceTest {
         SpeakerService testMe = new SpeakerService();
         testMe.setIsDuplicateTimeoutMs(50);
 
-        Assert.assertFalse(testMe.isDuplicate(toList(SAMPLE_TEXT)));
-        Assert.assertTrue(testMe.isDuplicate(toList(SAMPLE_TEXT)));
+        Assert.assertFalse(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+        Assert.assertTrue(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
 
         Thread.sleep(100);
         Assert.assertFalse("Repetitions should be OK after the timeout",
-            testMe.isDuplicate(toList(SAMPLE_TEXT)));
-        Assert.assertTrue(testMe.isDuplicate(toList(SAMPLE_TEXT)));
+            testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+        Assert.assertTrue(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+    }
+
+    @Test
+    public void testIsDuplicateDisconnected() throws Exception {
+        SpeakerService testMe = new SpeakerService();
+        Assert.assertFalse("First time should never be a duplicate", testMe.isDuplicate(null, false));
+        Assert.assertTrue(testMe.isDuplicate(null, false));
+
+        // As long as we're disconnected we should always say it's a duplicate
+        Assert.assertTrue(testMe.isDuplicate(toList("something"), false));
+        Assert.assertTrue(testMe.isDuplicate(toList("anything"), false));
+
+        testMe.setIsDuplicateTimeoutMs(50);
+        Thread.sleep(100);
+        Assert.assertTrue("Disconnected dups shouldn't time out", testMe.isDuplicate(toList("anything"), false));
+
+        Assert.assertFalse(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
     }
 }

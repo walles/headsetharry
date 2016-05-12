@@ -52,6 +52,7 @@ public class SpeakerService extends Service {
     private long isDuplicateTimeoutMs = 60000;
     private List<TextWithLocale> duplicateBase;
     private long duplicateBaseTimestamp;
+    private boolean duplicateIsConnected;
 
     private final List<TimestampedAnnouncement> announcementQueue = new LinkedList<>();
 
@@ -158,11 +159,23 @@ public class SpeakerService extends Service {
         return true;
     }
 
-    boolean isDuplicate(List<TextWithLocale> announcement) {
+    boolean isDuplicate(List<TextWithLocale> announcement, boolean isConnected) {
+        if (duplicateBaseTimestamp == 0) {
+            duplicateBase = announcement;
+            duplicateBaseTimestamp = System.currentTimeMillis();
+            duplicateIsConnected = isConnected;
+            return false;
+        }
+
+        if ((!duplicateIsConnected) && (!isConnected)) {
+            return true;
+        }
+
         if (!announcement.equals(duplicateBase)) {
             // Not the same message, start over
             duplicateBase = announcement;
             duplicateBaseTimestamp = System.currentTimeMillis();
+            duplicateIsConnected = isConnected;
             return false;
         }
 
@@ -171,6 +184,7 @@ public class SpeakerService extends Service {
             // This is the same message, but our duplicate has timed out, start over
             duplicateBase = announcement;
             duplicateBaseTimestamp = System.currentTimeMillis();
+            duplicateIsConnected = isConnected;
             return false;
         }
 
@@ -198,12 +212,12 @@ public class SpeakerService extends Service {
             } else if (MmsPresenter.TYPE.equals(type)) {
                 return Optional.of(new MmsPresenter(this, intent).getAnnouncement());
             } else if (WifiPresenter.TYPE.equals(type)) {
-                List<TextWithLocale> announcement = new WifiPresenter(this).getAnnouncement();
-                if (isDuplicate(announcement)) {
-                    Timber.w("Ignoring duplicate Wifi announcement <%s>", announcement);
+                WifiPresenter wifiPresenter = new WifiPresenter(this);
+                if (isDuplicate(wifiPresenter.getAnnouncement(), wifiPresenter.isConnected())) {
+                    Timber.w("Ignoring duplicate Wifi announcement <%s>", wifiPresenter.getAnnouncement());
                     return Optional.absent();
                 }
-                return Optional.of(announcement);
+                return Optional.of(wifiPresenter.getAnnouncement());
             } else if (EmailPresenter.TYPE.equals(type)) {
                 return Optional.of(new EmailPresenter(this, intent).getAnnouncement());
             } else if (CalendarPresenter.TYPE.equals(type)) {

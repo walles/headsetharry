@@ -51,6 +51,11 @@ reliably when phrases end; we don't want to leave things hanging in our
 queue.
 
 # TODO Misc
+* Make a preferences checkbox for calendar events. If the user tries to
+enable it when we don't have READ_CALENDAR permission on Marshmallow+,
+take the user to the give-us-permissions screen via a suitable dialog
+box with an explanation. Make sure it's always disabled when we don't
+have permissions.
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml

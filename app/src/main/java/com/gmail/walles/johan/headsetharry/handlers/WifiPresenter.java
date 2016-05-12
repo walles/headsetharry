@@ -43,6 +43,7 @@ public class WifiPresenter extends Presenter {
     public final static String TYPE = "WiFi";
 
     private final List<TextWithLocale> announcement;
+    private final boolean connected;
 
     /**
      * Speak current WiFi connectivity status.
@@ -60,6 +61,10 @@ public class WifiPresenter extends Presenter {
         return announcement;
     }
 
+    public boolean isConnected() {
+        return connected;
+    }
+
     public WifiPresenter(Context context) {
         super(context);
 
@@ -74,6 +79,7 @@ public class WifiPresenter extends Presenter {
             // This is apparently how it used to work:
             // https://code.google.com/p/android/issues/detail?id=43336
             announcement = translations.format(R.string.wifi_disconnected);
+            connected = false;
             return;
         }
 
@@ -81,6 +87,7 @@ public class WifiPresenter extends Presenter {
         // http://developer.android.com/reference/android/net/wifi/WifiInfo.html#getSSID()
         if ("<unknown ssid>".equals(ssid)) {
             announcement = translations.format(R.string.wifi_disconnected);
+            connected = false;
             return;
         }
 
@@ -90,10 +97,12 @@ public class WifiPresenter extends Presenter {
             @NonNls String problem = "Got empty SSID when supposedly connected: " + ssid;
             Timber.w(new Exception(problem), "%s", problem);
             announcement = translations.format(R.string.wifi_disconnected);
+            connected = false;
             return;
         }
 
         announcement = createWifiAnnouncement(ssid);
+        connected = true;
     }
 
     /**
