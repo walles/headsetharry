@@ -230,7 +230,10 @@ public class TtsUtils {
                         sortEngines(someTts[0].getEngines(), someTts[0].getDefaultEngine());
                     Timber.d("System TTS packages: %s", remainingEnginePackageNames);
 
-                    // FIXME: Do someTts[0].shutdown(); here
+                    // We only wanted it for listing other installed engines, and we have that list
+                    // now. Bye.
+                    someTts[0].shutdown();
+                    someTts[0] = null;
 
                     // Start going through the remaining engine package names
                     tryNextEngine();
