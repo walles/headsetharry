@@ -185,13 +185,33 @@ public class EmailPresenter extends Presenter {
             body = null;
         }
 
-        intent.putExtra(EXTRA_SENDER, sender);
+        intent.putExtra(EXTRA_SENDER, censorSender(sender));
         intent.putExtra(EXTRA_SUBJECT, subject);
         intent.putExtra(EXTRA_BODY, body);
 
         context.startService(intent);
 
         return true;
+    }
+
+    /**
+     * If sender contains ": ", remove everything before and including that.
+     * <p/>
+     * The rationale is that Google Inbox sender is often prefixed with the bundle name, and we
+     * don't want to read that as part of the sender.
+     */
+    static CharSequence censorSender(@Nullable CharSequence sender) {
+        if (sender == null) {
+            return null;
+        }
+
+        String senderString = sender.toString();
+        int colonSpaceIndex = senderString.indexOf(": ");
+        if (colonSpaceIndex == -1) {
+            return sender;
+        }
+
+        return senderString.substring(colonSpaceIndex + ": ".length());
     }
 
     @NonNls

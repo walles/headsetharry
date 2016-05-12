@@ -41,9 +41,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
-* If an Inbox sender name contains ":", remove everything up to and
-including the first colon. That part is most often the name of an Inbox
-label / bundle / whatever they call them.
 * I have a feeling that after I started using this app, sometimes voice
 calls over Bluetooth SCO don't produce any sound. Try to repro this and
 determine if we should do something differently.
@@ -127,8 +124,8 @@ chosen. Then, if that doesn't work, refer people to the system language
 settings or to Google Play Store for installing more engines /
 languages.
 * Announce Google Inbox incoming e-mail by reading system notifications
-* If we get multiple events at once, speak one at a time rather than just
-messing up.
+* If we get multiple events at once, speak one at a time rather than
+just messing up.
 * Report most popular notification apps to Crashlytics.
 * If the user is playing music, pause or turn down the music while the
 message is being read.
@@ -139,3 +136,6 @@ reliably when phrases end; we don't want to leave things hanging in our
 queue.
 * Make it possible for users to send me the most recent log excerpt when
 they think Harry misbehaves.
+* If an Inbox sender name contains ":", remove everything up to and
+including the first colon. That part is most often the name of an Inbox
+label / bundle / whatever they call them.

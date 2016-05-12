@@ -17,16 +17,24 @@
  * along with Headset Harry.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.gmail.walles.johan.headsetharry;
+package com.gmail.walles.johan.headsetharry.handlers;
 
-import android.app.Application;
-import android.test.ApplicationTestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
-/**
- * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
- */
-public class ApplicationTest extends ApplicationTestCase<Application> {
-    public ApplicationTest() {
-        super(Application.class);
+import static org.junit.Assert.assertNull;
+
+public class EmailPresenterTest {
+    @Test
+    public void testCensorSender() {
+        assertNull(EmailPresenter.censorSender(null));
+        Assert.assertEquals("", EmailPresenter.censorSender(""));
+        Assert.assertEquals("hej", EmailPresenter.censorSender("hej"));
+
+        Assert.assertEquals("hej", EmailPresenter.censorSender("something: hej"));
+
+        Assert.assertEquals(": hej", EmailPresenter.censorSender("something: : hej"));
+
+        Assert.assertEquals("", EmailPresenter.censorSender("something: "));
     }
 }
