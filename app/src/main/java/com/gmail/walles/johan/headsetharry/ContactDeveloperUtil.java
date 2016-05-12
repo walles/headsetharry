@@ -98,7 +98,6 @@ public class ContactDeveloperUtil {
                                  CharSequence attachmentText)
     {
         final Intent emailIntent = getSendMailIntent(context, subject, attachmentText);
-        if (emailIntent == null) return;
 
         try {
             context.startActivity(emailIntent);

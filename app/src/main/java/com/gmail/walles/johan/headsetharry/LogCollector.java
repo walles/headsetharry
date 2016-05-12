@@ -70,6 +70,9 @@ public class LogCollector {
         long newest = 0;
 
         File[] logFiles = getLogDir(context).listFiles();
+        if (logFiles == null) {
+            logFiles = new File[0];
+        }
         for (File logfile : logFiles) {
             if (!logfile.isFile()) {
                 continue;
@@ -155,7 +158,13 @@ public class LogCollector {
         final String logcatCommandLine[] = createLogcatCommandLine(context);
 
         Collection<Integer> pids = new LinkedList<>();
-        for (File directory : new File("/proc").listFiles()) {
+        File[] files = new File("/proc").listFiles();
+        if (files == null) {
+            // I'd really like to throw an NPE here, but FindBugs doesn't accept that. No, I haven't
+            // reported it :/ /johan.walles@gmail.com - 2016may12
+            throw new RuntimeException("Got null when trying to list files in /proc");
+        }
+        for (File directory : files) {
             try {
                 if (!"logcat".equals(new File(directory, "exe").getCanonicalFile().getName())) {
                     continue;
@@ -229,20 +238,22 @@ public class LogCollector {
     public static CharSequence readLogs(Context context) {
         File[] allFiles = getLogDir(context).listFiles();
         List<File> logFiles = new LinkedList<>();
-        for (File file : allFiles) {
-            if (!file.isFile()) {
-                continue;
+        if (allFiles != null) {
+            for (File file : allFiles) {
+                if (!file.isFile()) {
+                    continue;
+                }
+
+                if (!file.getName().startsWith("log")) {
+                    continue;
+                }
+
+                logFiles.add(file);
             }
 
-            if (!file.getName().startsWith("log")) {
-                continue;
-            }
-
-            logFiles.add(file);
+            Collections.sort(logFiles);
+            Collections.reverse(logFiles);
         }
-
-        Collections.sort(logFiles);
-        Collections.reverse(logFiles);
 
         StringBuilder returnMe = new StringBuilder();
         for (File logFile : logFiles) {
