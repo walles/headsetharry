@@ -41,8 +41,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
-* Make it possible for users to send me the most recent log excerpt when
-they think Harry misbehaves.
 * I have a feeling that after I started using this app, sometimes voice
 calls over Bluetooth SCO don't produce any sound. Try to repro this and
 determine if we should do something differently.
@@ -136,3 +134,5 @@ message is being read.
 * Get on top of the UtteranceProgressListener not getting notified
 reliably when phrases end; we don't want to leave things hanging in our
 queue.
+* Make it possible for users to send me the most recent log excerpt when
+they think Harry misbehaves.
