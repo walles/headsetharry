@@ -31,4 +31,9 @@
     <string name="email_from_who_colon_subject">Elektrisk post från %1$s: %2$s</string>
     <string name="email_from_whom">Elektrisk post från %s</string>
     <string name="calendar_event_colon_what">Kalenderhändelse: %s</string>
+    <string name="contact_developer">Kontakta utvecklaren</string>
+    <string name="contact_developer_condensed">Maila utvecklaren</string>
+    <string name="support">Hjälp</string>
+    <string name="view_app_logs">Visa applikationsloggar</string>
+    <string name="reading_logs_ellipsis">Läser loggarna, vänta…</string>
 </resources>

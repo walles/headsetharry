@@ -41,4 +41,5 @@
     <string name="email_from_whom">Email from %s</string>
 
     <string name="calendar_event_colon_what">Calendar event: %s</string>
+    <string name="reading_logs_ellipsis">Reading logs, please stand by…</string>
 </resources>

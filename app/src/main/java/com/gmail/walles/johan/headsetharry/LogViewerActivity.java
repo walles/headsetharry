@@ -56,7 +56,7 @@ public class LogViewerActivity extends AppCompatActivity {
             throw new NullPointerException("Got null verticalScrollView");
         }
 
-        logView.setText("Reading logs, please stand by...");
+        logView.setText(R.string.reading_logs_ellipsis);
         new AsyncTask<Void, Void, CharSequence>() {
             @Override
             protected void onPostExecute(CharSequence logText) {
