@@ -41,6 +41,9 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
+* If an Inbox sender name contains ":", remove everything up to and
+including the first colon. That part is most often the name of an Inbox
+label / bundle / whatever they call them.
 * I have a feeling that after I started using this app, sometimes voice
 calls over Bluetooth SCO don't produce any sound. Try to repro this and
 determine if we should do something differently.
