@@ -43,4 +43,11 @@
         <!-- Fix things discovered by profiling; this is a premature-optimization suggestion IMO -->
         <Bug pattern="SBSC_USE_STRINGBUFFER_CONCATENATION"/>
     </Match>
+    <Match>
+        <!--
+        On Android, the default encoding is always UTF-8:
+        http://developer.android.com/reference/java/nio/charset/Charset.html#defaultCharset()
+        -->
+        <Bug pattern="DM_DEFAULT_ENCODING"/>
+    </Match>
 </FindBugsFilter>
