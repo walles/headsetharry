@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -97,5 +98,13 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+        int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        Timber.i("Settings activity notified about updated permissions, code=%d", requestCode);
+        PermissionsPreference.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
     }
 }

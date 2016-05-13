@@ -24,14 +24,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.preference.CheckBoxPreference;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 
+import org.jetbrains.annotations.NonNls;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * Checkbox tunnelling requests to the system notification access settings.
@@ -40,6 +45,12 @@ public class PermissionsPreference
     extends CheckBoxPreference
     implements SharedPreferences.OnSharedPreferenceChangeListener
 {
+    @NonNls
+    private static final List<String> ALLOWED_KEYS = new LinkedList<>(); {
+        ALLOWED_KEYS.add("announceSmsMms");
+        ALLOWED_KEYS.add("announceCalendar");
+    }
+
     /**
      * The permissions required by this preference.
      */
@@ -49,11 +60,41 @@ public class PermissionsPreference
 
     public PermissionsPreference(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-
         activity = (Activity)context;
-        permissions = parsePermissions(attributeSet.getAttributeValue("http://schemas.android.com/apk/lib/com.gmail.walles.johan.headsetharry", "permissions"));
+
+        if (ALLOWED_KEYS.indexOf(getKey().intern()) == -1) {
+            throw new IllegalArgumentException("Key must be listed in PermissionsPreference.ALLOWED_KEYS");
+        }
+
+        String permissionsAttribute =
+            attributeSet.getAttributeValue("http://schemas.android.com/apk/lib/com.gmail.walles.johan.headsetharry", "permissions");
+        if (permissionsAttribute == null) {
+            throw new IllegalArgumentException(
+                "Must be set but wasn't: 'permissions' of namespace 'http://schemas.android.com/apk/lib/com.gmail.walles.johan.headsetharry'");
+        }
+        permissions = parsePermissions(permissionsAttribute);
+        if (permissions.length == 0) {
+            throw new IllegalArgumentException(
+                "Must contain at least one permission but didn't: 'permissions' of namespace 'http://schemas.android.com/apk/lib/com.gmail.walles.johan.headsetharry'");
+        }
 
         // Preferences change listener registered in {@link #onAttachedToActivity}
+    }
+
+    public static void onRequestPermissionsResult(
+        Context context, int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        for (int i = 0; i < grantResults.length; i++) {
+            if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                // We didn't get all we wanted
+                Timber.i("Permission not granted: %s", permissions[i]);
+                return;
+            }
+        }
+
+        String key = ALLOWED_KEYS.get(requestCode);
+        Timber.i("Enabling preference: %s", key);
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(key, true).apply();
     }
 
     @NonNull
@@ -93,9 +134,9 @@ public class PermissionsPreference
             return;
         }
 
-        // FIXME: If the request goes through, check the box
-        // FIXME: Read this: http://developer.android.com/reference/android/support/v4/app/ActivityCompat.html#requestPermissions(android.app.Activity, java.lang.String[], int)
-        ActivityCompat.requestPermissions(activity, permissions, 0);
+
+        ActivityCompat.requestPermissions(activity, permissions, ALLOWED_KEYS.indexOf(getKey().intern()));
+        Timber.i("Permissions requested");
     }
 
     @Override
@@ -107,5 +148,6 @@ public class PermissionsPreference
 
         boolean newValue = sharedPreferences.getBoolean(key, false);
         setChecked(newValue);
+        Timber.i("Preference checkbox updated: %s=%b", key, newValue);
     }
 }
