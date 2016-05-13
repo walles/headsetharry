@@ -41,16 +41,13 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Before Releasing on Android Market
-* I have a feeling that after I started using this app, sometimes voice
-calls over Bluetooth SCO don't produce any sound. Try to repro this and
-determine if we should do something differently.
-
-# TODO Misc
 * Make a preferences checkbox for calendar events. If the user tries to
 enable it when we don't have READ_CALENDAR permission on Marshmallow+,
 take the user to the give-us-permissions screen via a suitable dialog
 box with an explanation. Make sure it's always disabled when we don't
 have permissions.
+
+# TODO Misc
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml

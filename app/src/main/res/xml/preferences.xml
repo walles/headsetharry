@@ -19,10 +19,22 @@
   -->
 
 <PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/lib/com.gmail.walles.johan.headsetharry">
     <com.gmail.walles.johan.headsetharry.settings.LanguagesPreference
         android:title="Active Languages"
         android:key="activeLanguagesList"/>
     <com.gmail.walles.johan.headsetharry.settings.NotificationsPreference
         android:title="Announce Incoming E-mail"/>
+    <com.gmail.walles.johan.headsetharry.settings.PermissionsPreference
+        android:title="Announce Incoming SMS / MMS"
+        android:key="announceSmsMms"
+        app:permissions="android.permission.RECEIVE_SMS, android.permission.READ_CONTACTS"/>
+    <com.gmail.walles.johan.headsetharry.settings.PermissionsPreference
+        android:title="Announce Calendar Events"
+        android:key="announceCalendar"
+        app:permissions="android.permission.READ_CALENDAR"/>
+    <CheckBoxPreference
+        android:title="Announce Wi-Fi Events"
+        android:key="announceWifi"/>
 </PreferenceScreen>
