@@ -30,6 +30,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 
+import com.gmail.walles.johan.headsetharry.handlers.CalendarPresenter;
+import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
+
 import org.jetbrains.annotations.NonNls;
 
 import java.util.Collections;
@@ -46,9 +49,11 @@ public class PermissionsPreference
     implements SharedPreferences.OnSharedPreferenceChangeListener
 {
     @NonNls
-    private static final List<String> ALLOWED_KEYS = new LinkedList<>(); {
-        ALLOWED_KEYS.add("announceSmsMms");
-        ALLOWED_KEYS.add("announceCalendar");
+    private static final List<String> ALLOWED_KEYS;
+    static {
+        ALLOWED_KEYS = new LinkedList<>();
+        ALLOWED_KEYS.add(SmsPresenter.class.getSimpleName());
+        ALLOWED_KEYS.add(CalendarPresenter.class.getSimpleName());
     }
 
     /**

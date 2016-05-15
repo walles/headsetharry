@@ -28,13 +28,13 @@
         android:title="Announce Incoming E-mail"/>
     <com.gmail.walles.johan.headsetharry.settings.PermissionsPreference
         android:title="Announce Incoming SMS / MMS"
-        android:key="announceSmsMms"
+        android:key="SmsPresenter"
         app:permissions="android.permission.RECEIVE_SMS, android.permission.READ_CONTACTS"/>
     <com.gmail.walles.johan.headsetharry.settings.PermissionsPreference
         android:title="Announce Calendar Events"
-        android:key="announceCalendar"
+        android:key="CalendarPresenter"
         app:permissions="android.permission.READ_CALENDAR"/>
     <CheckBoxPreference
         android:title="Announce Wi-Fi Events"
-        android:key="announceWifi"/>
+        android:key="WifiPresenter"/>
 </PreferenceScreen>

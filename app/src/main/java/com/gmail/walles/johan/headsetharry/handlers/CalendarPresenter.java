@@ -34,7 +34,6 @@ import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,7 +48,7 @@ public class CalendarPresenter extends Presenter {
     @NonNls
     public static final String TYPE = "Calendar";
 
-    private final List<TextWithLocale> announcement;
+    private final Date alarmTime;
 
     public static void speak(Context context, Date alarmTime) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -62,20 +61,23 @@ public class CalendarPresenter extends Presenter {
     public CalendarPresenter(Context context, Intent intent) {
         super(context);
 
-        Date alarmTime = (Date)intent.getSerializableExtra(EXTRA_ALARM_TIME);
+        alarmTime = (Date)intent.getSerializableExtra(EXTRA_ALARM_TIME);
         if (alarmTime == null) {
             throw new IllegalArgumentException(intent.toString());
         }
+    }
 
+    @NonNull
+    @Override
+    protected Optional<List<TextWithLocale>> createAnnouncement() {
         // We're getting announcements at random times for things, so unless this date is within a
         // minute from or before [now] we should just drop it
         if (Math.abs(alarmTime.getTime() - System.currentTimeMillis()) > 60000) {
             Timber.i("Dropping calendar alarm for %s", alarmTime);
-            announcement = Collections.emptyList();
-            return;
+            return Optional.absent();
         }
 
-        announcement = new LinkedList<>();
+        List<TextWithLocale> announcement = new LinkedList<>();
 
         // Find all events IDs that have alarms scheduled at this time
         try (Cursor cursor = context.getContentResolver().query(
@@ -102,7 +104,9 @@ public class CalendarPresenter extends Presenter {
 
         if (announcement.isEmpty()) {
             Timber.d("No non-declined events found for alarm time %s", alarmTime);
+            return Optional.absent();
         }
+        return Optional.of(announcement);
     }
 
     @Nullable
@@ -149,9 +153,8 @@ public class CalendarPresenter extends Presenter {
         }
     }
 
-    @NonNull
     @Override
-    public List<TextWithLocale> getAnnouncement() {
-        return announcement;
+    protected boolean isEnabled() {
+        return isEnabled(getClass());
     }
 }

@@ -42,9 +42,8 @@ public class Translations {
     /**
      * Fetch strings for a given locale.
      * <p/>
-     * Note that before using these strings you may want to check what locale you actually got. That
-     * is done by calling {@link #getLocale()}, or by using {@link #format(int, Object...)} to
-     * format your output.
+     * Note that you may not get the locale you asked for. Therefore, always access these strings by
+     * using {@link #format(int, Object...)} to format your output.
      * <p/>
      * Locales are tried in the following order:<ol>
      * <li>First we try to find strings for the requested locale
@@ -96,7 +95,7 @@ public class Translations {
     }
 
     /**
-     * Retrieve a string for the locale returned by {@link #getLocale()}.
+     * Retrieve a string for {@link #locale}.
      */
     public String getString(@StringRes int resourceId) {
         String string = idToStrings.get(resourceId);
@@ -107,16 +106,9 @@ public class Translations {
     }
 
     /**
-     * Get the locale for which {@link #getString(int)} returns strings.
-     */
-    public Locale getLocale() {
-        return locale;
-    }
-
-    /**
      * @see TextWithLocale#format(Locale, String, Object...)
      */
     public List<TextWithLocale> format(@StringRes int resourceId, Object ... args) {
-        return TextWithLocale.format(getLocale(), getString(resourceId), args);
+        return TextWithLocale.format(locale, getString(resourceId), args);
     }
 }

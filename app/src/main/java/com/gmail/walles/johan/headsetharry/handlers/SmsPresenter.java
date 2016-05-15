@@ -22,14 +22,13 @@ package com.gmail.walles.johan.headsetharry.handlers;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.gmail.walles.johan.headsetharry.TextWithLocale;
-import com.gmail.walles.johan.headsetharry.Translations;
 import com.gmail.walles.johan.headsetharry.LookupUtils;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
+import com.gmail.walles.johan.headsetharry.Translations;
 import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
@@ -45,8 +44,8 @@ public class SmsPresenter extends Presenter {
 
     @NonNls
     public static final String TYPE = "SMS";
-
-    private final List<TextWithLocale> announcement;
+    private final CharSequence body;
+    private final CharSequence sender;
 
     public static void speak(Context context, CharSequence body, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -57,28 +56,18 @@ public class SmsPresenter extends Presenter {
         context.startService(intent);
     }
 
-    @NonNull
-    @Override
-    public List<TextWithLocale> getAnnouncement() {
-        return announcement;
-    }
-
     public SmsPresenter(Context context, Intent intent) {
         super(context);
 
-        CharSequence body = intent.getCharSequenceExtra(EXTRA_BODY);
-        if (body == null) {
-            body = "";
-        }
+        body = Optional.fromNullable(intent.getCharSequenceExtra(EXTRA_BODY)).or("");
 
         // It's OK for the sender to be null, we'll just say it's unknown
-        CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
-
-        announcement = createAnnouncement(body, sender);
+        sender = intent.getCharSequenceExtra(EXTRA_SENDER);
     }
 
-    private List<TextWithLocale> createAnnouncement(CharSequence body, @Nullable CharSequence sender)
-    {
+    @NonNull
+    @Override
+    protected Optional<List<TextWithLocale>> createAnnouncement() {
         Optional<Locale> smsBodyLocale = identifyLanguage(body);
         Translations translations = new Translations(context, smsBodyLocale.or(Locale.getDefault()),
             R.string.sms,
@@ -87,17 +76,18 @@ public class SmsPresenter extends Presenter {
             R.string.unknown_sender,
             R.string.what_from_where_colon_body);
 
+        String presentableSender;
         if (TextUtils.isEmpty(sender)) {
-            sender = translations.getString(R.string.unknown_sender);
+            presentableSender = translations.getString(R.string.unknown_sender);
         } else {
-            sender =
+            presentableSender =
                 LookupUtils.getNameForNumber(context, sender.toString())
                     .or(translations.getString(R.string.unknown_sender));
         }
 
         if (TextUtils.isEmpty(body)) {
-            return translations.format(R.string.what_from_where_colon_body,
-                translations.getString(R.string.empty_sms), sender, body);
+            return Optional.of(translations.format(R.string.what_from_where_colon_body,
+                translations.getString(R.string.empty_sms), presentableSender, body));
         }
 
         String sms;
@@ -106,6 +96,12 @@ public class SmsPresenter extends Presenter {
         } else {
             sms = translations.getString(R.string.unknown_language_sms);
         }
-        return translations.format(R.string.what_from_where_colon_body, sms, sender, smsBodyLocale.or(Locale.getDefault()), body);
+        return Optional.of(translations.format(R.string.what_from_where_colon_body,
+            sms, presentableSender, smsBodyLocale.or(Locale.getDefault()), body));
+    }
+
+    @Override
+    protected boolean isEnabled() {
+        return isEnabled(getClass());
     }
 }
