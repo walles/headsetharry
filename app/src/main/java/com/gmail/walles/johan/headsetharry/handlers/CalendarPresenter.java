@@ -22,6 +22,7 @@ package com.gmail.walles.johan.headsetharry.handlers;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -148,7 +149,20 @@ public class CalendarPresenter extends Presenter {
                 R.string.calendar_event_colon_what);
             return translations.format(R.string.calendar_event_colon_what, eventLocale.or(Locale.getDefault()), title);
         } catch (SecurityException e) {
-            Timber.e(e, "Calendar access denied");
+            boolean pref = PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(getClass().getSimpleName(), true);
+
+            // Warning because if things work as intended this would require somebody to:
+            // 1. Enable calendar announcements
+            // 2. Grant us READ_CALENDAR permissions
+            // 3. Go to the system settings and remove our READ_CALENDAR permissions
+            Timber.w(e, "Calendar access denied with pref=%b, resetting preference", pref);
+
+            PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(getClass().getSimpleName(), false)
+                .apply();
+
             return null;
         }
     }
