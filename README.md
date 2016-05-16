@@ -41,6 +41,7 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Misc
+* Make sure our icon works equally well on both black and white backgrounds.
 * Only contact Answers.getInstance() after we've initialized
 Crashlytics; this probably means "not in the emulator", but there may be
 other conditions involved as well.

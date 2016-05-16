@@ -20,6 +20,7 @@
 package com.gmail.walles.johan.headsetharry.handlers;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -76,7 +77,13 @@ public abstract class Presenter {
 
     protected boolean isEnabled(Class<? extends Presenter> klass) {
         String key = klass.getSimpleName();
-        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(key, false);
+
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!preferences.contains(key)) {
+            throw new IllegalArgumentException("No preference for class, check preferences.xml: " + key);
+        }
+
+        return preferences.getBoolean(key, false);
     }
 
     @NonNull

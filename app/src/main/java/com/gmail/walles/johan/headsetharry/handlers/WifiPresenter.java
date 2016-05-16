@@ -111,7 +111,7 @@ public class WifiPresenter extends Presenter {
 
     @Override
     protected boolean isEnabled() {
-        return false;
+        return isEnabled(getClass());
     }
 
     /**
