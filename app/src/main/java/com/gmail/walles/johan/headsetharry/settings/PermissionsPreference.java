@@ -115,6 +115,12 @@ public class PermissionsPreference
 
         // We can't do this in the constructor because getSharedPreferences() returns null there
         getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+
+        if (getSharedPreferences().getBoolean(getKey(), true) && !hasPermissions()) {
+            // Uncheck if we don't have permissions (any more)
+            Timber.i("Preference was enabled but permissions lacking, resetting: %s", getKey());
+            getSharedPreferences().edit().putBoolean(getKey(), false).apply();
+        }
     }
 
     private boolean hasPermissions() {

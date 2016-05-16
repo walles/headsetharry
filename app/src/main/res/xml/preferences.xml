@@ -29,12 +29,15 @@
     <com.gmail.walles.johan.headsetharry.settings.PermissionsPreference
         android:title="Announce Incoming SMS / MMS"
         android:key="SmsPresenter"
+        android:defaultValue="true"
         app:permissions="android.permission.RECEIVE_SMS, android.permission.READ_CONTACTS"/>
     <com.gmail.walles.johan.headsetharry.settings.PermissionsPreference
         android:title="Announce Calendar Events"
         android:key="CalendarPresenter"
+        android:defaultValue="true"
         app:permissions="android.permission.READ_CALENDAR"/>
     <CheckBoxPreference
         android:title="Announce Wi-Fi Events"
+        android:defaultValue="true"
         android:key="WifiPresenter"/>
 </PreferenceScreen>

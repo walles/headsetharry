@@ -48,6 +48,9 @@ box with an explanation. Make sure it's always disabled when we don't
 have permissions.
 
 # TODO Misc
+* Only contact Answers.getInstance() after we've initialized
+Crashlytics; this probably means "not in the emulator", but there may be
+other conditions involved as well.
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
