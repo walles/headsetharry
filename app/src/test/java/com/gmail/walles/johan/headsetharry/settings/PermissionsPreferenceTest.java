@@ -26,13 +26,13 @@ public class PermissionsPreferenceTest {
     @Test
     public void testParsePermissions() {
         Assert.assertArrayEquals(
-            new String[]{"apa"},
-            PermissionsPreference.parsePermissions("apa"));
+            new String[]{"apa1"},
+            PermissionsPreference.parsePermissions("apa1"));
         Assert.assertArrayEquals(
-            new String[]{"apa", "gris"},
-            PermissionsPreference.parsePermissions("apa,gris"));
+            new String[]{"apa2", "gris2"},
+            PermissionsPreference.parsePermissions("apa2,gris2"));
         Assert.assertArrayEquals(
-            new String[]{"apa", "gris"},
-            PermissionsPreference.parsePermissions("apa, gris"));
+            new String[]{"apa3", "gris3"},
+            PermissionsPreference.parsePermissions("apa3, gris3"));
     }
 }

@@ -21,7 +21,6 @@ package com.gmail.walles.johan.headsetharry.settings;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 
 import com.gmail.walles.johan.headsetharry.R;
 
