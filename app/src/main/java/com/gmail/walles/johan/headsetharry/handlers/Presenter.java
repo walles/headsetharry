@@ -20,7 +20,10 @@
 package com.gmail.walles.johan.headsetharry.handlers;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.gmail.walles.johan.headsetharry.TextWithLocale;
@@ -44,12 +47,43 @@ import timber.log.Timber;
 
 public abstract class Presenter {
     @NonNull
-    public abstract List<TextWithLocale> getAnnouncement();
+    protected abstract Optional<List<TextWithLocale>> createAnnouncement();
+
+    protected abstract boolean isEnabled();
+
+    @Nullable
+    private Optional<List<TextWithLocale>> announcement;
+
+    public final Optional<List<TextWithLocale>> getAnnouncement() {
+        if (!isEnabled()) {
+            Timber.d("Presenter disabled: %s", getClass().getSimpleName());
+            return Optional.absent();
+        }
+        if (announcement == null) {
+            announcement = createAnnouncement();
+        }
+        if (announcement.isPresent() && announcement.get().isEmpty()) {
+            Timber.d("Empty announcement from: %s", getClass().getSimpleName());
+            return Optional.absent();
+        }
+        return announcement;
+    }
 
     protected final Context context;
 
     protected Presenter(Context context) {
         this.context = context;
+    }
+
+    protected boolean isEnabled(Class<? extends Presenter> klass) {
+        String key = klass.getSimpleName();
+
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!preferences.contains(key)) {
+            throw new IllegalArgumentException("No preference for class, check preferences.xml: " + key);
+        }
+
+        return preferences.getBoolean(key, false);
     }
 
     @NonNull

@@ -82,7 +82,7 @@ public class NotificationsPreference
             setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Intent intent=new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS);
+                    Intent intent = new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS);
                     getContext().startActivity(intent);
                 }
             }).show();

@@ -48,6 +48,10 @@ public class EmailPresenter extends Presenter {
     @NonNls
     private static final String GOOGLE_INBOX_PACKAGE_NAME = "com.google.android.apps.inbox";
 
+    private final CharSequence sender;
+    private final CharSequence subject;
+    private final CharSequence body;
+
     /**
      * Try to parse a Notification as an incoming e-mail announcement and if it is, speak it.
      *
@@ -228,34 +232,24 @@ public class EmailPresenter extends Presenter {
     @NonNls
     private static final String EXTRA_BODY = "com.gmail.walles.johan.headsetharry.body";
 
-    private final List<TextWithLocale> announcement;
-
     public EmailPresenter(Context context, Intent intent) {
         super(context);
 
-        CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
+        sender = intent.getCharSequenceExtra(EXTRA_SENDER);
         if (TextUtils.isEmpty(sender)) {
             throw new IllegalArgumentException("Sender must not be empty: " + sender);
         }
 
         // We don't always get the subject from Google Inbox
-        CharSequence subject = intent.getCharSequenceExtra(EXTRA_SUBJECT);
+        subject = intent.getCharSequenceExtra(EXTRA_SUBJECT);
 
         // It's OK for the body to be empty; we don't always get it and we don't need to present it
-        CharSequence body = intent.getCharSequenceExtra(EXTRA_BODY);
-
-        announcement = createAnnouncement(sender, subject, body);
+        body = intent.getCharSequenceExtra(EXTRA_BODY);
     }
 
     @NonNull
     @Override
-    public List<TextWithLocale> getAnnouncement() {
-        return announcement;
-    }
-
-    private List<TextWithLocale> createAnnouncement(
-        CharSequence sender, @Nullable CharSequence subject, @Nullable CharSequence body)
-    {
+    protected Optional<List<TextWithLocale>> createAnnouncement() {
         Optional<Locale> emailLocale = identifyLanguage(subject);
         boolean hasBody = !TextUtils.isEmpty(body);
         if (hasBody && !emailLocale.isPresent()) {
@@ -271,10 +265,17 @@ public class EmailPresenter extends Presenter {
             R.string.email_from_who_colon_subject,
             R.string.email_from_whom);
         if (TextUtils.isEmpty(subject)) {
-            return translations.format(R.string.email_from_whom, sender);
+            return Optional.of(translations.format(R.string.email_from_whom, sender));
         } else {
-            return translations.format(R.string.email_from_who_colon_subject,
-                sender, emailLocale.or(Locale.getDefault()), subject);
+            return Optional.of(translations.format(R.string.email_from_who_colon_subject,
+                sender, emailLocale.or(Locale.getDefault()), subject));
         }
+    }
+
+    @Override
+    protected boolean isEnabled() {
+        // FIXME: This is decided by whether we have Notifications access or not, maybe we should
+        // FIXME: turn that into an actual preference for symmetry reasons?
+        return true;
     }
 }

@@ -40,17 +40,11 @@ by clicking the (very small) `API Key` and `Build Secret` links.
   [Google Play](https://play.google.com/apps/publish/)
 5. ```git push --tags```
 
-# TODO Before Releasing on Android Market
-* I have a feeling that after I started using this app, sometimes voice
-calls over Bluetooth SCO don't produce any sound. Try to repro this and
-determine if we should do something differently.
-
 # TODO Misc
-* Make a preferences checkbox for calendar events. If the user tries to
-enable it when we don't have READ_CALENDAR permission on Marshmallow+,
-take the user to the give-us-permissions screen via a suitable dialog
-box with an explanation. Make sure it's always disabled when we don't
-have permissions.
+* Make sure our icon works equally well on both black and white backgrounds.
+* Only contact Answers.getInstance() after we've initialized
+Crashlytics; this probably means "not in the emulator", but there may be
+other conditions involved as well.
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
@@ -139,3 +133,4 @@ they think Harry misbehaves.
 * If an Inbox sender name contains ":", remove everything up to and
 including the first colon. That part is most often the name of an Inbox
 label / bundle / whatever they call them.
+* Implement Marshmallow permissions handling

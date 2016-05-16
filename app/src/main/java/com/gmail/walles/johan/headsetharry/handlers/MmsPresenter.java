@@ -22,13 +22,13 @@ package com.gmail.walles.johan.headsetharry.handlers;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.gmail.walles.johan.headsetharry.LookupUtils;
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
 import com.gmail.walles.johan.headsetharry.TextWithLocale;
 import com.gmail.walles.johan.headsetharry.Translations;
+import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 
@@ -41,8 +41,7 @@ public class MmsPresenter extends Presenter {
 
     @NonNls
     public static final String TYPE = "MMS";
-
-    private final List<TextWithLocale> announcement;
+    private final CharSequence sender;
 
     public static void speak(Context context, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
@@ -56,23 +55,23 @@ public class MmsPresenter extends Presenter {
         super(context);
 
         // It's OK for the sender to be null, we'll just say it's unknown
-        CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
-
-        announcement = createAnnouncement(sender);
+        sender = intent.getCharSequenceExtra(EXTRA_SENDER);
     }
 
     @NonNull
     @Override
-    public List<TextWithLocale> getAnnouncement() {
-        return announcement;
-    }
-
-    private List<TextWithLocale> createAnnouncement(@Nullable CharSequence sender) {
-        sender =
+    protected Optional<List<TextWithLocale>> createAnnouncement() {
+        String presentableSender =
             LookupUtils.getNameForNumber(context, sender)
                 .or(context.getString(R.string.unknown_sender));
 
         Translations translations = new Translations(context, Locale.getDefault(), R.string.mms_from_x);
-        return translations.format(R.string.mms_from_x, sender);
+        return Optional.of(translations.format(R.string.mms_from_x, presentableSender));
+    }
+
+    @Override
+    protected boolean isEnabled() {
+        // We use the same setting for both SMS and MMS presentations
+        return isEnabled(SmsPresenter.class);
     }
 }

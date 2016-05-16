@@ -29,6 +29,7 @@ import android.text.TextUtils;
 import com.gmail.walles.johan.headsetharry.handlers.CalendarPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.EmailPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.MmsPresenter;
+import com.gmail.walles.johan.headsetharry.handlers.Presenter;
 import com.gmail.walles.johan.headsetharry.handlers.SmsPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.WifiPresenter;
 import com.google.common.base.Optional;
@@ -100,6 +101,9 @@ public class SpeakerService extends Service {
 
         Optional<List<TextWithLocale>> announcement = toAnnouncement(intent);
         if (!announcement.isPresent()) {
+            return Service.START_NOT_STICKY;
+        }
+        if (announcement.get().isEmpty()) {
             return Service.START_NOT_STICKY;
         }
 
@@ -207,33 +211,31 @@ public class SpeakerService extends Service {
         }
 
         try {
+            Presenter presenter;
             if (SmsPresenter.TYPE.equals(type)) {
-                return Optional.of(new SmsPresenter(this, intent).getAnnouncement());
+                presenter = new SmsPresenter(this, intent);
             } else if (MmsPresenter.TYPE.equals(type)) {
-                return Optional.of(new MmsPresenter(this, intent).getAnnouncement());
+                presenter = new MmsPresenter(this, intent);
             } else if (WifiPresenter.TYPE.equals(type)) {
                 WifiPresenter wifiPresenter = new WifiPresenter(this);
-                if (isDuplicate(wifiPresenter.getAnnouncement(), wifiPresenter.isConnected())) {
+                if (!wifiPresenter.getAnnouncement().isPresent()) {
+                    return Optional.absent();
+                }
+                if (isDuplicate(wifiPresenter.getAnnouncement().get(), wifiPresenter.isConnected())) {
                     Timber.w("Ignoring duplicate Wifi announcement <%s>", wifiPresenter.getAnnouncement());
                     return Optional.absent();
                 }
-                return Optional.of(wifiPresenter.getAnnouncement());
+                return wifiPresenter.getAnnouncement();
             } else if (EmailPresenter.TYPE.equals(type)) {
-                return Optional.of(new EmailPresenter(this, intent).getAnnouncement());
+                presenter = new EmailPresenter(this, intent);
             } else if (CalendarPresenter.TYPE.equals(type)) {
-                List<TextWithLocale> announcement = new CalendarPresenter(this, intent).getAnnouncement();
-                if (announcement.isEmpty()) {
-                    // There are two known causes for this:
-                    // 1. We were notified about a declined event
-                    // 2. When the user edits an event on the device, we get fake event notifications
-                    //   that we can only ignore
-                    return Optional.absent();
-                }
-                return Optional.of(announcement);
+                presenter = new CalendarPresenter(this, intent);
             } else {
                 Timber.w("Ignoring incoming intent of type %s", type);
                 return Optional.absent();
             }
+
+            return presenter.getAnnouncement();
         } catch (IllegalArgumentException e) {
             Timber.e(e, "Error parsing intent: %s", intent);
             return Optional.absent();
