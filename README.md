@@ -40,13 +40,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
   [Google Play](https://play.google.com/apps/publish/)
 5. ```git push --tags```
 
-# TODO Before Releasing on Android Market
-* Make a preferences checkbox for calendar events. If the user tries to
-enable it when we don't have READ_CALENDAR permission on Marshmallow+,
-take the user to the give-us-permissions screen via a suitable dialog
-box with an explanation. Make sure it's always disabled when we don't
-have permissions.
-
 # TODO Misc
 * Only contact Answers.getInstance() after we've initialized
 Crashlytics; this probably means "not in the emulator", but there may be
@@ -139,3 +132,4 @@ they think Harry misbehaves.
 * If an Inbox sender name contains ":", remove everything up to and
 including the first colon. That part is most often the name of an Inbox
 label / bundle / whatever they call them.
+* Implement Marshmallow permissions handling
