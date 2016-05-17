@@ -28,7 +28,6 @@ import android.service.notification.StatusBarNotification;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
 
-import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 import com.gmail.walles.johan.headsetharry.LoggingUtils;
 import com.gmail.walles.johan.headsetharry.settings.NotificationsPreference;
@@ -88,10 +87,9 @@ public class NotificationListener extends NotificationListenerService {
             }
         }
 
-        Answers.getInstance().
-            logCustom(
-                new CustomEvent("Status Bar Notification"). //NON-NLS
-                    putCustomAttribute("package", sbn.getPackageName())); //NON-NLS
+        LoggingUtils.logCustom(
+            new CustomEvent("Status Bar Notification"). //NON-NLS
+                putCustomAttribute("package", sbn.getPackageName())); //NON-NLS
     }
 
     @Override

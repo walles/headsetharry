@@ -24,7 +24,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.support.annotation.StringRes;
 
-import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 
 import java.util.HashMap;
@@ -65,20 +64,18 @@ public class Translations {
             Locale foundLocale = LocaleUtils.parseLocaleString(res.getString(R.string.locale));
 
             if (!foundLocale.getLanguage().equals(conf.locale.getLanguage())) {
-                Answers.getInstance().
-                    logCustom(
-                        new CustomEvent("Retrieve Translations"). //NON-NLS
-                            putCustomAttribute("Requested Translations Missing", locale.toString())); //NON-NLS
+                LoggingUtils.logCustom(
+                    new CustomEvent("Retrieve Translations"). //NON-NLS
+                        putCustomAttribute("Requested Translations Missing", locale.toString())); //NON-NLS
 
                 conf.locale = Locale.getDefault();
                 res.updateConfiguration(conf, null); // second arg null means don't change display metrics
                 foundLocale = LocaleUtils.parseLocaleString(res.getString(R.string.locale));
 
                 if (!foundLocale.getLanguage().equals(conf.locale.getLanguage())) {
-                    Answers.getInstance().
-                        logCustom(
-                            new CustomEvent("Retrieve Translations"). //NON-NLS
-                                putCustomAttribute("System Locale Translations Missing", Locale.getDefault().toString())); //NON-NLS
+                    LoggingUtils.logCustom(
+                        new CustomEvent("Retrieve Translations"). //NON-NLS
+                            putCustomAttribute("System Locale Translations Missing", Locale.getDefault().toString())); //NON-NLS
                 }
             }
             this.locale = foundLocale;

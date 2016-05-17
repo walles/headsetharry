@@ -24,6 +24,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 
 import org.jetbrains.annotations.NonNls;
 
@@ -37,12 +39,22 @@ public class LoggingUtils {
         // Don't let people instantiate this class
     }
 
+    private static boolean isCrashlyticsEnabled() {
+        return !EmulatorUtils.isRunningOnEmulator();
+    }
+
+    public static void logCustom(CustomEvent event) {
+        if (isCrashlyticsEnabled()) {
+            Answers.getInstance().logCustom(event);
+        }
+    }
+
     public static void setUpLogging(Context context) {
         Timber.Tree tree;
-        if (EmulatorUtils.isRunningOnEmulator()) {
-            tree = new LocalTree();
-        } else {
+        if (isCrashlyticsEnabled()) {
             tree = new CrashlyticsTree(context);
+        } else {
+            tree = new LocalTree();
         }
 
         if (initializedLoggingClass != Timber.class) {

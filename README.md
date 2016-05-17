@@ -41,9 +41,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Misc
-* Only contact Answers.getInstance() after we've initialized
-Crashlytics; this probably means "not in the emulator", but there may be
-other conditions involved as well.
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
@@ -134,3 +131,4 @@ including the first colon. That part is most often the name of an Inbox
 label / bundle / whatever they call them.
 * Implement Marshmallow permissions handling
 * Make sure our icon works equally well on both black and white backgrounds.
+* Only contact Answers.getInstance() after we've initialized Crashlytics
