@@ -41,7 +41,6 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Misc
-* Make sure our icon works equally well on both black and white backgrounds.
 * Only contact Answers.getInstance() after we've initialized
 Crashlytics; this probably means "not in the emulator", but there may be
 other conditions involved as well.
@@ -134,3 +133,4 @@ they think Harry misbehaves.
 including the first colon. That part is most often the name of an Inbox
 label / bundle / whatever they call them.
 * Implement Marshmallow permissions handling
+* Make sure our icon works equally well on both black and white backgrounds.
