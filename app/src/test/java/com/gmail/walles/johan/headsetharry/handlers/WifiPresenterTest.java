@@ -24,12 +24,15 @@ import org.junit.Test;
 
 public class WifiPresenterTest {
     @Test
-    public void testSpacify() {
-        Assert.assertEquals("Foo", WifiPresenter.spacify("Foo").toString());
-        Assert.assertEquals("Ownit 99", WifiPresenter.spacify("Ownit 99").toString());
-        Assert.assertEquals("99 monkeys", WifiPresenter.spacify("99monkeys").toString());
-        Assert.assertEquals("Ownit 99", WifiPresenter.spacify("Ownit-99").toString());
-        Assert.assertEquals("Ownit Pownit", WifiPresenter.spacify("OwnitPownit").toString());
-        Assert.assertEquals("Ownit POWNIT", WifiPresenter.spacify("OwnitPOWNIT").toString());
+    public void testPrettify() {
+        Assert.assertNull(WifiPresenter.prettify(null));
+        Assert.assertEquals("", WifiPresenter.prettify(""));
+        Assert.assertEquals("", WifiPresenter.prettify("\"\""));
+        Assert.assertEquals("Foo", WifiPresenter.prettify("Foo"));
+        Assert.assertEquals("Ownit 99", WifiPresenter.prettify("Ownit 99"));
+        Assert.assertEquals("99 monkeys", WifiPresenter.prettify("99monkeys"));
+        Assert.assertEquals("Ownit 99", WifiPresenter.prettify("Ownit-99"));
+        Assert.assertEquals("Ownit Pownit", WifiPresenter.prettify("OwnitPownit"));
+        Assert.assertEquals("Ownit POWNIT", WifiPresenter.prettify("OwnitPOWNIT"));
     }
 }

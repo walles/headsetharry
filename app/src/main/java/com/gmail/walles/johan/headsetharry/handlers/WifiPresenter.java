@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
+import android.support.annotation.Nullable;
 
 import com.gmail.walles.johan.headsetharry.R;
 import com.gmail.walles.johan.headsetharry.SpeakerService;
@@ -37,15 +37,12 @@ import org.jetbrains.annotations.NonNls;
 import java.util.List;
 import java.util.Locale;
 
-import timber.log.Timber;
-
 public class WifiPresenter extends Presenter {
     @NonNls
     public final static String TYPE = "WiFi";
 
     @NonNls
     private final String ssid;
-    private final boolean connected;
 
     /**
      * Speak current WiFi connectivity status.
@@ -58,7 +55,23 @@ public class WifiPresenter extends Presenter {
     }
 
     public boolean isConnected() {
-        return connected;
+        if (ssid == null) {
+            return false;
+        }
+
+        if (ssid.isEmpty()) {
+            // This is apparently how it used to work:
+            // https://code.google.com/p/android/issues/detail?id=43336
+            return false;
+        }
+
+        if ("<unknown ssid>".equals(ssid)) {
+            // Explanation of the "<unknown ssid>" magic constant:
+            // http://developer.android.com/reference/android/net/wifi/WifiInfo.html#getSSID()
+            return false;
+        }
+
+        return true;
     }
 
     public WifiPresenter(Context context) {
@@ -66,32 +79,7 @@ public class WifiPresenter extends Presenter {
 
         WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        ssid = wifiInfo.getSSID();
-
-        if (TextUtils.isEmpty(ssid)) {
-            // This is apparently how it used to work:
-            // https://code.google.com/p/android/issues/detail?id=43336
-            connected = false;
-            return;
-        }
-
-        // Explanation of the "<unknown ssid>" magic constant:
-        // http://developer.android.com/reference/android/net/wifi/WifiInfo.html#getSSID()
-        if ("<unknown ssid>".equals(ssid)) {
-            connected = false;
-            return;
-        }
-
-        // Trim surrounding double quotes if applicable
-        String spacedSsid = spacify(ssid.replaceAll("^\"|\"$", "")).toString();
-        if (TextUtils.isEmpty(spacedSsid)) {
-            @NonNls String problem = "Got empty SSID when supposedly connected: " + ssid;
-            Timber.w(new Exception(problem), "%s", problem);
-            connected = false;
-            return;
-        }
-
-        connected = true;
+        ssid = prettify(wifiInfo.getSSID());
     }
 
     @NonNull
@@ -101,7 +89,7 @@ public class WifiPresenter extends Presenter {
             R.string.wifi_disconnected,
             R.string.connected_to_networkname);
 
-        if (!connected) {
+        if (!isConnected()) {
             return Optional.of(translations.format(R.string.wifi_disconnected));
         }
 
@@ -118,7 +106,12 @@ public class WifiPresenter extends Presenter {
      * Insert spaces where the SSID goes from lowercase to uppercase or from letters to numbers.
      * Also replace dashes and underscores with spaces.
      */
-    static CharSequence spacify(CharSequence ssid) {
+    static String prettify(@Nullable String ssid) {
+        if (ssid == null) {
+            return null;
+        }
+        ssid = ssid.replaceAll("^\"|\"$", "");
+
         StringBuilder returnMe = new StringBuilder();
         char lastChar = '☺';
         for (int i = 0; i < ssid.length(); i++) {
@@ -149,6 +142,6 @@ public class WifiPresenter extends Presenter {
             lastChar = currentChar;
         }
 
-        return returnMe;
+        return returnMe.toString();
     }
 }
