@@ -35,7 +35,6 @@ import com.gmail.walles.johan.headsetharry.handlers.WifiPresenter;
 import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.TestOnly;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -50,12 +49,9 @@ public class SpeakerService extends Service {
     @NonNls
     public static final String EXTRA_TYPE = "com.gmail.walles.johan.headsetharry.type";
 
-    private long isDuplicateTimeoutMs = 60000;
-    private List<TextWithLocale> duplicateBase;
-    private long duplicateBaseTimestamp;
-    private boolean duplicateIsConnected;
-
     private final List<TimestampedAnnouncement> announcementQueue = new LinkedList<>();
+
+    private final WifiPresenter.State wifiState = new WifiPresenter.State();
 
     private static class TimestampedAnnouncement {
         public final long timestamp;
@@ -163,46 +159,6 @@ public class SpeakerService extends Service {
         return true;
     }
 
-    boolean isDuplicate(List<TextWithLocale> announcement, boolean isConnected) {
-        if (duplicateBaseTimestamp == 0) {
-            duplicateBase = announcement;
-            duplicateBaseTimestamp = System.currentTimeMillis();
-            duplicateIsConnected = isConnected;
-            return false;
-        }
-
-        if ((!duplicateIsConnected) && (!isConnected)) {
-            return true;
-        }
-
-        if (!announcement.equals(duplicateBase)) {
-            // Not the same message, start over
-            duplicateBase = announcement;
-            duplicateBaseTimestamp = System.currentTimeMillis();
-            duplicateIsConnected = isConnected;
-            return false;
-        }
-
-        long now = System.currentTimeMillis();
-        if (now - duplicateBaseTimestamp > isDuplicateTimeoutMs) {
-            // This is the same message, but our duplicate has timed out, start over
-            duplicateBase = announcement;
-            duplicateBaseTimestamp = System.currentTimeMillis();
-            duplicateIsConnected = isConnected;
-            return false;
-        }
-
-        return true;
-    }
-
-    @TestOnly
-    void setIsDuplicateTimeoutMs(long timeoutMillis) {
-        if (timeoutMillis < 0) {
-            throw new IllegalArgumentException("Timeout must be >= 0, was " + timeoutMillis);
-        }
-        isDuplicateTimeoutMs = timeoutMillis;
-    }
-
     private Optional<List<TextWithLocale>> toAnnouncement(Intent intent) {
         String type = intent.getStringExtra(EXTRA_TYPE);
         if (TextUtils.isEmpty(type)) {
@@ -217,15 +173,7 @@ public class SpeakerService extends Service {
             } else if (MmsPresenter.TYPE.equals(type)) {
                 presenter = new MmsPresenter(this, intent);
             } else if (WifiPresenter.TYPE.equals(type)) {
-                WifiPresenter wifiPresenter = new WifiPresenter(this);
-                if (!wifiPresenter.getAnnouncement().isPresent()) {
-                    return Optional.absent();
-                }
-                if (isDuplicate(wifiPresenter.getAnnouncement().get(), wifiPresenter.isConnected())) {
-                    Timber.w("Ignoring duplicate Wifi announcement <%s>", wifiPresenter.getAnnouncement());
-                    return Optional.absent();
-                }
-                return wifiPresenter.getAnnouncement();
+                presenter = new WifiPresenter(this, wifiState);
             } else if (EmailPresenter.TYPE.equals(type)) {
                 presenter = new EmailPresenter(this, intent);
             } else if (CalendarPresenter.TYPE.equals(type)) {
