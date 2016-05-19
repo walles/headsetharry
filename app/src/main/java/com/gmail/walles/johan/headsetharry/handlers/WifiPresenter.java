@@ -85,15 +85,15 @@ public class WifiPresenter extends Presenter {
     @NonNull
     @Override
     protected Optional<List<TextWithLocale>> createAnnouncement() {
-        Translations translations = new Translations(context, Locale.getDefault(),
-            R.string.wifi_disconnected,
-            R.string.connected_to_networkname);
-
         if (!isConnected()) {
-            return Optional.of(translations.format(R.string.wifi_disconnected));
+            return Optional.of(new Translations(context, Locale.getDefault(),
+                R.string.wifi_disconnected).format(R.string.wifi_disconnected));
         }
 
         Locale ssidLocale = identifyLanguage(ssid).or(Locale.getDefault());
+        Translations translations = new Translations(context, ssidLocale,
+            R.string.connected_to_networkname);
+
         return Optional.of(translations.format(R.string.connected_to_networkname, ssidLocale, ssid));
     }
 
