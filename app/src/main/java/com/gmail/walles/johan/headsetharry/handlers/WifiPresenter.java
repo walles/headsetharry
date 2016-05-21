@@ -134,28 +134,26 @@ public class WifiPresenter extends Presenter {
     }
 
     @NonNull
-    @Override
-    protected Optional<List<TextWithLocale>> createAnnouncement() {
+    private List<TextWithLocale> createAnnouncementInternal() {
         if (!isConnected()) {
-            if (!state.duplicateIsConnected) {
-                // Last announcement was "disconnected", let's not repeat ourselves
-                return Optional.absent();
-            }
-
-            return Optional.of(new Translations(context, Locale.getDefault(),
-                R.string.wifi_disconnected).format(R.string.wifi_disconnected));
+            return new Translations(context, Locale.getDefault(),
+                R.string.wifi_disconnected).format(R.string.wifi_disconnected);
         }
 
         Locale ssidLocale = identifyLanguage(ssid).or(Locale.getDefault());
         Translations translations = new Translations(context, ssidLocale,
             R.string.connected_to_networkname);
 
-        final List<TextWithLocale> announcement =
-            translations.format(R.string.connected_to_networkname, ssidLocale, ssid);
-        if (state.isDuplicate(announcement, true)) {
+        return translations.format(R.string.connected_to_networkname, ssidLocale, ssid);
+    }
+
+    @NonNull
+    @Override
+    protected Optional<List<TextWithLocale>> createAnnouncement() {
+        List<TextWithLocale> announcement = createAnnouncementInternal();
+        if (state.isDuplicate(announcement, isConnected())) {
             return Optional.absent();
         }
-
         return Optional.of(announcement);
     }
 
