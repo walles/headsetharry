@@ -33,6 +33,7 @@ import com.gmail.walles.johan.headsetharry.Translations;
 import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.TestOnly;
 
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +44,55 @@ public class WifiPresenter extends Presenter {
 
     @NonNls
     private final String ssid;
+
+    private final State state;
+
+    public static class State {
+        private long isDuplicateTimeoutMs = 60000;
+        private List<TextWithLocale> duplicateBase;
+        private long duplicateBaseTimestamp;
+        private boolean duplicateIsConnected;
+
+        public boolean isDuplicate(List<TextWithLocale> announcement, boolean isConnected) {
+            if (duplicateBaseTimestamp == 0) {
+                duplicateBase = announcement;
+                duplicateBaseTimestamp = System.currentTimeMillis();
+                duplicateIsConnected = isConnected;
+                return false;
+            }
+
+            if ((!duplicateIsConnected) && (!isConnected)) {
+                return true;
+            }
+
+            if (!announcement.equals(duplicateBase)) {
+                // Not the same message, start over
+                duplicateBase = announcement;
+                duplicateBaseTimestamp = System.currentTimeMillis();
+                duplicateIsConnected = isConnected;
+                return false;
+            }
+
+            long now = System.currentTimeMillis();
+            if (now - duplicateBaseTimestamp > isDuplicateTimeoutMs) {
+                // This is the same message, but our duplicate has timed out, start over
+                duplicateBase = announcement;
+                duplicateBaseTimestamp = System.currentTimeMillis();
+                duplicateIsConnected = isConnected;
+                return false;
+            }
+
+            return true;
+        }
+
+        @TestOnly
+        void setIsDuplicateTimeoutMs(long timeoutMillis) {
+            if (timeoutMillis < 0) {
+                throw new IllegalArgumentException("Timeout must be >= 0, was " + timeoutMillis);
+            }
+            isDuplicateTimeoutMs = timeoutMillis;
+        }
+    }
 
     /**
      * Speak current WiFi connectivity status.
@@ -74,8 +124,9 @@ public class WifiPresenter extends Presenter {
         return true;
     }
 
-    public WifiPresenter(Context context) {
+    public WifiPresenter(Context context, State state) {
         super(context);
+        this.state = state;
 
         WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -83,18 +134,27 @@ public class WifiPresenter extends Presenter {
     }
 
     @NonNull
-    @Override
-    protected Optional<List<TextWithLocale>> createAnnouncement() {
+    private List<TextWithLocale> createAnnouncementInternal() {
         if (!isConnected()) {
-            return Optional.of(new Translations(context, Locale.getDefault(),
-                R.string.wifi_disconnected).format(R.string.wifi_disconnected));
+            return new Translations(context, Locale.getDefault(),
+                R.string.wifi_disconnected).format(R.string.wifi_disconnected);
         }
 
         Locale ssidLocale = identifyLanguage(ssid).or(Locale.getDefault());
         Translations translations = new Translations(context, ssidLocale,
             R.string.connected_to_networkname);
 
-        return Optional.of(translations.format(R.string.connected_to_networkname, ssidLocale, ssid));
+        return translations.format(R.string.connected_to_networkname, ssidLocale, ssid);
+    }
+
+    @NonNull
+    @Override
+    protected Optional<List<TextWithLocale>> createAnnouncement() {
+        List<TextWithLocale> announcement = createAnnouncementInternal();
+        if (state.isDuplicate(announcement, isConnected())) {
+            return Optional.absent();
+        }
+        return Optional.of(announcement);
     }
 
     @Override

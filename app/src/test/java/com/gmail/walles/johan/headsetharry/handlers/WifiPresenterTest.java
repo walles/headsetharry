@@ -19,8 +19,14 @@
 
 package com.gmail.walles.johan.headsetharry.handlers;
 
+import com.gmail.walles.johan.headsetharry.TextWithLocale;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 
 public class WifiPresenterTest {
     @Test
@@ -34,5 +40,57 @@ public class WifiPresenterTest {
         Assert.assertEquals("Ownit 99", WifiPresenter.prettify("Ownit-99"));
         Assert.assertEquals("Ownit Pownit", WifiPresenter.prettify("OwnitPownit"));
         Assert.assertEquals("Ownit POWNIT", WifiPresenter.prettify("OwnitPOWNIT"));
+    }
+
+    private static final String SAMPLE_TEXT = "flaska";
+
+    private List<TextWithLocale> toList(String text) {
+        List<TextWithLocale> returnMe = new LinkedList<>();
+        returnMe.add(new TextWithLocale(Locale.getDefault(), text));
+        return returnMe;
+    }
+
+    @Test
+    public void testIsDuplicate() {
+        WifiPresenter.State testMe = new WifiPresenter.State();
+
+        // Tests that the initial comparison is false
+        Assert.assertFalse(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+        Assert.assertTrue(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+
+        // Tests that following comparisons are false
+        Assert.assertFalse(testMe.isDuplicate(toList("gris"), true));
+        Assert.assertTrue(testMe.isDuplicate(toList("gris"), true));
+    }
+
+    @Test
+    public void testIsDuplicateTimeout() throws Exception {
+        WifiPresenter.State testMe = new WifiPresenter.State();
+        testMe.setIsDuplicateTimeoutMs(50);
+
+        Assert.assertFalse(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+        Assert.assertTrue(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+
+        Thread.sleep(100);
+        Assert.assertFalse("Repetitions should be OK after the timeout",
+            testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+        Assert.assertTrue(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
+    }
+
+    @Test
+    public void testIsDuplicateDisconnected() throws Exception {
+        WifiPresenter.State testMe = new WifiPresenter.State();
+        Assert.assertFalse("First time should never be a duplicate", testMe.isDuplicate(null, false));
+        Assert.assertTrue(testMe.isDuplicate(null, false));
+
+        // As long as we're disconnected we should always say it's a duplicate
+        Assert.assertTrue(testMe.isDuplicate(toList("something"), false));
+        Assert.assertTrue(testMe.isDuplicate(toList("anything"), false));
+
+        testMe.setIsDuplicateTimeoutMs(50);
+        Thread.sleep(100);
+        Assert.assertTrue("Disconnected dups shouldn't time out", testMe.isDuplicate(toList("anything"), false));
+
+        Assert.assertFalse(testMe.isDuplicate(toList(SAMPLE_TEXT), true));
     }
 }
