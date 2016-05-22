@@ -22,8 +22,6 @@ package com.gmail.walles.johan.headsetharry;
 import android.app.Service;
 import android.content.ComponentCallbacks2;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -155,18 +153,9 @@ public class SpeakerService extends Service {
         if (speechStarted) {
             speechStartTimestamp = System.currentTimeMillis();
 
-            String versionName;
-            try {
-                PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                versionName = packageInfo.versionName;
-            } catch (PackageManager.NameNotFoundException e) {
-                versionName = "<unknown>"; //NON-NLS
-            }
-
             LoggingUtils.logCustom(
                 new CustomEvent("Announcement Sent to TTS"). //NON-NLS
-                    putCustomAttribute("Presenter", entry.presenterName). //NON-NLS
-                    putCustomAttribute("App Version", versionName)); //NON-NLS
+                    putCustomAttribute("Presenter", entry.presenterName)); //NON-NLS
         }
     }
 

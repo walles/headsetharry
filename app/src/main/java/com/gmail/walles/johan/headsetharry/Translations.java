@@ -66,7 +66,7 @@ public class Translations {
             if (!foundLocale.getLanguage().equals(conf.locale.getLanguage())) {
                 LoggingUtils.logCustom(
                     new CustomEvent("Retrieve Translations"). //NON-NLS
-                        putCustomAttribute("Requested Translations Missing", locale.toString())); //NON-NLS
+                        putCustomAttribute("Requested Translations Missing", conf.locale.toString())); //NON-NLS
 
                 conf.locale = Locale.getDefault();
                 res.updateConfiguration(conf, null); // second arg null means don't change display metrics
@@ -75,7 +75,7 @@ public class Translations {
                 if (!foundLocale.getLanguage().equals(conf.locale.getLanguage())) {
                     LoggingUtils.logCustom(
                         new CustomEvent("Retrieve Translations"). //NON-NLS
-                            putCustomAttribute("System Locale Translations Missing", Locale.getDefault().toString())); //NON-NLS
+                            putCustomAttribute("System Locale Translations Missing", conf.locale.toString())); //NON-NLS
                 }
             }
             this.locale = foundLocale;

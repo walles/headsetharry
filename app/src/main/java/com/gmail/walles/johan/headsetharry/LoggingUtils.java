@@ -20,6 +20,8 @@
 package com.gmail.walles.johan.headsetharry;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -35,6 +37,8 @@ import timber.log.Timber;
 public class LoggingUtils {
     private static Class<Timber> initializedLoggingClass = null;
 
+    private static String version;
+
     private LoggingUtils() {
         // Don't let people instantiate this class
     }
@@ -45,6 +49,7 @@ public class LoggingUtils {
 
     public static void logCustom(CustomEvent event) {
         if (isCrashlyticsEnabled()) {
+            event.putCustomAttribute("App Version", version); //NON-NLS
             Answers.getInstance().logCustom(event);
         }
     }
@@ -64,6 +69,14 @@ public class LoggingUtils {
         }
 
         LogCollector.keepAlive(context);
+
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            version = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            Timber.w(e, "Unable to find out my own version");
+            version = "<unknown>"; //NON-NLS
+        }
     }
 
     private static class CrashlyticsTree extends Timber.Tree {
