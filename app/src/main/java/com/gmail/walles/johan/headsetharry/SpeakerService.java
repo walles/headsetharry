@@ -22,10 +22,13 @@ package com.gmail.walles.johan.headsetharry;
 import android.app.Service;
 import android.content.ComponentCallbacks2;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.crashlytics.android.answers.CustomEvent;
 import com.gmail.walles.johan.headsetharry.handlers.CalendarPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.EmailPresenter;
 import com.gmail.walles.johan.headsetharry.handlers.MmsPresenter;
@@ -56,10 +59,12 @@ public class SpeakerService extends Service {
     private static class TimestampedAnnouncement {
         public final long timestamp;
         public final List<TextWithLocale> announcement;
+        public final String presenterName;
 
-        public TimestampedAnnouncement(List<TextWithLocale> announcement) {
+        public TimestampedAnnouncement(List<TextWithLocale> announcement, String presenterName) {
             this.timestamp = System.currentTimeMillis();
             this.announcement = announcement;
+            this.presenterName = presenterName;
         }
     }
 
@@ -95,7 +100,12 @@ public class SpeakerService extends Service {
             return Service.START_NOT_STICKY;
         }
 
-        Optional<List<TextWithLocale>> announcement = toAnnouncement(intent);
+        Optional<Presenter> presenter = getPresenter(intent);
+        if (!presenter.isPresent()) {
+            return Service.START_NOT_STICKY;
+        }
+
+        Optional<List<TextWithLocale>> announcement = presenter.get().getAnnouncement();
         if (!announcement.isPresent()) {
             return Service.START_NOT_STICKY;
         }
@@ -103,18 +113,18 @@ public class SpeakerService extends Service {
             return Service.START_NOT_STICKY;
         }
 
-        enqueue(announcement.get());
+        enqueue(announcement.get(), presenter.get().getClass().getSimpleName());
 
         return START_NOT_STICKY;
     }
 
-    private void enqueue(List<TextWithLocale> announcement) {
+    private void enqueue(List<TextWithLocale> announcement, String presenterName) {
         if (!announcementQueue.isEmpty()) {
             long oldestAnnouncementAgeMs = System.currentTimeMillis() - announcementQueue.get(0).timestamp;
             @NonNls String message = "Oldest enqueued announcement is " + oldestAnnouncementAgeMs + "ms old";
             Timber.w(new Exception(message), "%s", message);
         }
-        announcementQueue.add(new TimestampedAnnouncement(announcement));
+        announcementQueue.add(new TimestampedAnnouncement(announcement, presenterName));
         dequeue();
     }
 
@@ -126,8 +136,8 @@ public class SpeakerService extends Service {
             return;
         }
 
-        List<TextWithLocale> announcement = announcementQueue.remove(0).announcement;
-        boolean speechStarted = AudioUtils.speakOverHeadset(this, announcement, new TtsUtils.CompletionListener() {
+        final TimestampedAnnouncement entry = announcementQueue.remove(0);
+        boolean speechStarted = AudioUtils.speakOverHeadset(this, entry.announcement, new TtsUtils.CompletionListener() {
             @Override
             public void onSuccess() {
                 speechStartTimestamp = 0;
@@ -141,8 +151,22 @@ public class SpeakerService extends Service {
                 dequeue();
             }
         });
+
         if (speechStarted) {
             speechStartTimestamp = System.currentTimeMillis();
+
+            String versionName;
+            try {
+                PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+                versionName = packageInfo.versionName;
+            } catch (PackageManager.NameNotFoundException e) {
+                versionName = "<unknown>"; //NON-NLS
+            }
+
+            LoggingUtils.logCustom(
+                new CustomEvent("Announcement Sent to TTS"). //NON-NLS
+                    putCustomAttribute("Presenter", entry.presenterName). //NON-NLS
+                    putCustomAttribute("App Version", versionName)); //NON-NLS
         }
     }
 
@@ -159,7 +183,7 @@ public class SpeakerService extends Service {
         return true;
     }
 
-    private Optional<List<TextWithLocale>> toAnnouncement(Intent intent) {
+    private Optional<Presenter> getPresenter(Intent intent) {
         String type = intent.getStringExtra(EXTRA_TYPE);
         if (TextUtils.isEmpty(type)) {
             Timber.e("Speak action with no type");
@@ -183,7 +207,7 @@ public class SpeakerService extends Service {
                 return Optional.absent();
             }
 
-            return presenter.getAnnouncement();
+            return Optional.of(presenter);
         } catch (IllegalArgumentException e) {
             Timber.e(e, "Error parsing intent: %s", intent);
             return Optional.absent();
