@@ -71,9 +71,9 @@ public class CalendarPresenter extends Presenter {
     @NonNull
     @Override
     protected Optional<List<TextWithLocale>> createAnnouncement() {
-        // We're getting announcements at random times for things, so unless this date is within a
+        // We're getting announcements at random times for things, so unless this date is inside a
         // minute from or before [now] we should just drop it
-        if (Math.abs(alarmTime.getTime() - System.currentTimeMillis()) > 60000) {
+        if (Math.abs(alarmTime.getTime() - System.currentTimeMillis()) > 45000) {
             Timber.i("Dropping calendar alarm for %s", alarmTime);
             return Optional.absent();
         }
