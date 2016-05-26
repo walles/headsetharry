@@ -119,8 +119,10 @@ public class SpeakerService extends Service {
     private void enqueue(List<TextWithLocale> announcement, String presenterName) {
         if (!announcementQueue.isEmpty()) {
             long oldestAnnouncementAgeMs = System.currentTimeMillis() - announcementQueue.get(0).timestamp;
-            @NonNls String message = "Oldest enqueued announcement is " + oldestAnnouncementAgeMs + "ms old";
-            Timber.w(new Exception(message), "%s", message);
+            if (oldestAnnouncementAgeMs > 30_000) {
+                @NonNls String message = "Oldest enqueued announcement is " + oldestAnnouncementAgeMs + "ms old";
+                Timber.w(new Exception(message), "%s", message);
+            }
         }
         announcementQueue.add(new TimestampedAnnouncement(announcement, presenterName));
         dequeue();
