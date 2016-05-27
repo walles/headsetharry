@@ -39,28 +39,24 @@ public class MmsPresenter extends Presenter {
     @NonNls
     private static final String EXTRA_SENDER = "com.gmail.walles.johan.headsetharry.sender";
 
-    @NonNls
-    public static final String TYPE = "MMS";
-    private final CharSequence sender;
-
     public static void speak(Context context, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
-        intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
+        Presenter.setType(intent, MmsPresenter.class);
         intent.putExtra(EXTRA_SENDER, sender);
         context.startService(intent);
     }
 
-    public MmsPresenter(Context context, Intent intent) {
+    public MmsPresenter(Context context) {
         super(context);
-
-        // It's OK for the sender to be null, we'll just say it's unknown
-        sender = intent.getCharSequenceExtra(EXTRA_SENDER);
     }
 
     @NonNull
     @Override
-    protected Optional<List<TextWithLocale>> createAnnouncement() {
+    public Optional<List<TextWithLocale>> getAnnouncement(Intent intent) {
+        // It's OK for the sender to be null, we'll just say it's unknown
+        CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
+
         String presentableSender =
             LookupUtils.getNameForNumber(context, sender)
                 .or(context.getString(R.string.unknown_sender));
@@ -70,7 +66,7 @@ public class MmsPresenter extends Presenter {
     }
 
     @Override
-    protected boolean isEnabled() {
+    public boolean isEnabled() {
         // We use the same setting for both SMS and MMS presentations
         return isEnabled(SmsPresenter.class);
     }

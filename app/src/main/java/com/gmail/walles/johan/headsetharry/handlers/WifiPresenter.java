@@ -32,20 +32,13 @@ import com.gmail.walles.johan.headsetharry.TextWithLocale;
 import com.gmail.walles.johan.headsetharry.Translations;
 import com.google.common.base.Optional;
 
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.List;
 import java.util.Locale;
 
 public class WifiPresenter extends Presenter {
-    @NonNls
-    public final static String TYPE = "WiFi";
-
-    @NonNls
-    private final String ssid;
-
-    private final State state;
+    private final State state = new State();
 
     public static class State {
         private long isDuplicateTimeoutMs = 60000;
@@ -100,11 +93,11 @@ public class WifiPresenter extends Presenter {
     public static void speakStatus(Context context) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
-        intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
+        Presenter.setType(intent, WifiPresenter.class);
         context.startService(intent);
     }
 
-    public boolean isConnected() {
+    private static boolean isConnected(String ssid) {
         if (ssid == null) {
             return false;
         }
@@ -115,7 +108,7 @@ public class WifiPresenter extends Presenter {
             return false;
         }
 
-        if ("<unknown ssid>".equals(ssid)) {
+        if ("<unknown ssid>".equals(ssid)) { //NON-NLS
             // Explanation of the "<unknown ssid>" magic constant:
             // http://developer.android.com/reference/android/net/wifi/WifiInfo.html#getSSID()
             return false;
@@ -124,18 +117,13 @@ public class WifiPresenter extends Presenter {
         return true;
     }
 
-    public WifiPresenter(Context context, State state) {
+    public WifiPresenter(Context context) {
         super(context);
-        this.state = state;
-
-        WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        ssid = prettify(wifiInfo.getSSID());
     }
 
     @NonNull
-    private List<TextWithLocale> createAnnouncementInternal() {
-        if (!isConnected()) {
+    private List<TextWithLocale> createAnnouncementInternal(String ssid) {
+        if (!isConnected(ssid)) {
             return new Translations(context, Locale.getDefault(),
                 R.string.wifi_disconnected).format(R.string.wifi_disconnected);
         }
@@ -149,16 +137,20 @@ public class WifiPresenter extends Presenter {
 
     @NonNull
     @Override
-    protected Optional<List<TextWithLocale>> createAnnouncement() {
-        List<TextWithLocale> announcement = createAnnouncementInternal();
-        if (state.isDuplicate(announcement, isConnected())) {
+    public Optional<List<TextWithLocale>> getAnnouncement(Intent intent) {
+        WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        String ssid = prettify(wifiInfo.getSSID());
+
+        List<TextWithLocale> announcement = createAnnouncementInternal(ssid);
+        if (state.isDuplicate(announcement, isConnected(ssid))) {
             return Optional.absent();
         }
         return Optional.of(announcement);
     }
 
     @Override
-    protected boolean isEnabled() {
+    public boolean isEnabled() {
         return isEnabled(getClass());
     }
 

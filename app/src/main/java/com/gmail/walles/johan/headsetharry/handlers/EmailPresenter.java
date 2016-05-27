@@ -48,10 +48,6 @@ public class EmailPresenter extends Presenter {
     @NonNls
     private static final String GOOGLE_INBOX_PACKAGE_NAME = "com.google.android.apps.inbox";
 
-    private final CharSequence sender;
-    private final CharSequence subject;
-    private final CharSequence body;
-
     /**
      * Try to parse a Notification as an incoming e-mail announcement and if it is, speak it.
      *
@@ -146,7 +142,7 @@ public class EmailPresenter extends Presenter {
 
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
-        intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
+        Presenter.setType(intent, EmailPresenter.class);
 
         Bundle extras = statusBarNotification.getNotification().extras;
         CharSequence body;
@@ -219,9 +215,6 @@ public class EmailPresenter extends Presenter {
     }
 
     @NonNls
-    public static final String TYPE = "Email";
-
-    @NonNls
     private static final String EXTRA_SENDER = "com.gmail.walles.johan.headsetharry.sender";
     @NonNls
     private static final String EXTRA_SUBJECT = "com.gmail.walles.johan.headsetharry.subject";
@@ -232,24 +225,24 @@ public class EmailPresenter extends Presenter {
     @NonNls
     private static final String EXTRA_BODY = "com.gmail.walles.johan.headsetharry.body";
 
-    public EmailPresenter(Context context, Intent intent) {
+    public EmailPresenter(Context context) {
         super(context);
+    }
 
-        sender = intent.getCharSequenceExtra(EXTRA_SENDER);
+    @NonNull
+    @Override
+    public Optional<List<TextWithLocale>> getAnnouncement(Intent intent) {
+        CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
         if (TextUtils.isEmpty(sender)) {
             throw new IllegalArgumentException("Sender must not be empty: " + sender);
         }
 
         // We don't always get the subject from Google Inbox
-        subject = intent.getCharSequenceExtra(EXTRA_SUBJECT);
+        CharSequence subject = intent.getCharSequenceExtra(EXTRA_SUBJECT);
 
         // It's OK for the body to be empty; we don't always get it and we don't need to present it
-        body = intent.getCharSequenceExtra(EXTRA_BODY);
-    }
+        CharSequence body = intent.getCharSequenceExtra(EXTRA_BODY);
 
-    @NonNull
-    @Override
-    protected Optional<List<TextWithLocale>> createAnnouncement() {
         Optional<Locale> emailLocale = identifyLanguage(subject);
         boolean hasBody = !TextUtils.isEmpty(body);
         if (hasBody && !emailLocale.isPresent()) {
@@ -273,7 +266,7 @@ public class EmailPresenter extends Presenter {
     }
 
     @Override
-    protected boolean isEnabled() {
+    public boolean isEnabled() {
         // FIXME: This is decided by whether we have Notifications access or not, maybe we should
         // FIXME: turn that into an actual preference for symmetry reasons?
         return true;

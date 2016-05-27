@@ -46,31 +46,26 @@ public class CalendarPresenter extends Presenter {
     @NonNls
     private static final String EXTRA_ALARM_TIME = "com.gmail.walles.johan.headsetharry.alarmTime";
 
-    @NonNls
-    public static final String TYPE = "Calendar";
-
-    private final Date alarmTime;
-
     public static void speak(Context context, Date alarmTime) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
-        intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
+        Presenter.setType(intent, CalendarPresenter.class);
         intent.putExtra(EXTRA_ALARM_TIME, alarmTime);
         context.startService(intent);
     }
 
-    public CalendarPresenter(Context context, Intent intent) {
+    public CalendarPresenter(Context context) {
         super(context);
-
-        alarmTime = (Date)intent.getSerializableExtra(EXTRA_ALARM_TIME);
-        if (alarmTime == null) {
-            throw new IllegalArgumentException(intent.toString());
-        }
     }
 
     @NonNull
     @Override
-    protected Optional<List<TextWithLocale>> createAnnouncement() {
+    public Optional<List<TextWithLocale>> getAnnouncement(Intent intent) {
+        Date alarmTime = (Date)intent.getSerializableExtra(EXTRA_ALARM_TIME);
+        if (alarmTime == null) {
+            throw new IllegalArgumentException(intent.toString());
+        }
+
         // We're getting announcements at random times for things, so unless this date is inside a
         // minute from or before [now] we should just drop it
         if (Math.abs(alarmTime.getTime() - System.currentTimeMillis()) > 45000) {
@@ -168,7 +163,7 @@ public class CalendarPresenter extends Presenter {
     }
 
     @Override
-    protected boolean isEnabled() {
+    public boolean isEnabled() {
         return isEnabled(getClass());
     }
 }
