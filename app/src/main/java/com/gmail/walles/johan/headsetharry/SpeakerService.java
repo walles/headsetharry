@@ -197,10 +197,14 @@ public class SpeakerService extends Service {
             if (!Presenter.hasType(intent, candidate.getClass())) {
                 continue;
             }
+
             if (!candidate.isEnabled()) {
+                // Candidate is of the right type, but it's not enabled
                 return Optional.absent();
             }
-            return Optional.of(candidate);
+
+            // Candidate is enabled and of the right type
+            return Optional.of(candidate); //NOPMD
         }
 
         Timber.w("No handler for intent %s", intent);
