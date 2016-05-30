@@ -36,9 +36,11 @@ import com.google.common.base.Optional;
 import org.jetbrains.annotations.NonNls;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import timber.log.Timber;
 
@@ -52,6 +54,60 @@ public class CalendarPresenter extends Presenter {
         Presenter.setType(intent, CalendarPresenter.class);
         intent.putExtra(EXTRA_ALARM_TIME, alarmTime);
         context.startService(intent);
+    }
+
+    private final State state = new State();
+
+    static class State {
+        private static class DateAndId {
+            @NonNull
+            public final Date date;
+            public final int id;
+
+            public DateAndId(@NonNull Date date, int id) {
+                this.date = date;
+                this.id = id;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) {
+                    return true;
+                }
+                if (o == null || getClass() != o.getClass()) {
+                    return false;
+                }
+
+                DateAndId dateAndId = (DateAndId)o;
+
+                if (id != dateAndId.id) {
+                    return false;
+                }
+                if (!date.equals(dateAndId.date)) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = date.hashCode();
+                result = 31 * result + id;
+                return result;
+            }
+        }
+
+        private final Set<DateAndId> cache = new HashSet<>();
+
+        public boolean isDuplicate(int eventId, Date alarmTime) {
+            if (cache.contains(new DateAndId(alarmTime, eventId))) {
+                return true;
+            }
+
+            cache.add(new DateAndId(alarmTime, eventId));
+            return false;
+        }
     }
 
     public CalendarPresenter(Context context) {
@@ -88,6 +144,9 @@ public class CalendarPresenter extends Presenter {
 
             while (cursor.moveToNext()) {
                 int eventId = cursor.getInt(0);
+                if (state.isDuplicate(eventId, alarmTime)) {
+                    continue;
+                }
 
                 List<TextWithLocale> announcementForId = createAnnouncementForEventId(eventId);
                 if (announcementForId == null) {
