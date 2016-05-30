@@ -37,6 +37,7 @@ import org.jetbrains.annotations.NonNls;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -101,12 +102,34 @@ public class CalendarPresenter extends Presenter {
         private final Set<DateAndId> cache = new HashSet<>();
 
         public boolean isDuplicate(int eventId, Date alarmTime) {
+            trim();
+
             if (cache.contains(new DateAndId(alarmTime, eventId))) {
                 return true;
             }
 
             cache.add(new DateAndId(alarmTime, eventId));
             return false;
+        }
+
+        /**
+         * Trim old entries from the cache.
+         */
+        private void trim() {
+            Date now = new Date();
+            Iterator<DateAndId> iter = cache.iterator();
+            while (iter.hasNext()) {
+                DateAndId dateAndId = iter.next();
+                long ageMs = now.getTime() - dateAndId.date.getTime();
+                if (ageMs > 120_000) {
+                    iter.remove();
+                }
+                if (ageMs < 0) {
+                    @NonNls
+                    String message = "Cached announcement identifier from the future, ageMs=" + ageMs;
+                    Timber.w(new Exception(message), message);
+                }
+            }
         }
     }
 
