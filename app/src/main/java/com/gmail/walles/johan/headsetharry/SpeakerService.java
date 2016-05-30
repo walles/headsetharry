@@ -24,7 +24,6 @@ import android.content.ComponentCallbacks2;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.crashlytics.android.answers.CustomEvent;
 import com.gmail.walles.johan.headsetharry.handlers.CalendarPresenter;
@@ -37,9 +36,12 @@ import com.google.common.base.Optional;
 
 import org.jetbrains.annotations.NonNls;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import timber.log.Timber;
 
@@ -47,12 +49,9 @@ public class SpeakerService extends Service {
     @NonNls
     public static final String SPEAK_ACTION = "com.gmail.walles.johan.headsetharry.speak_action";
 
-    @NonNls
-    public static final String EXTRA_TYPE = "com.gmail.walles.johan.headsetharry.type";
-
     private final List<TimestampedAnnouncement> announcementQueue = new LinkedList<>();
 
-    private final WifiPresenter.State wifiState = new WifiPresenter.State();
+    private final Set<Presenter> presenters;
 
     private static class TimestampedAnnouncement {
         public final long timestamp;
@@ -64,6 +63,19 @@ public class SpeakerService extends Service {
             this.announcement = announcement;
             this.presenterName = presenterName;
         }
+    }
+
+    public SpeakerService() {
+        super();
+
+        Set<Presenter> presenters = new HashSet<>();
+        presenters.add(new CalendarPresenter(this));
+        presenters.add(new EmailPresenter(this));
+        presenters.add(new MmsPresenter(this));
+        presenters.add(new SmsPresenter(this));
+        presenters.add(new WifiPresenter(this));
+
+        this.presenters = Collections.unmodifiableSet(presenters);
     }
 
     /**
@@ -95,20 +107,26 @@ public class SpeakerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!SPEAK_ACTION.equals(intent.getAction())) {
             Timber.w("Ignoring unsupported action <%s>", intent.getAction());
-            return Service.START_NOT_STICKY;
+            return START_NOT_STICKY;
         }
 
         Optional<Presenter> presenter = getPresenter(intent);
         if (!presenter.isPresent()) {
-            return Service.START_NOT_STICKY;
+            return START_NOT_STICKY;
         }
 
-        Optional<List<TextWithLocale>> announcement = presenter.get().getAnnouncement();
+        Optional<List<TextWithLocale>> announcement;
+        try {
+            announcement = presenter.get().getAnnouncement(intent);
+        } catch (IllegalArgumentException e) {
+            Timber.w(e, "Failed to parse incoming intent");
+            return START_NOT_STICKY;
+        }
         if (!announcement.isPresent()) {
-            return Service.START_NOT_STICKY;
+            return START_NOT_STICKY;
         }
         if (announcement.get().isEmpty()) {
-            return Service.START_NOT_STICKY;
+            return START_NOT_STICKY;
         }
 
         enqueue(announcement.get(), presenter.get().getClass().getSimpleName());
@@ -175,34 +193,22 @@ public class SpeakerService extends Service {
     }
 
     private Optional<Presenter> getPresenter(Intent intent) {
-        String type = intent.getStringExtra(EXTRA_TYPE);
-        if (TextUtils.isEmpty(type)) {
-            Timber.e("Speak action with no type");
-            return Optional.absent();
-        }
+        for (Presenter candidate: presenters) {
+            if (!Presenter.hasType(intent, candidate.getClass())) {
+                continue;
+            }
 
-        try {
-            Presenter presenter;
-            if (SmsPresenter.TYPE.equals(type)) {
-                presenter = new SmsPresenter(this, intent);
-            } else if (MmsPresenter.TYPE.equals(type)) {
-                presenter = new MmsPresenter(this, intent);
-            } else if (WifiPresenter.TYPE.equals(type)) {
-                presenter = new WifiPresenter(this, wifiState);
-            } else if (EmailPresenter.TYPE.equals(type)) {
-                presenter = new EmailPresenter(this, intent);
-            } else if (CalendarPresenter.TYPE.equals(type)) {
-                presenter = new CalendarPresenter(this, intent);
-            } else {
-                Timber.w("Ignoring incoming intent of type %s", type);
+            if (!candidate.isEnabled()) {
+                // Candidate is of the right type, but it's not enabled
                 return Optional.absent();
             }
 
-            return Optional.of(presenter);
-        } catch (IllegalArgumentException e) {
-            Timber.e(e, "Error parsing intent: %s", intent);
-            return Optional.absent();
+            // Candidate is enabled and of the right type
+            return Optional.of(candidate); //NOPMD
         }
+
+        Timber.w("No handler for intent %s", intent);
+        return Optional.absent();
     }
 
     @Nullable

@@ -36,9 +36,12 @@ import com.google.common.base.Optional;
 import org.jetbrains.annotations.NonNls;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import timber.log.Timber;
 
@@ -46,31 +49,102 @@ public class CalendarPresenter extends Presenter {
     @NonNls
     private static final String EXTRA_ALARM_TIME = "com.gmail.walles.johan.headsetharry.alarmTime";
 
-    @NonNls
-    public static final String TYPE = "Calendar";
-
-    private final Date alarmTime;
-
     public static void speak(Context context, Date alarmTime) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
-        intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
+        Presenter.setType(intent, CalendarPresenter.class);
         intent.putExtra(EXTRA_ALARM_TIME, alarmTime);
         context.startService(intent);
     }
 
-    public CalendarPresenter(Context context, Intent intent) {
-        super(context);
+    private final State state = new State();
 
-        alarmTime = (Date)intent.getSerializableExtra(EXTRA_ALARM_TIME);
-        if (alarmTime == null) {
-            throw new IllegalArgumentException(intent.toString());
+    static class State {
+        private static class DateAndId {
+            @NonNull
+            public final Date date;
+            public final int id;
+
+            public DateAndId(@NonNull Date date, int id) {
+                this.date = date;
+                this.id = id;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) {
+                    return true;
+                }
+                if (o == null || getClass() != o.getClass()) {
+                    return false;
+                }
+
+                DateAndId dateAndId = (DateAndId)o;
+
+                if (id != dateAndId.id) {
+                    return false;
+                }
+                if (!date.equals(dateAndId.date)) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = date.hashCode();
+                result = 31 * result + id;
+                return result;
+            }
         }
+
+        private final Set<DateAndId> cache = new HashSet<>();
+
+        public boolean isDuplicate(int eventId, Date alarmTime) {
+            trim();
+
+            if (cache.contains(new DateAndId(alarmTime, eventId))) {
+                return true;
+            }
+
+            cache.add(new DateAndId(alarmTime, eventId));
+            return false;
+        }
+
+        /**
+         * Trim old entries from the cache.
+         */
+        private void trim() {
+            Date now = new Date();
+            Iterator<DateAndId> iter = cache.iterator();
+            while (iter.hasNext()) {
+                DateAndId dateAndId = iter.next();
+                long ageMs = now.getTime() - dateAndId.date.getTime();
+                if (ageMs > 120_000) {
+                    iter.remove();
+                }
+                if (ageMs < 0) {
+                    @NonNls
+                    String message = "Cached announcement identifier from the future, ageMs=" + ageMs;
+                    Timber.w(new Exception(message), message);
+                }
+            }
+        }
+    }
+
+    public CalendarPresenter(Context context) {
+        super(context);
     }
 
     @NonNull
     @Override
-    protected Optional<List<TextWithLocale>> createAnnouncement() {
+    public Optional<List<TextWithLocale>> getAnnouncement(Intent intent) {
+        Date alarmTime = (Date)intent.getSerializableExtra(EXTRA_ALARM_TIME);
+        if (alarmTime == null) {
+            throw new IllegalArgumentException(intent.toString());
+        }
+
         // We're getting announcements at random times for things, so unless this date is inside a
         // minute from or before [now] we should just drop it
         if (Math.abs(alarmTime.getTime() - System.currentTimeMillis()) > 45000) {
@@ -93,6 +167,9 @@ public class CalendarPresenter extends Presenter {
 
             while (cursor.moveToNext()) {
                 int eventId = cursor.getInt(0);
+                if (state.isDuplicate(eventId, alarmTime)) {
+                    continue;
+                }
 
                 List<TextWithLocale> announcementForId = createAnnouncementForEventId(eventId);
                 if (announcementForId == null) {
@@ -168,7 +245,7 @@ public class CalendarPresenter extends Presenter {
     }
 
     @Override
-    protected boolean isEnabled() {
+    public boolean isEnabled() {
         return isEnabled(getClass());
     }
 }

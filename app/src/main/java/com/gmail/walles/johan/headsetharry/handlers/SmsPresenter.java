@@ -42,32 +42,27 @@ public class SmsPresenter extends Presenter {
     @NonNls
     private static final String EXTRA_SENDER = "com.gmail.walles.johan.headsetharry.sender";
 
-    @NonNls
-    public static final String TYPE = "SMS";
-    private final CharSequence body;
-    private final CharSequence sender;
-
     public static void speak(Context context, CharSequence body, CharSequence sender) {
         Intent intent = new Intent(context, SpeakerService.class);
         intent.setAction(SpeakerService.SPEAK_ACTION);
-        intent.putExtra(SpeakerService.EXTRA_TYPE, TYPE);
+        Presenter.setType(intent, SmsPresenter.class);
         intent.putExtra(EXTRA_BODY, body);
         intent.putExtra(EXTRA_SENDER, sender);
         context.startService(intent);
     }
 
-    public SmsPresenter(Context context, Intent intent) {
+    public SmsPresenter(Context context) {
         super(context);
-
-        body = Optional.fromNullable(intent.getCharSequenceExtra(EXTRA_BODY)).or("");
-
-        // It's OK for the sender to be null, we'll just say it's unknown
-        sender = intent.getCharSequenceExtra(EXTRA_SENDER);
     }
 
     @NonNull
     @Override
-    protected Optional<List<TextWithLocale>> createAnnouncement() {
+    public Optional<List<TextWithLocale>> getAnnouncement(Intent intent) {
+        CharSequence body = Optional.fromNullable(intent.getCharSequenceExtra(EXTRA_BODY)).or("");
+
+        // It's OK for the sender to be null, we'll just say it's unknown
+        CharSequence sender = intent.getCharSequenceExtra(EXTRA_SENDER);
+
         Optional<Locale> smsBodyLocale = identifyLanguage(body);
         Translations translations = new Translations(context, smsBodyLocale.or(Locale.getDefault()),
             R.string.sms,
@@ -101,7 +96,7 @@ public class SmsPresenter extends Presenter {
     }
 
     @Override
-    protected boolean isEnabled() {
+    public boolean isEnabled() {
         return isEnabled(getClass());
     }
 }

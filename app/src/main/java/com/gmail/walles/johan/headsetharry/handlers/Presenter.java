@@ -20,10 +20,10 @@
 package com.gmail.walles.johan.headsetharry.handlers;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.gmail.walles.johan.headsetharry.TextWithLocale;
@@ -46,28 +46,21 @@ import java.util.Locale;
 import timber.log.Timber;
 
 public abstract class Presenter {
-    @NonNull
-    protected abstract Optional<List<TextWithLocale>> createAnnouncement();
+    @NonNls
+    private static final String EXTRA_TYPE = "com.gmail.walles.johan.headsetharry.type";
 
-    protected abstract boolean isEnabled();
-
-    @Nullable
-    private Optional<List<TextWithLocale>> announcement;
-
-    public final Optional<List<TextWithLocale>> getAnnouncement() {
-        if (!isEnabled()) {
-            Timber.d("Presenter disabled: %s", getClass().getSimpleName());
-            return Optional.absent();
-        }
-        if (announcement == null) {
-            announcement = createAnnouncement();
-        }
-        if (announcement.isPresent() && announcement.get().isEmpty()) {
-            Timber.d("Empty announcement from: %s", getClass().getSimpleName());
-            return Optional.absent();
-        }
-        return announcement;
+    protected static void setType(Intent intent, Class<? extends Presenter> type) {
+        intent.putExtra(EXTRA_TYPE, type.getSimpleName());
     }
+
+    public static boolean hasType(Intent intent, Class<? extends Presenter> type) {
+        String intentType = intent.getStringExtra(EXTRA_TYPE);
+        return type.getSimpleName().equals(intentType);
+    }
+
+    public abstract boolean isEnabled();
+
+    public abstract Optional<List<TextWithLocale>> getAnnouncement(Intent intent);
 
     protected final Context context;
 
