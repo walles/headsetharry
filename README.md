@@ -41,6 +41,10 @@ by clicking the (very small) `API Key` and `Build Secret` links.
 5. ```git push --tags```
 
 # TODO Misc
+* If somebody gets a lot of unknown-language announcements, make a
+notification asking them if they want to enable more languages. If we
+collect some messages it might even be possible for us to ask about some
+specific language.
 * Report battery status for attached bluetooth devices,
 http://stackoverflow.com/a/19701412/473672,
 https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml
