@@ -73,7 +73,9 @@ public abstract class Presenter {
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         if (!preferences.contains(key)) {
-            throw new IllegalArgumentException("No preference for class, check preferences.xml: " + key);
+            @NonNls String message =
+                "No preference for class, defaulting to false, check preferences.xml: " + key;
+            Timber.w(new IllegalArgumentException(message), message);
         }
 
         return preferences.getBoolean(key, false);
