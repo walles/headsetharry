@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/walles/headsetharry.svg?branch=master)](https://travis-ci.org/walles/headsetharry)
 
 # Headset Harry
-Reads events through a connected headset.
+Reads events through a connected headset, in the right language.
 
 Events can be:
 * Incoming SMS
@@ -15,6 +15,11 @@ One core concept is that Headset Harry tries to be smart about what
 language should be used for what events.
 
 Headset Harry supports all the languages you have TTS support for.
+
+# Installing
+Go here to install from Google Play Store:
+
+https://play.google.com/store/apps/details?id=com.gmail.walles.johan.headsetharry
 
 # Building
 Before building the project you need to add an `app/fabric.properties`
