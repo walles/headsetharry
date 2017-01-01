@@ -19,17 +19,17 @@
 
 package com.gmail.walles.johan.headsetharry;
 
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.text.TextUtils;
-import android.util.Log;
-
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 
 import org.jetbrains.annotations.NonNls;
+
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.text.TextUtils;
+import android.util.Log;
 
 import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
@@ -55,15 +55,14 @@ public class LoggingUtils {
     }
 
     public static void setUpLogging(Context context) {
-        Timber.Tree tree;
         if (isCrashlyticsEnabled()) {
-            tree = new CrashlyticsTree(context);
-        } else {
-            tree = new LocalTree();
+            Fabric.with(context, new Crashlytics());
         }
 
         if (initializedLoggingClass != Timber.class) {
             initializedLoggingClass = Timber.class;
+
+            Timber.Tree tree = new LocalTree();
             Timber.plant(tree);
             Timber.v("Logging tree planted: %s", tree.getClass());
         }
@@ -76,29 +75,6 @@ public class LoggingUtils {
         } catch (PackageManager.NameNotFoundException e) {
             Timber.w(e, "Unable to find out my own version");
             version = "<unknown>"; //NON-NLS
-        }
-    }
-
-    private static class CrashlyticsTree extends Timber.Tree {
-        public CrashlyticsTree(Context context) {
-            Fabric.with(context, new Crashlytics());
-        }
-
-        @Override
-        protected void log(int priority, @NonNls String tag, String message, Throwable t) {
-            if (BuildConfig.DEBUG) {
-                tag = "DEBUG";
-            } else if (TextUtils.isEmpty(tag)) {
-                tag = "HeadsetHarry";
-            }
-
-            // This call logs to *both* Crashlytics and LogCat, and will log the Exception backtrace
-            // to LogCat on exceptions.
-            Crashlytics.log(priority, tag, message);
-
-            if (t != null) {
-                Crashlytics.logException(t);
-            }
         }
     }
 
