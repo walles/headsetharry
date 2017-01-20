@@ -243,6 +243,7 @@ public class EmailPresenter extends Presenter {
         // It's OK for the body to be empty; we don't always get it and we don't need to present it
         CharSequence body = intent.getCharSequenceExtra(EXTRA_BODY);
 
+        // FIXME: Prefer identifying the language from the body, it should contain more text
         Optional<Locale> emailLocale = identifyLanguage(subject);
         boolean hasBody = !TextUtils.isEmpty(body);
         if (hasBody && !emailLocale.isPresent()) {

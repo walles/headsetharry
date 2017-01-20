@@ -46,8 +46,16 @@ import java.util.Set;
 import timber.log.Timber;
 
 public class SpeakerService extends Service {
+    /**
+     * After this much time it's OK to say the same thing again.
+     */
+    private static final long MAX_DUPLICATE_AGE_MS = 30_000;
+
     @NonNls
     public static final String SPEAK_ACTION = "com.gmail.walles.johan.headsetharry.speak_action";
+
+    @Nullable
+    private TimestampedAnnouncement lastAnnouncement;
 
     private final List<TimestampedAnnouncement> announcementQueue = new LinkedList<>();
 
@@ -146,6 +154,30 @@ public class SpeakerService extends Service {
         dequeue();
     }
 
+    private boolean isDuplicate(TimestampedAnnouncement announcement) {
+        if (lastAnnouncement == null) {
+            // This is the first announcement, not a dup
+            lastAnnouncement = announcement;
+            return false;
+        }
+
+        if (!lastAnnouncement.announcement.equals(announcement.announcement)) {
+            // The announcements differ, not a dup
+            lastAnnouncement = announcement;
+            return false;
+        }
+
+        if (System.currentTimeMillis() - lastAnnouncement.timestamp < MAX_DUPLICATE_AGE_MS) {
+            // The announcements are the same, and close enough in time, it's a dup!
+            return true;
+        }
+
+        // The announcements are the same, but it was long enough ago that we last said this so
+        // it doesn't count as a dup.
+        lastAnnouncement = announcement;
+        return false;
+    }
+
     private void dequeue() {
         if (isSpeaking()) {
             return;
@@ -155,6 +187,11 @@ public class SpeakerService extends Service {
         }
 
         final TimestampedAnnouncement entry = announcementQueue.remove(0);
+        if (isDuplicate(entry)) {
+            Timber.i("Dropping duplicate %s announcement: %s", entry.presenterName, entry.announcement);
+            return;
+        }
+
         boolean speechStarted = AudioUtils.speakOverHeadset(this, entry.announcement, new TtsUtils.CompletionListener() {
             @Override
             public void onSuccess() {
