@@ -4,6 +4,10 @@ sudo: false
 language: android
 jdk: oraclejdk8
 
+# Avoid permgen problems
+jdk:
+  - oraclejdk8
+
 # Give Crashlytics a dummy key, this is needed for the build to pass
 before_script: echo apiKey=0 > app/fabric.properties
 
@@ -17,3 +21,13 @@ android:
         - android-23
         - extra-android-m2repository
         - extra-google-m2repository
+
+after_success: ./gradlew jacocoTestReportDebug coveralls
+
+# From: https://github.com/travis-ci/docs-travis-ci-com/issues/358#issuecomment-142981773
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
